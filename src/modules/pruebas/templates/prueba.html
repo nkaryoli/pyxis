@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% block title %}Muro de pruebas{% endblock %} {%
+block content %}
+<div class="w-full max-w-4xl mx-auto p-6 text-white">
+
+  <h1 class="text-3xl font-bold mb-6">Listado de pruebas desde el template</h1>
+
+  {% if pruebas %}
+  <div class="space-y-4">
+    {% for prueba in pruebas %}
+    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-4">
+      <h2 class="text-xl font-semibold">{{ prueba.titulo }}</h2>
+      <p class="text-zinc-300 mt-2">{{ prueba.descripcion }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-zinc-400">No hay pruebas todavía.</p>
+  {% endif %}
+
+  <div class="mt-6">
+    <h1 class="text-3xl font-bold my-6">Lista de pruebas cargado con js</h1>
+      <div id="listaPruebas" class="my-6 space-y-4"></div>
+    <button id="cargarPruebas" class="bg-blue-600 text-white px-4 py-2 rounded">
+      Cargar pruebas
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script type="module" src="{{ url_for('static', filename='js/prueba.js') }}"></script>
+{% endblock %}

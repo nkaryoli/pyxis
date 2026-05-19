@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    // File Layout
+    "rootDir": "./ts_source",
+    "outDir": "./src/static/js",
+
+    // Environment Settings
+    "module": "es6",                          // <-- CAMBIADO: Genera módulos estándar para el navegador
+    "target": "es6",                          // Mantiene JavaScript moderno pero compatible
+    "lib": ["DOM", "ES6"],                    // <-- AÑADIDO: Permite usar fetch, document, window, etc.
+    "types": [],
+
+    // Other Outputs
+    "sourceMap": true,                        // Súper útil para debugear en la consola del navegador
+    "declaration": false,                     // Podéis ponerlo en false; no estáis creando una librería
+    "declarationMap": false,
+
+    // Stricter Typechecking Options
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitAny": true,
+    "strict": true,
+
+    // Recommended Options
+    "skipLibCheck": true,
+    "moduleDetection": "force"
+  }
+}

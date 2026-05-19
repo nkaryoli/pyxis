@@ -1,0 +1,7 @@
+/* src/static/css/input.css */
+@import "tailwindcss";
+
+/* Le decimos a Tailwind v4 exactamente dónde buscar vuestras clases */
+@source "../../templates/**/*.html";
+@source "../../modules/**/*.html";
+@source "../../static/js/**/*.js";
