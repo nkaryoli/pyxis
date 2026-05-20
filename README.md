@@ -67,7 +67,7 @@ Crea un archivo .env en la raíz del proyecto basándote en los datos de tu base
    MYSQL_HOST=localhost
    MYSQL_USER=root
    MYSQL_PASSWORD=tu_contrasena_aqui
-   MYSQL_DB=abpTes
+   MYSQL_DB=abpTest
 
 ---
 
