@@ -54,16 +54,20 @@ El proyecto utiliza el patrón *Application Factory* (`create_app()`) y está di
 
 4. **Instalar las dependencias de Python:**
    ```bash
-   python -m venv venv
+   pip install -r requirements.txt
 
-5. **Configurar las variables de entorno:**
+5. **Instalar las dependencias de Node:**
+   ```bash
+   pnpm install
+
+6. **Configurar las variables de entorno:**
 Crea un archivo .env en la raíz del proyecto basándote en los datos de tu base de datos local:
    ```bash
    SECRET_KEY=cambiar_esto_en_produccion
    MYSQL_HOST=localhost
    MYSQL_USER=root
    MYSQL_PASSWORD=tu_contrasena_aqui
-   MYSQL_DB=foro_daw
+   MYSQL_DB=abpTes
 
 ---
 
