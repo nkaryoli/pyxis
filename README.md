@@ -8,6 +8,7 @@ Bienvenido al repositorio de **Pyxis**, una plataforma de colaboración para est
 * **Backend:** Flask (Python) con SQLAlchemy (ORM) y PyMySQL.
 * **Frontend:** HTML5, Tailwind CSS y TypeScript (compilado a JS).
 * **Base de Datos:** MySQL.
+* **Testing:** pytest (Unit Tests) y Cypress (E2E Tests).
 
 ---
 
@@ -24,6 +25,8 @@ El proyecto utiliza el patrón *Application Factory* (`create_app()`) y está di
 * `ts_source/`: Código fuente en TypeScript antes de ser compilado.
 * `static/`: Archivos estáticos finales (CSS de Tailwind y JS compilado).
 * `sql/`: Scripts de la base de datos (creación de tablas e inserciones).
+* `tests/`: Tests unitarios e integración del backend (pytest).
+* `cypress/`: Tests E2E del frontend (Cypress).
 
 ---
 
@@ -56,9 +59,9 @@ El proyecto utiliza el patrón *Application Factory* (`create_app()`) y está di
    ```bash
    pip install -r requirements.txt
 
-5. **Instalar las dependencias de Node:**
+5. **Instalar las dependencias de Node.js:**
    ```bash
-   pnpm install
+   npm install
 
 6. **Configurar las variables de entorno:**
 Crea un archivo .env en la raíz del proyecto basándote en los datos de tu base de datos local:
@@ -73,7 +76,19 @@ Crea un archivo .env en la raíz del proyecto basándote en los datos de tu base
 
 ## Ejecución del Proyecto (Desarrollo en local)
 
-Para trabajar de forma fluida en el proyecto, debes abrir 3 terminales distintas en la raíz del proyecto y ejecutar un comando en cada una. Esto mantendrá el servidor levantado y compilará de forma automática cualquier cambio que hagas en el frontend:
+Para trabajar de forma fluida en el proyecto, puedes elegir entre dos opciones:
+
+**Opción A (Recomendada - 2 terminales):**
+
+- **Terminal 1:** Servidor Flask (Asegúrate de tener el entorno virtual activado aquí antes de lanzar el comando)
+   ```bash
+   flask --app "src:create_app" run --debug
+
+- **Terminal 2:** Combinación de watchers (TypeScript + Tailwind en paralelo)
+   ```bash
+   npm run watch
+
+**Opción B (3 terminales separadas):**
 
 - **Terminal 1:** Servidor Flask (Asegúrate de tener el entorno virtual activado aquí antes de lanzar el comando)
    ```bash
@@ -86,6 +101,64 @@ Para trabajar de forma fluida en el proyecto, debes abrir 3 terminales distintas
 - **Terminal 3:** Compilación interactiva de Tailwind CSS
    ```bash
    npm run tailwind:watch
+
+---
+
+## Testing
+
+El proyecto incluye dos tipos de tests:
+
+### Unit Tests (Backend - pytest)
+
+Los unit tests se encuentran en `tests/unit/` y prueban la lógica de servicios sin tocar la base de datos.
+
+**Ejecutar:**
+```bash
+npm run test:unit
+# o directamente
+pytest tests/unit -v --cov=src
+```
+
+**Con cobertura (para CI/entrega):**
+```bash
+pytest tests/unit -v --cov=src --cov-report=term-missing
+```
+
+### E2E Tests (Frontend - Cypress)
+
+Los E2E tests se encuentran en `cypress/e2e/` y prueban el flujo real del usuario en el navegador.
+
+**Prerequisitos:**
+- Asegúrate de que Flask está corriendo (`flask --app "src:create_app" run --debug`).
+
+**Ejecutar (Interfaz gráfica):**
+```bash
+npm run cypress:open
+# Selecciona el navegador y el spec a ejecutar en la ventana de Cypress.
+```
+
+**Ejecutar (Headless - terminal):**
+```bash
+npm run cypress:run
+# o ejecutar un spec concreto:
+npx cypress run --spec "cypress/e2e/pruebas.cy.js"
+```
+
+**Escribir nuevos tests:**
+- Crea archivos `.cy.js` en `cypress/e2e/`.
+- Usa `cy.visit()` para navegar, `cy.get()` para selectores, `cy.click()` para acciones.
+- Ejemplo:
+```javascript
+describe('Mi feature', () => {
+  it('hace algo', () => {
+    cy.visit('/ruta')
+    cy.get('#selector').click()
+    cy.get('#resultado').should('be.visible')
+  })
+})
+```
+
+---
 
 ## 👨‍💼 Autores
 
