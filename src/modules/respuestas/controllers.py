@@ -1,15 +1,11 @@
-# Coloca este import arriba junto a los demás servicios
+from flask import Blueprint, jsonify, request
 from src.services.respuesta_service import RespuestaService 
 
-# ... (Tus rutas anteriores de posts y render_template se quedan igual) ...
 
-
-# ==========================================
-# --- ENDPOINTS API PARA RESPUESTAS     ---
-# ==========================================
+respuestas = Blueprint('respuestas', __name__)
 
 # --- 1. CREAR RESPUESTA (POST) ---
-@posts.route('/api/posts/<int:id_post>/respuestas', methods=['POST'])
+@respuestas.route('/api/posts/<int:id_post>/respuestas', methods=['POST'])
 def crear_respuesta_api(id_post):
     datos = request.get_json()
     
@@ -31,7 +27,7 @@ def crear_respuesta_api(id_post):
 
 
 # --- 2. GET RESPUESTAS POR ID_POST ---
-@posts.route('/api/posts/<int:id_post>/respuestas', methods=['GET'])
+@respuestas.route('/api/posts/<int:id_post>/respuestas', methods=['GET'])
 def listar_respuestas_post_api(id_post):
     try:
         lista = RespuestaService.obtener_respuestas_de_post(id_post)
@@ -41,7 +37,7 @@ def listar_respuestas_post_api(id_post):
 
 
 # --- 3. GET RESPUESTAS POR ID_USUARIO ---
-@posts.route('/api/users/<int:id_usuario>/respuestas', methods=['GET'])
+@respuestas.route('/api/users/<int:id_usuario>/respuestas', methods=['GET'])
 def ver_respuestas_usuario_api(id_usuario):
     try:
         lista = RespuestaService.obtener_respuestas_de_usuario(id_usuario)

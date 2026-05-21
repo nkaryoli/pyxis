@@ -1,4 +1,4 @@
-from src.repositories.posts_repository import PostRepository
+from src.repositories.post_repository import PostRepository
 
 class PostService:
 

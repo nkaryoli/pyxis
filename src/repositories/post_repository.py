@@ -1,5 +1,5 @@
 from src.extensions import get_session
-from src.models.posts import Post
+from src.models.post import Post
 
 class PostRepository:
 

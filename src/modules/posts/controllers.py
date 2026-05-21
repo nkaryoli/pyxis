@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.services.posts_service import PostService
+from src.services.post_service import PostService
 
 posts = Blueprint('posts', __name__)
 

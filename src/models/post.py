@@ -16,14 +16,4 @@ class Post(Base):
     def __repr__(self):
         return f"<Post {self.id_post}: {self.titulo_post}>"
 
-    def to_dict(self):
-        """Devuelve el diccionario con las claves adaptadas para tu JSON."""
-        return {
-            "id_post": self.id_post,
-            "titulo_post": self.titulo_post,
-            "contenido_post": self.contenido_post,
-            "fecha_creacion_post": self.fecha_creacion_post.isoformat() if self.fecha_creacion_post else None,
-            "id_usuario": self.id_usuario,
-            "codigo_modulo": self.codigo_modulo,
-            "imagen_post": self.imagen_post
-        }
+ 
