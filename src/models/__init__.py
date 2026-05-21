@@ -1,16 +1,20 @@
+
+from src.models.post import Post
+from src.models.respuesta import Respuesta
 from flask import Flask
-# 1. Asegúrate de tener las tres importaciones arriba
-from src.modules.posts.controllers import posts
-from src.modules.respuestas.controllers import respuestas
-from src.modules.pruebas.controllers import pruebas
+from src.extensions import init_db  # (O las extensiones que tengas instaladas)
 
 def create_app():
     app = Flask(__name__)
+    
+    # ... Aquí van tus configuraciones (Base de datos, JWT, etc.) ...
+    # Ej: init_db(app)
 
-    # ... (aquí tus configuraciones de base de datos si tienes) ...
+    # 1. Importamos SOLO los módulos reales dentro de la función
+    from src.modules.posts.controllers import posts
+    from src.modules.respuestas.controllers import respuestas
 
-    # 2. Registra los tres uno detrás del otro, bien alineados a la izquierda (con 4 espacios de indentación)
-    app.register_blueprint(pruebas, url_prefix='/pruebas')
+    # 2. Registramos los blueprints que sí vas a usar
     app.register_blueprint(posts)
     app.register_blueprint(respuestas)
 
