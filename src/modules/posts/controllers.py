@@ -70,3 +70,28 @@ def ver_posts_usuario_api(id_usuario):
         return jsonify([p.to_dict() for p in lista]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+# --- 6. UPDATE POSTS POR ID DE POST ---   
+@posts.route('/api/posts/<int:id_post>', methods=['PUT'])
+def modificar_post_api(id_post):
+    try:
+        data = request.get_json()
+        
+        # Le pasamos el ID y los datos que queremos actualizar al servicio
+        post_actualizado = PostService.modificar_post(
+            id_post=id_post,
+            titulo=data.get('titulo_post'),
+            contenido=data.get('contenido_post'),
+            codigo_modulo=data.get('codigo_modulo'),
+            imagen=data.get('imagen_post') # Mantenemos nuestra palabra clave unificada 'imagen'
+        )
+        
+        # Si el servicio devuelve None, significa que el post no existía
+        if not post_actualizado:
+            return jsonify({"error": f"No se encontró el post con ID {id_post}"}), 404
+            
+        return jsonify(post_actualizado.to_dict()), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

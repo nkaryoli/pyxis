@@ -75,5 +75,36 @@ class PostRepository:
             return session.query(Post).filter_by(id_post=id_post).first()
         finally:
             session.close()
-    
+            
+            
+            
+    @staticmethod
+    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):
+        session = get_session()
+        try:
+
+            post = session.query(Post).filter_by(id_post=id_post).first()
+            
+            if not post:
+                return None
+
+            if titulo is not None:
+                post.titulo_post = titulo
+            if contenido is not None:
+                post.contenido_post = contenido
+            if codigo_modulo is not None:
+                post.codigo_modulo = codigo_modulo
+            if imagen is not None:
+                post.imagen_post = imagen
+
+            session.commit()
+            session.refresh(post)
+            return post
+            
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+        
 
