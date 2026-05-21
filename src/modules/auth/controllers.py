@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for
+from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for, g
 
 from src.services.auth_service import AuthService
 
@@ -27,6 +27,31 @@ def _crear_respuesta_con_token(payload, status_code, token):
 		max_age=60 * 60 * 24,
 	)
 	return response
+
+
+@auth.route('/auth/me', methods=['GET'])
+@AuthService.token_required
+def me():
+	"""Devuelve el usuario autenticado o redirige al login."""
+	usuario = getattr(g, 'current_user', None)
+	if not usuario:
+		if _wants_json():
+			return jsonify({'error': 'No autenticado'}), 401
+		return redirect(url_for('auth.login'))
+
+	respuesta = {
+		'id_usuario': usuario.id_usuario,
+		'username': usuario.username,
+		'email_usuario': usuario.email_usuario,
+		'rol': usuario.rol,
+		'puntos': getattr(usuario, 'tokens', None)
+	}
+
+	if _wants_json():
+		return jsonify(respuesta), 200
+
+	# Para navegación web, redirigimos al perfil público/privado
+	return redirect(url_for('usuarios.ver_perfil', id_usuario=usuario.id_usuario))
 
 @auth.route('/auth/register', methods=['GET', 'POST'])
 def register():
