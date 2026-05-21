@@ -20,12 +20,19 @@ def create_app():
     init_db(db_url)
     
     # Importamos y registramos tus Blueprints (los módulos del foro)
-    #from src.modules.auth.controllers import auth
-    #from src.modules.asignaturas.controllers import asignaturas
-    from src.modules.pruebas.controllers import pruebas
+    #from src.modules.pruebas.controllers import pruebas
+    from src.modules.posts.controllers import posts
+    from src.modules.respuestas.controllers import respuestas
+    from src.modules.tokens.controllers import tokens
+    from src.modules.modulos.controllers import modulos
+    from src.modules.usuario.controllers import usuarios_bp
 
-    #app.register_blueprint(auth, url_prefix='/auth')
-    #app.register_blueprint(asignaturas, url_prefix='/')
-    app.register_blueprint(pruebas, url_prefix='/pruebas')
+
+    #app.register_blueprint(pruebas, url_prefix='/pruebas')
+    app.register_blueprint(posts)
+    app.register_blueprint(respuestas)
+    app.register_blueprint(tokens)
+    app.register_blueprint(modulos, url_prefix='/api/modulos')
+    app.register_blueprint(usuarios_bp)
     
     return app
