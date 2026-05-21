@@ -50,3 +50,15 @@ class TokensRepository:
             raise e
         finally:
             session.close()
+    
+    
+    @staticmethod
+    def get_all():
+        session = get_session()
+        try:
+            # Hace un SELECT * FROM HISTORICO_TOKENS
+            todos_los_tokens = session.query(HistoricoTokens).all()
+            session.expunge_all()
+            return todos_los_tokens
+        finally:
+            session.close()

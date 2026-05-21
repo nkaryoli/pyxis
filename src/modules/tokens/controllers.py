@@ -61,3 +61,26 @@ def eliminar_tokens_api(id_tokens):
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+    
+# --- 4. VER TODOS LOS TOKENS DE LA PLATAFORMA (GET GLOBAL) ---
+@tokens.route('/api/tokens', methods=['GET'])
+def ver_todos_los_tokens_api():
+    try:
+        # Extraemos el rol desde las cabeceras de Postman por seguridad
+        usuario_rol = request.headers.get('X-User-Role')
+        
+        if not usuario_rol:
+            return jsonify({"error": "Autenticación requerida. Falta X-User-Role en los Headers."}), 401
+
+        # REGLA DE SEGURIDAD: Un alumno no debe ver los movimientos de tokens de sus compañeros
+        if usuario_rol not in ['ADMINISTRADOR', 'PROFESOR']:
+            return jsonify({"error": "No tienes permisos para ver el listado global de tokens."}), 403
+
+        # Si pasa el filtro, obtenemos la lista completa
+        lista_completa = TokensService.obtener_todos_los_tokens()
+        return jsonify([t.to_dict() for t in lista_completa]), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

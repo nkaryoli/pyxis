@@ -13,3 +13,7 @@ class TokensService:
     @staticmethod
     def eliminar_registro_tokens(id_tokens):
         return TokensRepository.delete(id_tokens)
+
+    @staticmethod
+    def obtener_todos_los_tokens():
+        return TokensRepository.get_all()
