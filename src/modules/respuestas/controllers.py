@@ -37,7 +37,7 @@ def listar_respuestas_post_api(id_post):
 
 
 # --- 3. GET RESPUESTAS POR ID_USUARIO ---
-@respuestas.route('/api/users/<int:id_usuario>/respuestas', methods=['GET'])
+@respuestas.route('/api/usuarios/<int:id_usuario>/respuestas', methods=['GET'])
 def ver_respuestas_usuario_api(id_usuario):
     try:
         lista = RespuestaService.obtener_respuestas_de_usuario(id_usuario)

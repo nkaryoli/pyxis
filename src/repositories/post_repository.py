@@ -31,7 +31,7 @@ class PostRepository:
 
     
     @staticmethod
-    def create(titulo, contenido, id_usuario1, codigo_modulo=None, imagen=None):
+    def create(titulo, contenido, id_usuario1, codigo_modulo, imagen=None):
         session = get_session()
         try:
             nuevo_post = Post(
