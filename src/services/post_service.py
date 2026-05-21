@@ -14,7 +14,6 @@ class PostService:
     def crear_post(titulo, contenido, id_usuario, codigo_modulo, imagen=None):
         return PostRepository.create(titulo, contenido, id_usuario, codigo_modulo, imagen)
 
-
     @staticmethod
     def eliminar_post(id_post):
         exito = PostRepository.delete(id_post)
@@ -24,7 +23,8 @@ class PostService:
     
     @staticmethod
     def obtener_por_id(id_post):
-        return PostRepository.get_by_post_id(id_post)
+        # ¡CAMBIO AQUÍ! Se adapta al nuevo método limpio del repositorio
+        return PostRepository.get_by_id(id_post)
     
     @staticmethod
     def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):

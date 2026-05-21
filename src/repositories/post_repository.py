@@ -7,43 +7,49 @@ class PostRepository:
     def get_all():
         session = get_session()
         try:
-            return session.query(Post).all()
+            posts = session.query(Post).all()
+            # Hacemos expunge_all para poder usar los objetos fuera de la sesión abierta
+            session.expunge_all()
+            return posts
         finally:
             session.close()
 
-    
     @staticmethod
     def get_by_id(id_post):
         session = get_session()
         try:
-            return session.query(Post).filter_by(id_post=id_post).first()
+            post = session.query(Post).filter_by(id_post=id_post).first()
+            if post:
+                session.expunge(post)
+            return post
         finally:
             session.close()
-
 
     @staticmethod
     def get_by_user_id(id_usuario):
         session = get_session()
         try:
-            return session.query(Post).filter_by(id_usuario=id_usuario).all()
+            posts = session.query(Post).filter_by(id_usuario=id_usuario).all()
+            session.expunge_all()
+            return posts
         finally:
             session.close()
 
-    
     @staticmethod
-    def create(titulo, contenido, id_usuario1, codigo_modulo, imagen=None):
+    def create(titulo, contenido, id_usuario, codigo_modulo, imagen=None):
         session = get_session()
         try:
             nuevo_post = Post(
                 titulo_post=titulo,
                 contenido_post=contenido,
-                id_usuario=id_usuario1,
+                id_usuario=id_usuario, # Corregido de id_usuario1 a id_usuario
                 codigo_modulo=codigo_modulo,
                 imagen_post=imagen
             )
             session.add(nuevo_post)
             session.commit()
             session.refresh(nuevo_post)
+            session.expunge(nuevo_post)
             return nuevo_post
         except Exception as e:
             session.rollback()
@@ -66,23 +72,11 @@ class PostRepository:
             raise e
         finally:
             session.close()
-            
-            
-    @staticmethod
-    def get_by_post_id(id_post):
-        session = get_session()
-        try:
-            return session.query(Post).filter_by(id_post=id_post).first()
-        finally:
-            session.close()
-            
-            
-            
+
     @staticmethod
     def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):
         session = get_session()
         try:
-
             post = session.query(Post).filter_by(id_post=id_post).first()
             
             if not post:
@@ -99,6 +93,7 @@ class PostRepository:
 
             session.commit()
             session.refresh(post)
+            session.expunge(post)
             return post
             
         except Exception as e:
@@ -106,5 +101,3 @@ class PostRepository:
             raise e
         finally:
             session.close()
-        
-
