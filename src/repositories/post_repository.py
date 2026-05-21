@@ -31,15 +31,15 @@ class PostRepository:
 
     
     @staticmethod
-    def create(titulo, contenido, id_usuario, codigo_modulo=None, imagen=None):
+    def create(titulo, contenido, id_usuario1, codigo_modulo=None, imagen=None):
         session = get_session()
         try:
             nuevo_post = Post(
                 titulo_post=titulo,
                 contenido_post=contenido,
-                id_usuario=id_usuario,
+                id_usuario=id_usuario1,
                 codigo_modulo=codigo_modulo,
-                imagen_post=imagen_post
+                imagen_post=imagen
             )
             session.add(nuevo_post)
             session.commit()

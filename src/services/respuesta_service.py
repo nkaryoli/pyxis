@@ -26,3 +26,8 @@ class RespuestaService:
             es_mejor=es_mejor,
             imagen=imagen
         )
+
+
+    @staticmethod
+    def eliminar_respuesta(id_respuesta):
+        return RespuestaRepository.delete(id_respuesta)

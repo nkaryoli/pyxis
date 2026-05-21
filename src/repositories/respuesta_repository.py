@@ -39,3 +39,21 @@ class RespuestaRepository:
             raise e
         finally:
             session.close()
+            
+    
+    @staticmethod
+    def delete(id_respuesta):
+        session = get_session()
+        try:
+            respuesta = session.query(Respuesta).filter_by(id_respuesta=id_respuesta).first()
+            if not respuesta:
+                return False
+            session.delete(respuesta)
+            session.commit()
+            return True
+            
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()

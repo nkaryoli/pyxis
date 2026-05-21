@@ -44,3 +44,21 @@ def ver_respuestas_usuario_api(id_usuario):
         return jsonify([r.to_dict() for r in lista]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+    
+    
+# --- 4. DELETE RESPUESTAS POR ID_RESPUESTA ---
+@respuestas.route('/api/respuestas/<int:id_respuesta>', methods=['DELETE'])
+def eliminar_respuesta_api(id_respuesta):
+    try:
+
+        eliminado = RespuestaService.eliminar_respuesta(id_respuesta)
+
+        if not eliminado:
+            return jsonify({"error": f"No se encontró ninguna respuesta con el ID {id_respuesta}"}), 404
+            
+        return jsonify({"mensaje": f"Respuesta con ID {id_respuesta} eliminada correctamente"}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
