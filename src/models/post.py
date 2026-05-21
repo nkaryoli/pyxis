@@ -3,7 +3,7 @@ from datetime import datetime
 from src.extensions import Base
 
 class Post(Base):
-    __tablename__ = 'posts'
+    __tablename__ = 'POSTS'
     
     id_post = Column(Integer, primary_key=True, autoincrement=True)
     titulo_post = Column(String(150), nullable=False)
@@ -15,5 +15,16 @@ class Post(Base):
     
     def __repr__(self):
         return f"<Post {self.id_post}: {self.titulo_post}>"
+    
+    def to_dict(self):
+        return {
+            "id_post": self.id_post,
+            "titulo_post": self.titulo_post,
+            "contenido_post": self.contenido_post,
+            "id_usuario": self.id_usuario,
+            "codigo_modulo": self.codigo_modulo,
+            "imagen_post": self.imagen_post
+            # "fecha_creacion": self.fecha_creacion_post.isoformat() if self.fecha_creacion_post else None
+        }
 
  

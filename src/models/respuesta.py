@@ -3,7 +3,7 @@ from datetime import datetime
 from src.extensions import Base
 
 class Respuesta(Base):
-    __tablename__ = 'respuestas'
+    __tablename__ = 'RESPUESTAS'
     
     id_respuesta = Column(Integer, primary_key=True, autoincrement=True)
     contenido_respuesta = Column(Text, nullable=False)
@@ -15,5 +15,14 @@ class Respuesta(Base):
     
     def __repr__(self):
         return f"<Respuesta {self.id_respuesta} del Post {self.id_post}>"
+    
+    def to_dict(self):
+        return {
+            "id_respuesta": self.id_respuesta,
+            "contenido_respuesta": self.contenido_respuesta,
+            "id_post": self.id_post,
+            "id_usuario": self.id_usuario
+            # Añade el resto de columnas que tenga tu tabla de respuestas
+        }
 
     
