@@ -72,7 +72,7 @@ def gestionar_post_api(id_post):
         if not post:
             return jsonify({"error": f"No se encontró el post con ID {id_post}"}), 404
 
-        # REGLA DE AUTORIZACIÓN: ¿Es Admin? ¿Es Profesor? ¿O es el dueño del post?
+
         es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (post.id_usuario == usuario_id_solicitante)
         
         if not es_autorizado:
