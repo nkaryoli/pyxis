@@ -39,7 +39,7 @@ class PostRepository:
                 contenido_post=contenido,
                 id_usuario=id_usuario,
                 codigo_modulo=codigo_modulo,
-                imagen_post=imagen
+                imagen_post=imagen_post
             )
             session.add(nuevo_post)
             session.commit()

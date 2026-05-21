@@ -24,20 +24,21 @@ def eliminar_post_api(id_post):
 # --- 3. CREAR ---
 @posts.route('/api/posts', methods=['POST'])
 def crear_post_api():
-    datos = request.get_json()
-    
-    if not datos or 'titulo_post' not in datos or 'contenido_post' not in datos or 'id_usuario' not in datos:
-        return jsonify({"error": "Faltan campos: titulo_post, contenido_post o id_usuario"}), 400
-        
     try:
-        nuevo = PostService.crear_post(
-            titulo=datos['titulo_post'],
-            contenido=datos['contenido_post'],
-            id_usuario=datos['id_usuario'],
-            codigo_modulo=datos.get('codigo_modulo'),
-            imagen=datos.get('imagen_post')
+
+        data = request.get_json() 
+        
+        # Ahora que 'data' ya existe, Flask podrá leer los campos del JSON:
+        nuevo_post = PostService.crear_post(
+            titulo=data.get('titulo_post'),
+            contenido=data.get('contenido_post'),
+            id_usuario=data.get('id_usuario'),
+            codigo_modulo=data.get('codigo_modulo'),
+            imagen=data.get('imagen_post')
         )
-        return jsonify({"mensaje": "Post creado con éxito", "post": nuevo.to_dict()}), 201
+        
+        return jsonify(nuevo_post.to_dict()), 201
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     

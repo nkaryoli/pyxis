@@ -11,8 +11,8 @@ class PostService:
         return PostRepository.get_by_user_id(id_usuario)
 
     @staticmethod
-    def crear_post(titulo, contenido, id_usuario):
-        return PostRepository.create(titulo, contenido, id_usuario)
+    def crear_post(titulo, contenido, id_usuario, codigo_modulo=None, imagen_post=None):
+        return PostRepository.create(titulo, contenido, id_usuario, codigo_modulo, imagen_post)
 
 
     @staticmethod
