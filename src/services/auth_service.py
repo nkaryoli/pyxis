@@ -3,6 +3,8 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.repositories.usuario_repository import UsuarioRepository
+from functools import wraps
+from flask import request, g, jsonify
 
 
 class AuthService:
@@ -95,3 +97,47 @@ class AuthService:
             raise ValueError('El token ha expirado.') from e
         except BadSignature as e:
             raise ValueError('El token no es válido.') from e
+
+
+    @classmethod
+    def token_required(cls, func):
+        """Decorador para proteger endpoints que requieren autenticación.
+
+        Busca el token en la cookie `auth_token` o en el header `Authorization: Bearer ...`.
+        Valida el token y, si es válido, adjunta el usuario actual en `flask.g.current_user`.
+        Devuelve 401 si falta o es inválido.
+        """
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            token = None
+            # Prefer cookie HttpOnly
+            token = request.cookies.get('auth_token')
+
+            # Fallback a header Authorization
+            if not token:
+                auth_header = request.headers.get('Authorization', '')
+                if auth_header.startswith('Bearer '):
+                    token = auth_header.split(' ', 1)[1].strip()
+
+            if not token:
+                return jsonify({'error': 'Autenticación requerida'}), 401
+
+            try:
+                payload = cls.validar_token(token)
+            except ValueError as e:
+                return jsonify({'error': str(e)}), 401
+
+            id_usuario = payload.get('id_usuario')
+            if not id_usuario:
+                return jsonify({'error': 'Token inválido (sin id)'}), 401
+
+            usuario = UsuarioRepository.get_by_id(id_usuario)
+            if not usuario:
+                return jsonify({'error': 'Usuario no encontrado'}), 401
+
+            # Attach current user to flask.g
+            g.current_user = usuario
+            return func(*args, **kwargs)
+
+        return wrapper

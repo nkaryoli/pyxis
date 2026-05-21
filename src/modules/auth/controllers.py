@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, jsonify, make_response, redirect, render_template, request, url_for
 
 from src.services.auth_service import AuthService
 
@@ -14,6 +14,19 @@ def _extraer_datos_request():
 def _wants_json():
 	"""Indica si la respuesta debe devolverse en formato JSON."""
 	return request.is_json or 'application/json' in request.headers.get('Accept', '')
+
+
+def _crear_respuesta_con_token(payload, status_code, token):
+	"""Crea una respuesta y guarda el token en una cookie HttpOnly."""
+	response = make_response(payload, status_code)
+	response.set_cookie(
+		'auth_token',
+		token,
+		httponly=True,
+		samesite='Lax',
+		max_age=60 * 60 * 24,
+	)
+	return response
 
 @auth.route('/auth/register', methods=['GET', 'POST'])
 def register():
@@ -62,15 +75,8 @@ def login():
 		usuario = resultado['usuario']
 		token = resultado['token']
 
-		session.clear()
-		session['auth_token'] = token
-		session['user_id'] = usuario.id_usuario
-		session['username'] = usuario.username
-		session['rol'] = usuario.rol
-
 		respuesta = {
 			'mensaje': 'Inicio de sesión correcto',
-			'token': token,
 			'usuario': {
 				'id_usuario': usuario.id_usuario,
 				'username': usuario.username,
@@ -80,9 +86,17 @@ def login():
 		}
 
 		if _wants_json():
-			return jsonify(respuesta), 200
+			return _crear_respuesta_con_token(jsonify(respuesta), 200, token)
 
-		return redirect(url_for('usuarios.ver_perfil', id_usuario=usuario.id_usuario))
+		response = redirect(url_for('usuarios.ver_perfil', id_usuario=usuario.id_usuario))
+		response.set_cookie(
+			'auth_token',
+			token,
+			httponly=True,
+			samesite='Lax',
+			max_age=60 * 60 * 24,
+		)
+		return response
 	except ValueError as e:
 		mensaje = str(e)
 		if _wants_json():
@@ -96,9 +110,12 @@ def login():
 @auth.route('/auth/logout', methods=['GET', 'POST'])
 def logout():
 	"""Cierra la sesión activa y redirige al login."""
-	session.clear()
+	response = make_response(
+		jsonify({'mensaje': 'Sesión cerrada correctamente'}) if _wants_json() else redirect(url_for('auth.login'))
+	)
+	response.delete_cookie('auth_token')
 
 	if _wants_json():
-		return jsonify({'mensaje': 'Sesión cerrada correctamente'}), 200
+		return response, 200
 
-	return redirect(url_for('auth.login'))
+	return response
