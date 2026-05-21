@@ -66,5 +66,14 @@ class PostRepository:
             raise e
         finally:
             session.close()
+            
+            
+    @staticmethod
+    def get_by_post_id(id_post):
+        session = get_session()
+        try:
+            return session.query(Post).filter_by(id_post=id_post).first()
+        finally:
+            session.close()
     
 

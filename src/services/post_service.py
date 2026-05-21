@@ -21,3 +21,7 @@ class PostService:
         if not exito:
             raise Exception("El post no existe")
         return True
+    
+    @staticmethod
+    def obtener_por_id(id_post):
+        return PostRepository.get_by_post_id(id_post)
