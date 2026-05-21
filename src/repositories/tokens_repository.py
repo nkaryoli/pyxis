@@ -34,4 +34,19 @@ class TokensRepository:
         finally:
             session.close()
             
-    
+    @staticmethod
+    def delete(id_tokens):
+        session = get_session()
+        try:
+            # Buscamos el registro en la tabla física HISTORICO_TOKENS
+            registro = session.query(HistoricoTokens).filter_by(id_tokens=id_tokens).first()
+            if registro:
+                session.delete(registro)
+                session.commit()
+                return True
+            return False
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()

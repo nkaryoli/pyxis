@@ -35,3 +35,29 @@ def ver_historial_tokens_api(id_usuario):
         return jsonify([t.to_dict() for t in lista]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+# --- 3. ELIMINAR REGISTRO DE TOKENS POR ID (DELETE) ---
+@tokens.route('/api/tokens/<int:id_tokens>', methods=['DELETE'])
+def eliminar_tokens_api(id_tokens):
+    try:
+        # Extraemos el rol desde las cabeceras de seguridad de Postman
+        usuario_rol = request.headers.get('X-User-Role') # 'ALUMNO', 'PROFESOR', 'ADMINISTRADOR'
+        
+        if not usuario_rol:
+            return jsonify({"error": "Autenticación requerida. Falta X-User-Role en los Headers."}), 401
+
+        # REGLA DE SEGURIDAD: Solo profesores o administradores pueden alterar el histórico
+        if usuario_rol not in ['ADMINISTRADOR', 'PROFESOR']:
+            return jsonify({"error": "No tienes permisos para eliminar registros del histórico de tokens."}), 403
+
+        # Si pasa el filtro, procedemos a borrar
+        eliminado = TokensService.eliminar_registro_tokens(id_tokens)
+
+        if not eliminado:
+            return jsonify({"error": f"No se encontró ningún registro de tokens con el ID {id_tokens}"}), 404
+            
+        return jsonify({"mensaje": f"Registro de tokens con ID {id_tokens} eliminado correctamente"}), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
