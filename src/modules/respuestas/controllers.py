@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.services.respuesta_service import RespuestaService 
 
-
 respuestas = Blueprint('respuestas', __name__)
 
 # --- 1. CREAR RESPUESTA (POST) ---
@@ -44,21 +43,45 @@ def ver_respuestas_usuario_api(id_usuario):
         return jsonify([r.to_dict() for r in lista]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-    
-    
-    
-# --- 4. DELETE RESPUESTAS POR ID_RESPUESTA ---
-@respuestas.route('/api/respuestas/<int:id_respuesta>', methods=['DELETE'])
-def eliminar_respuesta_api(id_respuesta):
+
+
+# --- 4. GESTIONAR RESPUESTA POR ID (PUT y DELETE con verificación de Rol y Propiedad) ---
+@respuestas.route('/api/respuestas/<int:id_respuesta>', methods=['PUT', 'DELETE'])
+def gestionar_respuesta_api(id_respuesta):
     try:
+        # Extraemos las credenciales desde las cabeceras (Headers) de Postman
+        usuario_id_solicitante = request.headers.get('X-User-Id')
+        usuario_rol = request.headers.get('X-User-Role') # 'ALUMNO', 'PROFESOR', 'ADMINISTRADOR'
+        
+        if not usuario_id_solicitante or not usuario_rol:
+            return jsonify({"error": "Autenticación requerida. Falta X-User-Id o X-User-Role en los Headers."}), 401
 
-        eliminado = RespuestaService.eliminar_respuesta(id_respuesta)
+        usuario_id_solicitante = int(usuario_id_solicitante)
 
-        if not eliminado:
+        # Buscamos la respuesta primero para comprobar quién es el dueño original
+        respuesta = RespuestaService.obtener_por_id(id_respuesta)
+        if not respuesta:
             return jsonify({"error": f"No se encontró ninguna respuesta con el ID {id_respuesta}"}), 404
+
+        # REGLA DE AUTORIZACIÓN: ¿Es Admin? ¿Es Profesor? ¿O es el dueño de la respuesta?
+        es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (respuesta.id_usuario == usuario_id_solicitante)
+        
+        if not es_autorizado:
+            return jsonify({"error": "No tienes permisos para modificar o borrar esta respuesta."}), 403
+
+        # Si pasa el filtro de seguridad, ejecutamos según el método HTTP
+        if request.method == 'DELETE':
+            RespuestaService.eliminar_respuesta(id_respuesta)
+            return jsonify({"mensaje": f"Respuesta con ID {id_respuesta} eliminada correctamente"}), 200
             
-        return jsonify({"mensaje": f"Respuesta con ID {id_respuesta} eliminada correctamente"}), 200
+        elif request.method == 'PUT':
+            datos = request.get_json()
+            respuesta_actualizada = RespuestaService.modificar_respuesta(
+                id_respuesta=id_respuesta,
+                contenido=datos.get('contenido_respuesta'),
+                imagen=datos.get('imagen_respuesta')
+            )
+            return jsonify({"mensaje": "Respuesta modificada con éxito", "respuesta": respuesta_actualizada.to_dict()}), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
