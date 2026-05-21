@@ -22,10 +22,14 @@ def create_app():
     # Importamos y registramos tus Blueprints (los módulos del foro)
     #from src.modules.auth.controllers import auth
     #from src.modules.asignaturas.controllers import asignaturas
-    from src.modules.pruebas.controllers import pruebas
+    #from src.modules.pruebas.controllers import pruebas
+    from src.modules.posts.controllers import posts
+    from src.modules.respuestas.controllers import respuestas
 
     #app.register_blueprint(auth, url_prefix='/auth')
     #app.register_blueprint(asignaturas, url_prefix='/')
-    app.register_blueprint(pruebas, url_prefix='/pruebas')
+    #app.register_blueprint(pruebas, url_prefix='/pruebas')
+    app.register_blueprint(posts)
+    app.register_blueprint(respuestas)
     
     return app
