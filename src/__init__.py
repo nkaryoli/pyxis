@@ -1,12 +1,20 @@
 from flask import Flask
 from config import Config
 from src.extensions import init_db
+import os
 
 def create_app():
     app = Flask(__name__)
 
     # Cargamos la configuración desde config.py
     app.config.from_object(Config)
+    # Ajustes de seguridad según entorno: activar Secure para cookies en producción
+    is_prod = os.getenv('FLASK_ENV') == 'production' or os.getenv('ENV') == 'production'
+    app.config['SESSION_COOKIE_SECURE'] = is_prod
+    app.config['REMEMBER_COOKIE_SECURE'] = is_prod
+    # Asegurar SameSite y HttpOnly por defecto para sesiones
+    app.config.setdefault('SESSION_COOKIE_SAMESITE', 'Lax')
+    app.config.setdefault('SESSION_COOKIE_HTTPONLY', True)
     
     # Construimos la URL de conexión a la BD
     db_url = (
