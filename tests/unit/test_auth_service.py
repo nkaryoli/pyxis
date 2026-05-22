@@ -45,3 +45,39 @@ def test_registrar_usuario_hashea_password_y_usa_rol_por_defecto(app, monkeypatc
     assert captured["password_hash"] != "Secreta123"
     assert check_password_hash(captured["password_hash"], "Secreta123")
     
+
+def test_autenticar_usuario_devuelve_usuario_y_token(app, monkeypatch):
+    """Comprueba que el login devuelve el usuario autenticado y un token firmado."""
+    password_hash = generate_password_hash("Secreta123")
+    usuario = SimpleNamespace(
+        id_usuario=15,
+        username="alumno",
+        email_usuario="alumno@monlau.com",
+        password_usuario=password_hash,
+        rol="ALUMNO",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_email",
+        lambda email: usuario,
+    )
+
+    with app.app_context():
+        resultado = AuthService.autenticar_usuario(
+            {"email": "alumno@monlau.com", "password": "Secreta123"}
+        )
+
+    assert resultado["usuario"] is usuario
+    assert isinstance(resultado["token"], str)
+    assert resultado["token"]
+
+
+def test_validar_token_rechaza_tokens_invalidos(app):
+    """Comprueba que un token inválido lanza un error de validación."""
+    with app.app_context():
+        try:
+            AuthService.validar_token("token-invalido")
+        except ValueError as exc:
+            assert "no es válido" in str(exc)
+        else:
+            raise AssertionError("Se esperaba ValueError para un token inválido")
