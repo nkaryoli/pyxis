@@ -23,6 +23,7 @@ def _crear_respuesta_con_token(payload, status_code, token):
 		'auth_token',
 		token,
 		httponly=True,
+		# secure=True,  <== ACTIVAR SOLO EN PRODUCCION
 		samesite='Lax',
 		max_age=60 * 60 * 24,
 	)
@@ -118,6 +119,7 @@ def login():
 			'auth_token',
 			token,
 			httponly=True,
+			# secure=True,  <== ACTIVAR SOLO EN PRODUCCION
 			samesite='Lax',
 			max_age=60 * 60 * 24,
 		)
