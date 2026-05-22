@@ -18,44 +18,6 @@ class UsuarioService:
         return usuario.tokens
 
     @staticmethod
-    def crear_usuario(datos):
-        """
-        Crea un usuario con lógica profesional:
-        - Autogenera username ignorando los 6 últimos caracteres antes de la @.
-        - Valida dominios de Monlau.
-        - Comprueba duplicados antes de insertar.
-        """
-        email = datos.get('email_usuario')
-        password = datos.get('password_usuario')
-        rol = datos.get('rol', 'ALUMNO')
-
-        # 1. Validaciones básicas
-        if not email or not password:
-            raise ValueError("El email y la contraseña son obligatorios.")
-
-        # 2. Validación de dominios oficiales
-        dominios_validos = ['@monlau.com', '@campus.monlau.com', '@pixys.com']
-        if not any(email.lower().endswith(domino) for domino in dominios_validos):
-            raise ValueError("El email debe pertenecer a @monlau.com o @campus.monlau.com")
-
-        # 3. Lógica de Username: victoralcaba@... -> victor
-        parte_local = email.split('@')[0]
-        # Si la parte local es muy corta (menor o igual a 6), no recortamos para no dejarlo vacío
-        username_final = parte_local[:-6] if len(parte_local) > 6 else parte_local
-
-        # 4. Comprobación profesional de duplicados
-        # Verificar si el username ya existe
-        # if UsuarioRepository.get_by_username(username_final):
-        #     raise ValueError(f"El nombre de usuario '{username_final}' ya existe. Contacte con soporte.")
-        
-        # Verificar si el email ya existe
-        if UsuarioRepository.get_by_email(email):
-            raise ValueError("Este correo electrónico ya está registrado.")
-
-        # 5. Guardado en Repositorio
-        return UsuarioRepository.create(username_final, email, password, rol)
-
-    @staticmethod
     def actualizar_usuario(id_usuario_destino, datos, usuario_id_solicitante):
         """
         Lógica de permisos avanzada:
