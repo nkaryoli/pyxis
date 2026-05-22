@@ -17,9 +17,11 @@ Notas:
     recibe una instancia limpia. Si necesitas compartir estado entre muchos
     tests (más lento), cambia el scope a `session`.
 """
+
+from src import create_app
+
 import sys
 import types
-
 import pytest
 
 def _instalar_stub_usuario_repository():
@@ -46,11 +48,7 @@ def _instalar_stub_usuario_repository():
     sys.modules[module_name] = stub
     return stub
 
-
 _instalar_stub_usuario_repository()
-
-
-from src import create_app
 
 
 @pytest.fixture
