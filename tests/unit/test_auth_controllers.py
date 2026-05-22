@@ -96,3 +96,35 @@ def test_login_get_devuelve_template(client):
 
     assert response.status_code == 200
     assert b"html" in response.data.lower() or response.data
+
+
+def test_login_post_html_redirige_y_setea_cookie(client, monkeypatch):
+    """Comprueba que el login en modo HTML redirige y setea cookie auth_token."""
+
+    usuario = SimpleNamespace(
+        id_usuario=22,
+        username="alumno",
+        email_usuario="alumno@monlau.com",
+        rol="ALUMNO",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.autenticar_usuario",
+        lambda datos: {"usuario": usuario, "token": "token-prueba"},
+    )
+
+    response = client.post(
+        "/auth/login",
+        data={
+            "email": "alumno@monlau.com",
+            "password": "Secreta123",
+        },
+    )
+
+    assert response.status_code in (301, 302)
+
+    cookie = response.headers.get("Set-Cookie", "")
+    assert "auth_token=token-prueba" in cookie
+    assert "HttpOnly" in cookie
+
+    assert "/perfil" in response.headers.get("Location", "") or "usuario" in response.headers.get("Location", "")
