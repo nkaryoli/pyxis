@@ -1,7 +1,6 @@
 from types import SimpleNamespace
 from werkzeug.security import check_password_hash, generate_password_hash
 from src.services.auth_service import AuthService
-from types import SimpleNamespace
 
 import pytest
 
