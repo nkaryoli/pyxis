@@ -17,8 +17,39 @@ Notas:
     recibe una instancia limpia. Si necesitas compartir estado entre muchos
     tests (más lento), cambia el scope a `session`.
 """
+import sys
+import types
 
 import pytest
+
+def _instalar_stub_usuario_repository():
+    module_name = "src.repositories.usuario_repository"
+    if module_name in sys.modules:
+        return sys.modules[module_name]
+
+    stub = types.ModuleType(module_name)
+
+    class UsuarioRepository:
+        @staticmethod
+        def get_by_email(email):
+            raise NotImplementedError
+
+        @staticmethod
+        def get_by_id(id_usuario):
+            raise NotImplementedError
+
+        @staticmethod
+        def create(username, email, password_hash, rol):
+            raise NotImplementedError
+
+    stub.UsuarioRepository = UsuarioRepository
+    sys.modules[module_name] = stub
+    return stub
+
+
+_instalar_stub_usuario_repository()
+
+
 from src import create_app
 
 
