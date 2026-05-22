@@ -197,3 +197,48 @@ def test_autenticar_usuario_falla_si_password_es_incorrecta(app, monkeypatch):
             )
 
 
+def test_token_required_accepts_authorization_header(app, client, monkeypatch):
+    """Comprueba que el decorador acepta el token enviado en el header Authorization: Bearer."""
+
+    usuario = SimpleNamespace(
+        id_usuario=33,
+        email_usuario="otro@monlau.com",
+        rol="ALUMNO",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.validar_token",
+        lambda token, max_age=86400: {"id_usuario": 33, "email_usuario": "otro@monlau.com", "rol": "ALUMNO"},
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_id",
+        lambda id_usuario: usuario,
+    )
+
+    from flask import jsonify, g
+
+    @app.route("/test-protected-header")
+    @AuthService.token_required
+    def protected_header():
+        return jsonify({"ok": True, "user_id": g.current_user.id_usuario})
+
+    response = client.get("/test-protected-header", headers={"Authorization": "Bearer token-prueba"})
+
+    assert response.status_code == 200
+    assert response.json["ok"] is True
+    assert response.json["user_id"] == 33
+
+
+def test_validar_token_expira_inmediatamente(app):
+    """Comprueba que un token recién generado se considera expirado si se pasa max_age negativo."""
+
+    usuario = SimpleNamespace(id_usuario=99, email_usuario="x@monlau.com", rol="ALUMNO")
+
+    with app.app_context():
+        token = AuthService.generar_token(usuario)
+
+        with pytest.raises(ValueError, match="ha expirado"):
+            AuthService.validar_token(token, max_age=-1)
+
+
