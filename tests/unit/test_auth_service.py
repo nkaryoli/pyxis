@@ -2,6 +2,9 @@ from types import SimpleNamespace
 from werkzeug.security import check_password_hash, generate_password_hash
 from src.services.auth_service import AuthService
 
+import pytest
+
+
 def test_registrar_usuario_hashea_password_y_usa_rol_por_defecto(app, monkeypatch):
     """Comprueba que el registro hashea la contraseña y aplica el rol por defecto."""
     captured = {}
@@ -81,3 +84,19 @@ def test_validar_token_rechaza_tokens_invalidos(app):
             assert "no es válido" in str(exc)
         else:
             raise AssertionError("Se esperaba ValueError para un token inválido")
+
+
+def test_registrar_usuario_falla_si_passwords_no_coinciden(app):
+    """Comprueba que el registro falla cuando las contraseñas no coinciden."""
+
+    with app.app_context():
+        with pytest.raises(ValueError, match="Las contraseñas no coinciden"):
+            AuthService.registrar_usuario(
+                {
+                    "email": "alumno@monlau.com",
+                    "password": "Secreta123",
+                    "confirm_password": "OtraPassword456",
+                }
+            )
+            
+
