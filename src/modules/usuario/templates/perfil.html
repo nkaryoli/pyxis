@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block title %}Perfil | Pyxis{% endblock %} 
+{% block content %}
+<div class="w-full max-w-2xl px-6 py-10">
+	<div
+		class="rounded-3xl border border-white/10 bg-zinc-950/95 p-8 shadow-2xl shadow-black/40 backdrop-blur"
+	>
+		<div class="mb-8 text-center">
+		<p class="mb-2 text-sm uppercase tracking-[0.35em] text-emerald-400">
+			Pyxis
+		</p>
+		<h1 class="text-3xl font-semibold text-white">Mi perfil</h1>
+		<p class="mt-2 text-sm text-zinc-400">Vista rápida de tu cuenta</p>
+		</div>
+
+		<div
+		class="grid gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 text-zinc-200 sm:grid-cols-2"
+		>
+		<div>
+			<p class="text-xs uppercase tracking-[0.25em] text-zinc-500">Usuario</p>
+			<p class="mt-2 text-lg font-medium text-white">
+			{{ usuario.username }}
+			</p>
+		</div>
+
+		<div>
+			<p class="text-xs uppercase tracking-[0.25em] text-zinc-500">Correo</p>
+			<p class="mt-2 text-lg font-medium text-white">
+			{{ usuario.email_usuario }}
+			</p>
+		</div>
+
+		<div>
+			<p class="text-xs uppercase tracking-[0.25em] text-zinc-500">Rol</p>
+			<p class="mt-2 text-lg font-medium text-white">{{ usuario.rol }}</p>
+		</div>
+
+		<div>
+			<p class="text-xs uppercase tracking-[0.25em] text-zinc-500">Tokens</p>
+			<p class="mt-2 text-lg font-medium text-white">{{ usuario.tokens }}</p>
+		</div>
+		</div>
+
+		<div
+		class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+		>
+		<a
+			href="{{ url_for('usuarios.get_info_usuario', id_usuario=usuario.id_usuario) }}"
+			class="inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-5 py-3 font-medium text-white transition hover:border-emerald-400/40 hover:bg-white/10"
+		>
+			Ver datos API
+		</a>
+
+		<form method="POST" action="{{ url_for('auth.logout') }}">
+			<button
+			type="submit"
+			class="inline-flex w-full items-center justify-center rounded-xl bg-emerald-500 px-5 py-3 font-semibold text-black transition hover:bg-emerald-400 sm:w-auto"
+			>
+				Logout
+			</button>
+		</form>
+		</div>
+	</div>
+</div>
+{% endblock %}
