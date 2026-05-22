@@ -5,6 +5,9 @@ from types import SimpleNamespace
 
 import pytest
 
+# =========================================================
+# ....................... REGISTER ........................
+# =========================================================
 
 def test_registrar_usuario_hashea_password_y_usa_rol_por_defecto(app, monkeypatch):
     """Comprueba que el registro hashea la contraseña y aplica el rol por defecto."""
@@ -48,43 +51,6 @@ def test_registrar_usuario_hashea_password_y_usa_rol_por_defecto(app, monkeypatc
     assert captured["rol"] == AuthService.ROL_POR_DEFECTO
     assert captured["password_hash"] != "Secreta123"
     assert check_password_hash(captured["password_hash"], "Secreta123")
-
-
-def test_autenticar_usuario_devuelve_usuario_y_token(app, monkeypatch):
-    """Comprueba que el login devuelve el usuario autenticado y un token firmado."""
-    password_hash = generate_password_hash("Secreta123")
-    usuario = SimpleNamespace(
-        id_usuario=15,
-        username="alumno",
-        email_usuario="alumno@monlau.com",
-        password_usuario=password_hash,
-        rol="ALUMNO",
-    )
-
-    monkeypatch.setattr(
-        "src.services.auth_service.UsuarioRepository.get_by_email",
-        lambda email: usuario,
-    )
-
-    with app.app_context():
-        resultado = AuthService.autenticar_usuario(
-            {"email": "alumno@monlau.com", "password": "Secreta123"}
-        )
-
-    assert resultado["usuario"] is usuario
-    assert isinstance(resultado["token"], str)
-    assert resultado["token"]
-
-
-def test_validar_token_rechaza_tokens_invalidos(app):
-    """Comprueba que un token inválido lanza un error de validación."""
-    with app.app_context():
-        try:
-            AuthService.validar_token("token-invalido")
-        except ValueError as exc:
-            assert "no es válido" in str(exc)
-        else:
-            raise AssertionError("Se esperaba ValueError para un token inválido")
 
 
 def test_registrar_usuario_falla_si_passwords_no_coinciden(app):
@@ -145,6 +111,36 @@ def test_registrar_usuario_rechaza_dominios_no_autorizados(app):
             )
 
 
+# =========================================================
+# ........................ LOGIN ..........................
+# =========================================================
+
+def test_autenticar_usuario_devuelve_usuario_y_token(app, monkeypatch):
+    """Comprueba que el login devuelve el usuario autenticado y un token firmado."""
+    password_hash = generate_password_hash("Secreta123")
+    usuario = SimpleNamespace(
+        id_usuario=15,
+        username="alumno",
+        email_usuario="alumno@monlau.com",
+        password_usuario=password_hash,
+        rol="ALUMNO",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_email",
+        lambda email: usuario,
+    )
+
+    with app.app_context():
+        resultado = AuthService.autenticar_usuario(
+            {"email": "alumno@monlau.com", "password": "Secreta123"}
+        )
+
+    assert resultado["usuario"] is usuario
+    assert isinstance(resultado["token"], str)
+    assert resultado["token"]
+
+
 def test_autenticar_usuario_falla_si_usuario_no_existe(app, monkeypatch):
     """Comprueba que el login falla cuando el usuario no existe."""
 
@@ -197,6 +193,37 @@ def test_autenticar_usuario_falla_si_password_es_incorrecta(app, monkeypatch):
             )
 
 
+# =========================================================
+# ........................ TOKENS .........................
+# =========================================================
+
+def test_validar_token_rechaza_tokens_invalidos(app):
+    """Comprueba que un token inválido lanza un error de validación."""
+    with app.app_context():
+        try:
+            AuthService.validar_token("token-invalido")
+        except ValueError as exc:
+            assert "no es válido" in str(exc)
+        else:
+            raise AssertionError("Se esperaba ValueError para un token inválido")
+
+
+def test_validar_token_expira_inmediatamente(app):
+    """Comprueba que un token recién generado se considera expirado si se pasa max_age negativo."""
+
+    usuario = SimpleNamespace(id_usuario=99, email_usuario="x@monlau.com", rol="ALUMNO")
+
+    with app.app_context():
+        token = AuthService.generar_token(usuario)
+
+        with pytest.raises(ValueError, match="ha expirado"):
+            AuthService.validar_token(token, max_age=-1)
+
+
+# =========================================================
+# ................ DECORADOR token_required ...............
+# =========================================================
+
 def test_token_required_accepts_authorization_header(app, client, monkeypatch):
     """Comprueba que el decorador acepta el token enviado en el header Authorization: Bearer."""
 
@@ -228,17 +255,3 @@ def test_token_required_accepts_authorization_header(app, client, monkeypatch):
     assert response.status_code == 200
     assert response.json["ok"] is True
     assert response.json["user_id"] == 33
-
-
-def test_validar_token_expira_inmediatamente(app):
-    """Comprueba que un token recién generado se considera expirado si se pasa max_age negativo."""
-
-    usuario = SimpleNamespace(id_usuario=99, email_usuario="x@monlau.com", rol="ALUMNO")
-
-    with app.app_context():
-        token = AuthService.generar_token(usuario)
-
-        with pytest.raises(ValueError, match="ha expirado"):
-            AuthService.validar_token(token, max_age=-1)
-
-
