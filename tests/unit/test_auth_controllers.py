@@ -66,3 +66,24 @@ def test_auth_me_devuelve_usuario_autenticado(client, monkeypatch):
     assert body["rol"] == "ALUMNO"
     assert body["puntos"] == 120
 
+
+def test_auth_me_sin_cookie_devuelve_401(client):
+    """Comprueba que /auth/me responde 401 si no hay cookie de autenticación."""
+    response = client.get("/auth/me", headers={"Accept": "application/json"})
+
+    assert response.status_code == 401
+    assert response.is_json
+    assert response.get_json()["error"] == "Autenticación requerida"
+
+
+def test_logout_borra_cookie(client):
+    """Comprueba que logout responde OK y elimina la cookie auth_token."""
+    response = client.post("/auth/logout", headers={"Accept": "application/json"})
+    
+    cookie = response.headers.get("Set-Cookie", "")
+    
+    assert response.status_code == 200
+    assert response.is_json
+    assert response.get_json()["mensaje"] == "Sesión cerrada correctamente"
+    assert "auth_token=;" in cookie
+    assert "Expires=" in cookie or "Max-Age=0" in cookie
