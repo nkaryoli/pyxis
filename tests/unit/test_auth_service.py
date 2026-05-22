@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from werkzeug.security import check_password_hash, generate_password_hash
 from src.services.auth_service import AuthService
+from types import SimpleNamespace
 
 import pytest
 
@@ -47,7 +48,7 @@ def test_registrar_usuario_hashea_password_y_usa_rol_por_defecto(app, monkeypatc
     assert captured["rol"] == AuthService.ROL_POR_DEFECTO
     assert captured["password_hash"] != "Secreta123"
     assert check_password_hash(captured["password_hash"], "Secreta123")
-    
+
 
 def test_autenticar_usuario_devuelve_usuario_y_token(app, monkeypatch):
     """Comprueba que el login devuelve el usuario autenticado y un token firmado."""
@@ -98,5 +99,30 @@ def test_registrar_usuario_falla_si_passwords_no_coinciden(app):
                     "confirm_password": "OtraPassword456",
                 }
             )
-            
 
+
+def test_registrar_usuario_falla_si_email_ya_existe(app, monkeypatch):
+    """Comprueba que el registro falla si el email ya está registrado."""
+
+    usuario_existente = SimpleNamespace(
+        id_usuario=1,
+        email_usuario="alumno@monlau.com",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_email",
+        lambda email: usuario_existente,
+    )
+
+    with app.app_context():
+        with pytest.raises(
+            ValueError,
+            match="ya está registrado",
+        ):
+            AuthService.registrar_usuario(
+                {
+                    "email": "alumno@monlau.com",
+                    "password": "Secreta123",
+                    "confirm_password": "Secreta123",
+                }
+            )
