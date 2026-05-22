@@ -87,3 +87,12 @@ def test_logout_borra_cookie(client):
     assert response.get_json()["mensaje"] == "Sesión cerrada correctamente"
     assert "auth_token=;" in cookie
     assert "Expires=" in cookie or "Max-Age=0" in cookie
+
+
+def test_login_get_devuelve_template(client):
+    """Comprueba que GET /auth/login devuelve el formulario de login."""
+
+    response = client.get("/auth/login")
+
+    assert response.status_code == 200
+    assert b"html" in response.data.lower() or response.data
