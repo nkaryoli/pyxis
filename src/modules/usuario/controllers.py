@@ -1,44 +1,31 @@
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, g
 from src.services.usuario_service import UsuarioService
+from src.services.auth_service import AuthService
 
 usuarios_bp = Blueprint('usuarios', __name__, template_folder='templates')
 
 
 @usuarios_bp.route('/perfil/<int:id_usuario>', methods=['GET'])
+@AuthService.token_required
 def ver_perfil(id_usuario):
-    """Renderiza la página de perfil del usuario."""
+    """Renderiza la página de perfil del usuario.
+
+    Acceso solo para el propio usuario autenticado (o bloquear acceso si el id no coincide).
+    """
     try:
+        usuario_actual = getattr(g, 'current_user', None)
+        if not usuario_actual or usuario_actual.id_usuario != id_usuario:
+            return render_template('errors/error.html', error='Acceso denegado'), 403
+
         usuario = UsuarioService.obtener_usuario_por_id(id_usuario)
         if not usuario:
             return render_template('404.html', mensaje="Usuario no encontrado"), 404
-        return render_template('usuario/perfil.html', usuario=usuario)
+        return render_template('perfil.html', usuario=usuario)
     except Exception as e:
         return render_template('error.html', error=str(e))
 
 
 ### Endpoints de API (Backend)
-
-@usuarios_bp.route('/api/usuarios', methods=['POST'])
-def crear_usuario():
-    """Endpoint para crear un usuario con nombre autogenerado."""
-    try:
-        datos = request.get_json()        
-        nuevo_usuario = UsuarioService.crear_usuario(datos)
-        
-        return jsonify({
-            "mensaje": "Usuario creado con éxito",
-            "usuario": {
-                "id": nuevo_usuario.id_usuario, 
-                "username": nuevo_usuario.username,
-                "email": nuevo_usuario.email_usuario
-            }
-        }), 201
-    except ValueError as e:       
-        return jsonify({"error": str(e)}), 400 
-    except Exception as e:
-        # Log para depuración interna si hay fallos de BD
-        print(f"Error en POST /api/usuarios: {str(e)}")
-        return jsonify({"error": "Error interno del servidor"}), 500
 
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>', methods=['GET'])
 def get_info_usuario(id_usuario):
