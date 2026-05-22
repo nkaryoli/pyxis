@@ -126,3 +126,20 @@ def test_registrar_usuario_falla_si_email_ya_existe(app, monkeypatch):
                     "confirm_password": "Secreta123",
                 }
             )
+
+
+def test_registrar_usuario_rechaza_dominios_no_autorizados(app):
+    """Comprueba que solo se permiten emails de dominios autorizados."""
+
+    with app.app_context():
+        with pytest.raises(
+            ValueError,
+            match="dominio autorizado",
+        ):
+            AuthService.registrar_usuario(
+                {
+                    "email": "usuario@gmail.com",
+                    "password": "Secreta123",
+                    "confirm_password": "Secreta123",
+                }
+            )
