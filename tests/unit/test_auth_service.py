@@ -143,3 +143,57 @@ def test_registrar_usuario_rechaza_dominios_no_autorizados(app):
                     "confirm_password": "Secreta123",
                 }
             )
+
+
+def test_autenticar_usuario_falla_si_usuario_no_existe(app, monkeypatch):
+    """Comprueba que el login falla cuando el usuario no existe."""
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_email",
+        lambda email: None,
+    )
+
+    with app.app_context():
+        with pytest.raises(
+            ValueError,
+            match="Credenciales inválidas",
+        ):
+            AuthService.autenticar_usuario(
+                {
+                    "email": "inexistente@monlau.com",
+                    "password": "Secreta123",
+                }
+            )
+
+
+def test_autenticar_usuario_falla_si_password_es_incorrecta(app, monkeypatch):
+    """Comprueba que el login falla si la contraseña es incorrecta."""
+
+    password_hash = generate_password_hash("PasswordCorrecta")
+
+    usuario = SimpleNamespace(
+        id_usuario=15,
+        username="alumno",
+        email_usuario="alumno@monlau.com",
+        password_usuario=password_hash,
+        rol="ALUMNO",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_email",
+        lambda email: usuario,
+    )
+
+    with app.app_context():
+        with pytest.raises(
+            ValueError,
+            match="Credenciales inválidas",
+        ):
+            AuthService.autenticar_usuario(
+                {
+                    "email": "alumno@monlau.com",
+                    "password": "PasswordIncorrecta",
+                }
+            )
+
+
