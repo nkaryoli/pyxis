@@ -128,3 +128,41 @@ def test_login_post_html_redirige_y_setea_cookie(client, monkeypatch):
     assert "HttpOnly" in cookie
 
     assert "/perfil" in response.headers.get("Location", "") or "usuario" in response.headers.get("Location", "")
+
+
+def test_register_post_ok_json(client, monkeypatch):
+    """Comprueba que el registro funciona correctamente en modo JSON."""
+
+    usuario = SimpleNamespace(
+        id_usuario=1,
+        username="nuevo",
+        email_usuario="nuevo@monlau.com",
+        rol="ALUMNO",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.registrar_usuario",
+        lambda datos: usuario,
+    )
+
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "nuevo@monlau.com",
+            "password": "Secreta123",
+            "confirm_password": "Secreta123",
+        },
+        headers={"Accept": "application/json"},
+    )
+
+    assert response.status_code == 201
+
+    assert response.is_json
+
+    body = response.get_json()
+
+    assert body["mensaje"] == "Usuario registrado con éxito"
+
+    assert body["usuario"]["email_usuario"] == "nuevo@monlau.com"
+    assert body["usuario"]["username"] == "nuevo"
+    assert body["usuario"]["rol"] == "ALUMNO"
