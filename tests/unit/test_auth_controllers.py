@@ -97,7 +97,7 @@ def test_login_get_devuelve_template(client):
     assert response.status_code == 200
     assert b"html" in response.data.lower() or response.data
 
-
+# unitario / semi-integracion
 def test_login_post_html_redirige_y_setea_cookie(client, monkeypatch):
     """Comprueba que el login en modo HTML redirige y setea cookie auth_token."""
 
@@ -188,3 +188,37 @@ def test_register_post_error_valor(client, monkeypatch):
     assert response.is_json
     assert "error" in body
     assert "Las contraseñas no coinciden" in body["error"]
+
+# unitario / semi-integracion
+def test_me_get_html_redirige_a_perfil(client, monkeypatch):
+    """Comprueba que /auth/me en modo HTML redirige al perfil del usuario."""
+
+    usuario = SimpleNamespace(
+        id_usuario=22,
+        username="alumno",
+        email_usuario="alumno@monlau.com",
+        rol="ALUMNO",
+        tokens=120,
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.validar_token",
+        lambda token, max_age=86400: {
+            "id_usuario": 22,
+            "email_usuario": "alumno@monlau.com",
+            "rol": "ALUMNO",
+        },
+    )
+    
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_id",
+        lambda id_usuario: usuario,
+    )
+
+    client.set_cookie("auth_token", "token-prueba")
+    response = client.get("/auth/me")
+    location = response.headers.get("Location", "")
+
+    assert response.status_code in (301, 302)
+    assert location
+
