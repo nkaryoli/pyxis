@@ -120,13 +120,12 @@ def test_login_post_html_redirige_y_setea_cookie(client, monkeypatch):
             "password": "Secreta123",
         },
     )
+    
+    cookie = response.headers.get("Set-Cookie", "")
 
     assert response.status_code in (301, 302)
-
-    cookie = response.headers.get("Set-Cookie", "")
     assert "auth_token=token-prueba" in cookie
     assert "HttpOnly" in cookie
-
     assert "/perfil" in response.headers.get("Location", "") or "usuario" in response.headers.get("Location", "")
 
 
@@ -155,14 +154,37 @@ def test_register_post_ok_json(client, monkeypatch):
         headers={"Accept": "application/json"},
     )
 
-    assert response.status_code == 201
-
-    assert response.is_json
-
     body = response.get_json()
-
+    
+    assert response.status_code == 201
+    assert response.is_json
     assert body["mensaje"] == "Usuario registrado con éxito"
-
     assert body["usuario"]["email_usuario"] == "nuevo@monlau.com"
     assert body["usuario"]["username"] == "nuevo"
     assert body["usuario"]["rol"] == "ALUMNO"
+
+
+def test_register_post_error_valor(client, monkeypatch):
+    """Comprueba que el registro devuelve 400 si hay un error de validación."""
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.registrar_usuario",
+        lambda datos: (_ for _ in ()).throw(ValueError("Las contraseñas no coinciden")),
+    )
+
+    response = client.post(
+        "/auth/register",
+        json={
+            "email": "test@monlau.com",
+            "password": "Secreta123",
+            "confirm_password": "OtraPassword",
+        },
+        headers={"Accept": "application/json"},
+    )
+
+    body = response.get_json()
+
+    assert response.status_code == 400
+    assert response.is_json
+    assert "error" in body
+    assert "Las contraseñas no coinciden" in body["error"]
