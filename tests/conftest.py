@@ -18,8 +18,57 @@ Notas:
     tests (más lento), cambia el scope a `session`.
 """
 
-import pytest
 from src import create_app
+
+import sys
+import types
+import pytest
+
+def _instalar_stub_usuario_repository():
+    module_name = "src.repositories.usuario_repository"
+    if module_name in sys.modules:
+        return sys.modules[module_name]
+
+    stub = types.ModuleType(module_name)
+
+    class UsuarioRepository:
+        @staticmethod
+        def get_by_email(email):
+            return None
+
+        @staticmethod
+        def get_by_id(id_usuario):
+            return None
+
+        @staticmethod
+        def create(username, email, password_hash, rol):
+            return None
+
+    stub.UsuarioRepository = UsuarioRepository
+    sys.modules[module_name] = stub
+    return stub
+
+
+@pytest.fixture(scope="function", autouse=False)
+def stub_usuario_repository():
+    """Instala temporalmente un módulo stub `src.repositories.usuario_repository`.
+
+    Uso: incluir la fixture en tests que necesiten el módulo. La fixture
+    asegura que el stub se elimina de `sys.modules` al finalizar el test.
+    """
+    module_name = "src.repositories.usuario_repository"
+    if module_name in sys.modules:
+        existing = sys.modules[module_name]
+        yield existing
+        return
+
+    stub = _instalar_stub_usuario_repository()
+    try:
+        yield stub
+    finally:
+        # Solo eliminar si seguimos siendo los propietarios del stub
+        if sys.modules.get(module_name) is stub:
+            del sys.modules[module_name]
 
 
 @pytest.fixture
