@@ -166,11 +166,11 @@ def test_auth_me_devuelve_usuario_autenticado(client, monkeypatch):
     )
     client.set_cookie("auth_token", "token-prueba")
     response = client.get(
-		"/auth/me",
-		headers={
-			"Accept": "application/json",
-		},
-	)
+        "/auth/me",
+        headers={
+            "Accept": "application/json",
+        },
+    )
 
     assert response.status_code == 200
     assert response.is_json
