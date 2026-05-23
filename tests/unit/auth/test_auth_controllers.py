@@ -37,7 +37,8 @@ def test_login_get_devuelve_template(client):
     response = client.get("/auth/login")
 
     assert response.status_code == 200
-    assert b"html" in response.data.lower() or response.data
+    assert "text/html" in response.headers.get("Content-Type", "").lower()
+    assert b"<form" in response.data.lower() or b"login" in response.data.lower()
 
 
 # unitario / semi-integracion
