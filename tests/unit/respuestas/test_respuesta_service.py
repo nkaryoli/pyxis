@@ -2,7 +2,7 @@ from types import SimpleNamespace
 import pytest
 from src.services.respuesta_service import RespuestaService
 
-# Helper para generar respuestas simuladas con la estructura del Repositorio
+
 def crear_mock_respuesta(id_respuesta=1, id_post=5, id_usuario=10, contenido="Respuesta de prueba"):
     return SimpleNamespace(
         id_respuesta=id_respuesta,
