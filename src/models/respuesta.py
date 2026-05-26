@@ -40,7 +40,7 @@ class Respuesta(Base):
             "contenido_respuesta": self.contenido_respuesta,
             "id_post": self.id_post,
             "id_usuario": self.id_usuario
-            # Añade el resto de columnas que tenga tu tabla de respuestas
+            
         }
 
     
