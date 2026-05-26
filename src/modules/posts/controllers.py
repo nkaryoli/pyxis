@@ -52,9 +52,21 @@ def ver_posts_usuario_api(id_usuario):
         return jsonify([p.to_dict() for p in lista]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+# --- 5. VER POSTS POR CÓDIGO DE MÓDULO ---
+@posts.route('/api/modulos/<string:codigo_modulo>/posts', methods=['GET'])
+def ver_posts_modulo_api(codigo_modulo):
+    try:
+        lista = PostService.ver_posts_por_modulo(codigo_modulo)
+        
+        return jsonify([p.to_dict() for p in lista]), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
-# --- 5. MODIFICAR O ELIMINAR POR ID (CON VERIFICACIÓN DE ROL Y PROPIEDAD) ---
+# --- 6. MODIFICAR O ELIMINAR POR ID (CON VERIFICACIÓN DE ROL Y PROPIEDAD) ---
 @posts.route('/api/posts/<int:id_post>', methods=['PUT', 'DELETE'])
 def gestionar_post_api(id_post):
     try:

@@ -23,9 +23,13 @@ class PostService:
     
     @staticmethod
     def obtener_por_id(id_post):
-        # ¡CAMBIO AQUÍ! Se adapta al nuevo método limpio del repositorio
         return PostRepository.get_by_id(id_post)
     
     @staticmethod
     def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):
         return PostRepository.update(id_post, titulo, contenido, codigo_modulo, imagen)
+    
+    
+    @staticmethod
+    def ver_posts_por_modulo(codigo_modulo):
+        return PostRepository.get_by_modulo_code(codigo_modulo)
