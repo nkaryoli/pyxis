@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ modulo.nombre_asignatura }} | Pyxis Forum{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+	<div class="py-8">
+		<div class="flex flex-wrap items-center gap-3 text-sm text-zinc-400">
+			<a href="{{ url_for('modulos.listar_modulos') }}" class="text-cyan-400 hover:text-cyan-300">Módulos</a>
+			<span>/</span>
+			<span>{{ modulo.nombre_asignatura }}</span>
+		</div>
+		<h1 class="mt-4 text-4xl font-bold text-white">{{ modulo.nombre_asignatura }}</h1>
+		<p class="mt-2 text-zinc-300">{{ modulo.curso_modulo }} · {{ modulo.descripcion }}</p>
+		<div class="mt-5 flex flex-wrap gap-3 text-sm text-zinc-400">
+			<span class="rounded-full border border-zinc-700 px-3 py-1">{{ modulo.posts_count }} posts</span>
+			<a href="{{ url_for('posts.posts_por_modulo') }}" class="rounded-full border border-zinc-700 px-3 py-1 hover:border-cyan-500 hover:text-white">Ver todos los posts</a>
+		</div>
+	</div>
+
+	<div>
+		<div class="mb-4 flex items-end justify-between gap-4">
+			<div>
+				<h2 class="text-2xl font-semibold text-white">Posts del módulo</h2>
+				<p class="mt-1 text-sm text-zinc-400">Listado sencillo tipo foro: tema, autor, respuestas, visitas y actividad.</p>
+			</div>
+			<a href="{{ url_for('posts.destacados_page') }}" class="text-sm text-cyan-400 hover:text-cyan-300">Ir a destacados</a>
+		</div>
+
+		<div class="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/70">
+			<table class="w-full table-auto text-left">
+				<thead class="border-b border-zinc-800 text-sm text-zinc-400">
+					<tr>
+						<th class="px-6 py-4">Tema</th>
+						<th class="px-6 py-4">Autor</th>
+						<th class="py-4">Respuestas</th>
+						<th class=" px-6 py-4">Visitas</th>
+						<th class="00 pr-6 py-4">Actividad</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-zinc-800">
+					{% for post in posts %}
+						{% include 'post_table_row.html' %}
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>
+{% endblock %}

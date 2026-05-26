@@ -51,7 +51,7 @@ CREATE TABLE POSTS (
     titulo_post          VARCHAR(150) NOT NULL,
     contenido_post       TEXT NOT NULL,
     fecha_creacion_post  DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    id_usuario           INT,
+    id_usuario           INT NOT NULL,
     codigo_modulo        VARCHAR(50) NOT NULL,
     imagen_post          VARCHAR(150),
     
@@ -67,7 +67,7 @@ CREATE TABLE RESPUESTAS (
     contenido_respuesta  TEXT NOT NULL,
     fecha_respuesta      DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     id_post              INT NOT NULL,
-    id_usuario           INT,
+    id_usuario           INT NOT NULL,
     es_mejor_respuesta   BOOLEAN DEFAULT FALSE NOT NULL,
     imagen_respuesta     VARCHAR(150),
     

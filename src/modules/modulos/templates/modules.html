@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Módulos | Pyxis Forum{% endblock %}
+
+{% block content %}
+<section class="space-y-8">
+		{% include 'partials/header.html' %} 
+	<div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-2">
+		{% for modulo in modulos %}
+			{% include 'partials/category_card.html' %}
+		{% endfor %}
+	</div>
+</section>
+{% endblock %}

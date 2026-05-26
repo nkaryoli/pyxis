@@ -1,0 +1,48 @@
+<a
+	href="{{ url_for('modulos.detalle_modulo', nombre_modulo=modulo.nombre_slug) }}"
+	class="group block rounded-lg border border-zinc-800 bg-zinc-900/80 p-6 transition hover:-translate-y-0.5 hover:border-cyan-500"
+>
+	<div class="grid grid-cols-[72px_1fr] gap-4 items-start">
+		<div class="flex items-center justify-center">
+			<div class="h-12 w-12 rounded-md bg-zinc-950/60 flex items-center justify-center border border-zinc-800 text-amber-400" >
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					class="h-6 w-6"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.2"
+				>
+					<path d="M12 2l3 6 6 .5-4.5 4 1 6L12 15l-5.5 3.5 1-6L3 8.5 9 8z" />
+				</svg>
+			</div>
+		</div>
+
+		<div>
+			<div class="flex items-center justify-between">
+				<h3 class="text-lg font-semibold text-white group-hover:text-cyan-300">
+					{{ modulo.nombre_asignatura }}
+				</h3>
+				<span class="rounded-full border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300">
+					{{ modulo.posts_count }} posts
+				</span>
+			</div>
+			<p class="mt-2 text-sm text-zinc-400">{{ modulo.curso_modulo }}</p>
+
+			<ul class="mt-4 space-y-2 text-sm text-zinc-400">
+				<li class="flex items-center gap-3">
+					<span class="h-2 w-2 rounded-full bg-cyan-400/30"></span>
+					<span>General</span>
+				</li>
+				<li class="flex items-center gap-3">
+					<span class="h-2 w-2 rounded-full bg-cyan-400/30"></span>
+					<span>Preguntas</span>
+				</li>
+				<li class="flex items-center gap-3">
+					<span class="h-2 w-2 rounded-full bg-cyan-400/30"></span>
+					<span>Recursos</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+</a>

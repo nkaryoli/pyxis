@@ -1,13 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{% block title %}Foro DAW{% endblock %}</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
-</head>
-<body class="bg-black flex items-center justify-center min-h-screen">
-	{% block content %}{% endblock %}
-	{% block page_scripts %}{% endblock %}
-</body>
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{% block title %}Pyxis Forum{% endblock %}</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='css/output.css') }}"
+		/>
+		{% block head_extra %}{% endblock %}
+	</head>
+	<body class="min-h-screen bg-linear-to-b from-zinc-950 via-zinc-950 to-black text-zinc-100 antialiased relative">
+		<div class="w-full h-96 bg-radial from-cyan-300/10 via-transparent to-trasparent absolute -top-32 -z-20"></div>
+		{% include 'partials/navbar.html' %}
+		<main class="mx-auto max-w-4xl pt-20 pb-8 px-4">
+			{% block content %}{% endblock %}
+		</main>
+		{% include 'partials/footer.html' %}
+	
+		{% block page_scripts %}{% endblock %}
+	</body>
 </html>
