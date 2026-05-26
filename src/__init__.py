@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, render_template
 from config import Config
 from src.extensions import init_db
+from src.mock_forum import get_modules, get_featured_posts, get_recent_posts
 import os
 
 def create_app():
@@ -26,6 +27,12 @@ def create_app():
     
     # Inicializamos la base de datos
     init_db(db_url)
+        
+    @app.route('/')
+    def home():
+        """Renderiza la página principal con contenido simulado del foro."""
+        # modulos = ModuloService.obtener_todos_los_modulos()
+        return render_template('home.html', modulos=get_modules()[:6])
     
     # Importamos y registramos tus Blueprints (los módulos del foro)
     #from src.modules.pruebas.controllers import pruebas
@@ -42,7 +49,7 @@ def create_app():
     app.register_blueprint(respuestas)
     app.register_blueprint(tokens)
     app.register_blueprint(auth)
-    app.register_blueprint(modulos, url_prefix='/api/modulos')
+    app.register_blueprint(modulos)
     app.register_blueprint(usuarios_bp)
     
     return app
