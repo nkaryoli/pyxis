@@ -33,3 +33,7 @@ class PostService:
     @staticmethod
     def ver_posts_por_modulo(codigo_modulo):
         return PostRepository.get_by_modulo_code(codigo_modulo)
+    
+    @staticmethod
+    def listar_recientes():
+        return PostRepository.get_recent()

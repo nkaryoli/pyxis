@@ -19,7 +19,6 @@ def test_crear_respuesta_service(monkeypatch):
     """Comprueba que el servicio delega correctamente al repositorio para crear una respuesta."""
     mock_creada = crear_mock_respuesta(id_respuesta=10, contenido="Solución exacta")
 
-    # Interceptamos RespuestaRepository.create
     monkeypatch.setattr(
         "src.services.respuesta_service.RespuestaRepository.create",
         lambda id_post, id_usuario, contenido, es_mejor, imagen: mock_creada

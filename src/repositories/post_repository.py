@@ -7,8 +7,7 @@ class PostRepository:
     def get_all():
         session = get_session()
         try:
-            posts = session.query(Post).all()
-            # Hacemos expunge_all para poder usar los objetos fuera de la sesión abierta
+            posts = session.query(Post).order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
@@ -106,9 +105,21 @@ class PostRepository:
     def get_by_modulo_code(codigo_modulo):
         session = get_session()
         try:
-            # Filtramos en la base de datos por el campo codigo_modulo
-            posts = session.query(Post).filter_by(codigo_modulo=codigo_modulo).all()
+            codigo_limpio = (codigo_modulo or "").strip().upper()
+            posts = session.query(Post).filter_by(codigo_modulo=codigo_limpio).order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
             session.close()
+            
+    @staticmethod
+    def get_recent():
+        session = get_session()
+        try:
+            posts = session.query(Post).order_by(Post.fecha_creacion_post.desc()).limit(10).all()
+            session.expunge_all()
+            return posts
+        finally:
+            session.close()
+    
+    

@@ -16,6 +16,30 @@ class Post(Base):
     def __repr__(self):
         return f"<Post {self.id_post}: {self.titulo_post}>"
     
+    @property
+    def created_at(self):
+        return self.fecha_creacion_post
+
+    @property
+    def autor(self):
+        return f"Usuario {self.id_usuario}"
+
+    @property
+    def respuestas(self):
+        return []
+
+    @property
+    def respuestas_count(self):
+        return len(self.respuestas)
+
+    @property
+    def modulo_nombre(self):
+        return self.codigo_modulo or "General"
+
+    @property
+    def modulo_slug(self):
+        return (self.codigo_modulo or "").lower().strip()
+    
     def to_dict(self):
         return {
             "id_post": self.id_post,

@@ -2,7 +2,7 @@ from types import SimpleNamespace
 import pytest
 from src.services.post_service import PostService
 
-# Helper para crear objetos Post simulados (simula lo que devolvería el repositorio)
+
 def crear_mock_post(id_post=1, titulo="Test", id_usuario=10):
     return SimpleNamespace(
         id_post=id_post,
@@ -87,7 +87,6 @@ def test_eliminar_post_no_existe_lanza_excepcion(monkeypatch):
         lambda id_post: False
     )
     
-    # Verificamos que se dispare el raise Exception
     with pytest.raises(Exception) as exc_info:
         PostService.eliminar_post(999)
         
