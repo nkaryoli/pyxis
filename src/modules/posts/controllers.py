@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, render_template, request
+from src.mock_forum import get_posts, get_featured_posts, get_recent_posts, get_post_by_id
 from src.services.post_service import PostService
 
-posts = Blueprint('posts', __name__)
+posts = Blueprint('posts', __name__, template_folder='templates')
 
 # --- 1. LISTAR TODOS ---
 @posts.route('/api/posts', methods=['GET'])
@@ -52,9 +53,21 @@ def ver_posts_usuario_api(id_usuario):
         return jsonify([p.to_dict() for p in lista]), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+# --- 5. VER POSTS POR CÓDIGO DE MÓDULO ---
+@posts.route('/api/modulos/<string:codigo_modulo>/posts', methods=['GET'])
+def ver_posts_modulo_api(codigo_modulo):
+    try:
+        lista = PostService.ver_posts_por_modulo(codigo_modulo)
+        
+        return jsonify([p.to_dict() for p in lista]), 200
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
-# --- 5. MODIFICAR O ELIMINAR POR ID (CON VERIFICACIÓN DE ROL Y PROPIEDAD) ---
+# --- 6. MODIFICAR O ELIMINAR POR ID (CON VERIFICACIÓN DE ROL Y PROPIEDAD) ---
 @posts.route('/api/posts/<int:id_post>', methods=['PUT', 'DELETE'])
 def gestionar_post_api(id_post):
     try:
@@ -96,3 +109,42 @@ def gestionar_post_api(id_post):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    
+@posts.route('/posts', methods=['GET'])
+def posts_por_modulo():
+    try:
+        return render_template('posts.html', posts=get_posts())
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
+ 
+ 
+@posts.route('/posts/<int:id_post>', methods=['GET'])
+def post_respuesta(id_post):
+    try:
+        post_encontrado = get_post_by_id(id_post)
+        if not post_encontrado:
+            return render_template('errors/404.html', mensaje='Post no encontrado'), 404
+ 
+        return render_template('post_detail.html', post=post_encontrado)
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
+ 
+ 
+@posts.route('/destacados', methods=['GET'])
+def destacados_page():
+    try:
+        return render_template('destacados.html', posts=get_featured_posts())
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
+ 
+ 
+@posts.route('/recientes', methods=['GET'])
+def recientes_page():
+    try:
+        return render_template('recientes.html', posts=get_recent_posts())
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
+    
+    
+    
