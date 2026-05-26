@@ -1,18 +1,30 @@
 from flask import Blueprint, render_template, jsonify, request
+from src.mock_forum import get_modules, get_module_by_slug, get_posts_by_module
 from src.services.modulo_service import ModuloService
 
 modulos = Blueprint('modulos', __name__, template_folder='templates')
 
-# @modulos.route('/')
-# def visualizar_modulos():
-#     """Renderiza el muro o lista con datos de los módulos académicos."""
-#     try:
-#         lista_modulos = ModuloService.obtener_todos_los_modulos()
-#         return render_template('modulo.html', modulos=lista_modulos)
-#     except Exception as e:
-#         return render_template('modulo.html', modulos=[], error=str(e))
+@modulos.route('/modulos')
+def listar_modulos():
+    """Renderiza el muro o lista con datos de los módulos académicos."""
+    try:
+        return render_template('modules.html', modulos=get_modules())
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
 
-@modulos.route('/', methods=['GET'])
+
+@modulos.route('/modulos/<string:nombre_modulo>')
+def detalle_modulo(nombre_modulo):
+    """Renderiza el detalle de un módulo con sus posts simulados."""
+    modulo = get_module_by_slug(nombre_modulo)
+    if not modulo:
+        return render_template('errors/404.html', mensaje='Módulo no encontrado'), 404
+
+    posts = get_posts_by_module(modulo['codigo_modulo'])
+    return render_template('module_detail.html', modulo=modulo, posts=posts)
+
+
+@modulos.route('/api/modulos', methods=['GET'])
 def get_modulos():
     """Endpoint API que devuelve todos los módulos en JSON."""
     try:
@@ -28,7 +40,7 @@ def get_modulos():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@modulos.route('/', methods=['POST'])
+@modulos.route('/api/modulos', methods=['POST'])
 def post_modulo():
     """Endpoint API para crear un nuevo módulo (Requiere rol PROFESOR o ADMINISTRADOR)."""
     try:
@@ -49,7 +61,7 @@ def post_modulo():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@modulos.route('/<string:codigo_modulo>', methods=['PUT'])
+@modulos.route('/api/modulos/<string:codigo_modulo>', methods=['PUT'])
 def put_modulo(codigo_modulo):
     """Endpoint API para modificar un módulo (Requiere rol PROFESOR o ADMINISTRADOR)."""
     try:
@@ -69,7 +81,7 @@ def put_modulo(codigo_modulo):
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-@modulos.route('/<string:codigo_modulo>', methods=['DELETE'])
+@modulos.route('/api/modulos/<string:codigo_modulo>', methods=['DELETE'])
 def delete_modulo(codigo_modulo):
     """Endpoint API para eliminar un módulo (Requiere rol PROFESOR o ADMINISTRADOR)."""
     try:
