@@ -1,0 +1,17 @@
+<header class="fixed z-50 w-full shadow-md shadow-zinc-900/20 bg-zinc-950/90 backdrop-blur">
+	<div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+		<a href="{{ url_for('home') if 'home' in request.endpoint else '/' }}" class="text-lg font-bold tracking-wide text-white">
+			Pyxis
+		</a>
+		<nav class="flex items-center gap-3 text-sm text-zinc-300">
+			<form action="" class="w-full">
+				<input type="text" placeholder="Buscar..." class="w-full h-9 rounded-sm border border-zinc-800  bg-zinc-950 px-4 py-1 text-sm text-white placeholder:text-zinc-500 focus:border-cyan-500 focus:outline-none">
+			</form>
+			<a href="{{ url_for('auth.login') }}" 
+				class="min-w-28 h-9 flex items-center justify-center rounded-sm border hover:border-cyan-600 border-zinc-700 bg-zinc-800 hover:bg-zinc-900"
+			>
+				Iniciar sesion
+			</a>
+		</nav>
+	</div>
+</header>
