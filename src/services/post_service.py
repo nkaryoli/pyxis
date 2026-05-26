@@ -26,8 +26,8 @@ class PostService:
         return PostRepository.get_by_id(id_post)
     
     @staticmethod
-    def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):
-        return PostRepository.update(id_post, titulo, contenido, codigo_modulo, imagen)
+    def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
+        return PostRepository.update(id_post, titulo, contenido, codigo_modulo, imagen, fecha_creacion)
     
     
     @staticmethod

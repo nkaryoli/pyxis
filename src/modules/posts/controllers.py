@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, render_template, request
-from src.mock_forum import get_posts, get_featured_posts, get_recent_posts, get_post_by_id
 from src.services.post_service import PostService
 
 posts = Blueprint('posts', __name__, template_folder='templates')
@@ -102,7 +101,8 @@ def gestionar_post_api(id_post):
                 titulo=data.get('titulo_post'),
                 contenido=data.get('contenido_post'),
                 codigo_modulo=data.get('codigo_modulo'),
-                imagen=data.get('imagen_post')
+                imagen=data.get('imagen_post'),
+                fecha_creacion=data.get('fecha_creacion_post')
             )
             return jsonify(post_actualizado.to_dict()), 200
 
@@ -137,7 +137,7 @@ def post_respuesta(id_post):
 @posts.route('/destacados', methods=['GET'])
 def destacados_page():
     try:
-        return render_template('destacados.html', posts=get_featured_posts())
+        return render_template('destacados.html', posts=PostService.listar_todos())
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
@@ -148,6 +148,5 @@ def recientes_page():
         return render_template('recientes.html', posts=PostService.listar_recientes())
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
-    
     
     

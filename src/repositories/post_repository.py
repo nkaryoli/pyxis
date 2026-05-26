@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from src.extensions import get_session
 from src.models.post import Post
 
@@ -73,7 +74,7 @@ class PostRepository:
             session.close()
 
     @staticmethod
-    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):
+    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
         session = get_session()
         try:
             post = session.query(Post).filter_by(id_post=id_post).first()
@@ -89,6 +90,8 @@ class PostRepository:
                 post.codigo_modulo = codigo_modulo
             if imagen is not None:
                 post.imagen_post = imagen
+            if fecha_creacion is not None: 
+                post.fecha_creacion_post = fecha_creacion 
 
             session.commit()
             session.refresh(post)
@@ -118,7 +121,14 @@ class PostRepository:
         try:
             posts = session.query(Post).order_by(Post.fecha_creacion_post.desc()).limit(10).all()
             session.expunge_all()
-            return posts
+            limite_tres_dias = datetime.now() - timedelta(days=3)
+            posts_filtrados = [
+                p for p in posts 
+                if p.fecha_creacion_post and p.fecha_creacion_post >= limite_tres_dias
+            ]
+            
+            return posts_filtrados
+
         finally:
             session.close()
     

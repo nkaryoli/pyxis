@@ -8,7 +8,7 @@ class Post(Base):
     id_post = Column(Integer, primary_key=True, autoincrement=True)
     titulo_post = Column(String(150), nullable=False)
     contenido_post = Column(Text, nullable=False)
-    fecha_creacion_post = Column(DateTime, default=datetime.utcnow)
+    fecha_creacion_post = Column(DateTime, default=datetime.now)
     id_usuario = Column(Integer, nullable=False)
     codigo_modulo = Column(String(50), nullable=True) 
     imagen_post = Column(String(255), nullable=True)   
@@ -47,8 +47,8 @@ class Post(Base):
             "contenido_post": self.contenido_post,
             "id_usuario": self.id_usuario,
             "codigo_modulo": self.codigo_modulo,
-            "imagen_post": self.imagen_post
-            # "fecha_creacion": self.fecha_creacion_post.isoformat() if self.fecha_creacion_post else None
+            "imagen_post": self.imagen_post,
+            "fecha_creacion": self.fecha_creacion_post.isoformat() if self.fecha_creacion_post else None
         }
 
  
