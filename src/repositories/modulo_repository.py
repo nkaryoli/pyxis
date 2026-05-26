@@ -1,5 +1,6 @@
 from src.extensions import get_session
 from src.models.modulo import Modulo
+from sqlalchemy import func
 
 class ModuloRepository:
     "Repositorio para operaciones CRUD de Modulo en la BD."
@@ -21,7 +22,19 @@ class ModuloRepository:
             return session.query(Modulo).filter_by(codigo_modulo=codigo_modulo).first()
         finally:
             session.close()
-    
+
+    @staticmethod
+    def get_by_name(nombre_modulo):
+        """Busca un módulo por nombre ignorando mayúsculas/minúsculas."""
+        session = get_session()
+        try:
+            modulo = session.query(Modulo).filter(
+                func.lower(Modulo.nombre_asignatura) == nombre_modulo.lower()
+            ).first()
+            return modulo
+        finally:
+            session.close()
+
     @staticmethod
     def create(codigo_modulo, nombre_asignatura, curso_modulo):
         """Crea un nuevo modulo en la BD (Solo profesores y administradores)."""
