@@ -39,7 +39,7 @@ Forum{% endblock %} {% block content %}
 
 		<div>
 			<div class="flex items-center gap-3 text-sm text-zinc-400">
-				<a href="{{ url_for('modulos.detalle_modulo', nombre_modulo=post.modulo_slug) }}"
+				<a href="{{ url_for('modulos.detalle_modulo', nombre_modulo=post.modulo_nombre) }}"
 					class="text-cyan-400 hover:text-cyan-300"
 				>
 					{{ post.modulo_nombre }}
