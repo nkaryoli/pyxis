@@ -194,3 +194,38 @@ def crear_post():
 
     except Exception as e:
         return f"Error al guardar en la base de datos: {str(e)}", 500
+    
+
+
+    # NAVBAR
+
+@posts.route('/search', methods=['GET'])
+def buscar_posts():
+    try:
+        query = request.args.get('q', '').strip()
+        page = request.args.get('page', 1, type=int)
+        if page is None or page < 1:
+            page = 1
+        per_page = 5 
+        if not query:
+            return render_template('navbar_busqueda.html', posts=[], query="", page=1, total_pages=1, total_items=0)
+        todos_resultados = PostService.buscar_por_relevancia(query)
+        total_items = len(todos_resultados)
+        import math
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = todos_resultados[inicio:fin]
+        
+        return render_template(
+            'navbar_busqueda.html', 
+            posts=posts_paginados, 
+            query=query, 
+            page=page, 
+            total_pages=total_pages,
+            total_items=total_items  
+        )
+        
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500

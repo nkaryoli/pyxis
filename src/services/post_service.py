@@ -45,4 +45,24 @@ class PostService:
         return lista_modulos
     
 
+    @staticmethod
+    def buscar_por_relevancia(query):
+        todos_los_posts = PostService.listar_todos()
+        query_lowercase = query.lower()
+        
+        coinciden_en_titulo = []
+        coinciden_en_contenido = []
+        
+        for post in todos_los_posts:
+            titulo = (post.titulo_post or "").lower()
+            contenido = (post.contenido_post or "").lower()
+            
+            if query_lowercase in titulo:
+                coinciden_en_titulo.append(post)
+            elif query_lowercase in contenido:
+                coinciden_en_contenido.append(post)
+                
+        return coinciden_en_titulo + coinciden_en_contenido
+
+
 
