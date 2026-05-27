@@ -21,7 +21,7 @@ def test_get_modulos_endpoint(client, monkeypatch):
     
     monkeypatch.setattr(ModuloService, "obtener_todos_los_modulos", staticmethod(fake_obtener_todos))
 
-    response = client.get('/api/modulos/')
+    response = client.get('/api/modulos')
     
     assert response.status_code == 200
     assert len(response.json) == 1
@@ -40,7 +40,7 @@ def test_post_modulo_endpoint_valido(client, monkeypatch):
         "curso_modulo": "1DAM",
         "rol_usuario_activo": "PROFESOR"
     }
-    response = client.post('/api/modulos/', json=payload)
+    response = client.post('/api/modulos', json=payload)
     
     assert response.status_code == 201
     assert response.json['nombre_asignatura'] == "Bases de Datos"
@@ -52,7 +52,7 @@ def test_post_modulo_endpoint_error(client, monkeypatch):
     
     monkeypatch.setattr(ModuloService, "crear_nuevo_modulo", staticmethod(fake_crear_error))
     
-    response = client.post('/api/modulos/', json={})
+    response = client.post('/api/modulos', json={})
     
     assert response.status_code == 400
     assert "Error de negocio simulado" in response.json['error']
