@@ -1,7 +1,4 @@
 from src.repositories.modulo_repository import ModuloRepository
-from src.services.post_service import PostService
-from src.services.respuesta_service import RespuestaService
-from src.services.usuario_service import UsuarioService
 
 class ModuloService:
     """Servicio de lógica de negocio para la gestión de Módulos académicos."""
@@ -34,17 +31,8 @@ class ModuloService:
 
     @staticmethod
     def obtener_posts_por_modulo(codigo_modulo):
-        posts_list = PostService.ver_posts_por_modulo(codigo_modulo)
-        for post in posts_list:
-            respuestas = RespuestaService.obtener_respuestas_de_post(post.id_post)
-            try:
-                post.autor = UsuarioService.obtener_usuario_por_id(post.id_usuario).username
-            except Exception:
-                post.autor = f"Usuario #{post.id_usuario}"
-            post.respuestas_count = len(respuestas)
-            post.created_at = post.fecha_creacion_post
-
-        return posts_list
+        from src.services.post_service import PostService
+        return PostService.ver_posts_por_modulo(codigo_modulo)
 
     @staticmethod
     def obtener_detalle_modulo(nombre_modulo):
