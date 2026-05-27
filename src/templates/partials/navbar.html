@@ -4,9 +4,17 @@
 			Pyxis
 		</a>
 		<nav class="flex items-center gap-3 text-sm text-zinc-300">
-			<form action="" class="w-full">
-				<input type="text" placeholder="Buscar..." class="w-full h-9 rounded-sm border border-cyan-400/30 bg-white/5 px-4 py-1 text-sm text-white placeholder:text-zinc-500 focus:border-cyan-300 focus:outline-none">
+			
+			<form action="{{ url_for('posts.buscar_posts') }}" method="GET" class="w-full">
+				<input 
+					type="text" 
+					name="q" 
+					value="{{ request.args.get('q', '') }}"
+					placeholder="Buscar..." 
+					class="w-full h-9 rounded-sm border border-cyan-400/30 bg-white/5 px-4 py-1 text-sm text-white placeholder:text-zinc-500 focus:border-cyan-300 focus:outline-none"
+				>
 			</form>
+
 			<a href="{{ url_for('auth.login') }}" 
 				class="min-w-28 h-9 flex items-center justify-center rounded-sm border hover:border-cyan-200 border-cyan-400/30 bg-zinc-900 hover:bg-zinc-800 text-sm text-cyan-400 transition"
 			>
