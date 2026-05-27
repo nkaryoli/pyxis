@@ -1,8 +1,22 @@
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, url_for, redirect, g
+from src.modules.auth.controllers import _wants_json
+from src.services.auth_service import AuthService
 from src.services.post_service import PostService
 from src.services.respuesta_service import RespuestaService
+# from datetime import datetime
 
 posts = Blueprint('posts', __name__, template_folder='templates')
+
+def _extraer_datos_request():
+    """Obtiene los datos de la petición como JSON o como formulario HTML."""
+    datos = request.get_json(silent=True)
+    if datos is None:
+        datos = request.form.to_dict()
+    return datos or {}
+
+# ==========================================
+# --- APIS (RETORNAN JSON) ---
+# ==========================================
 
 # --- 1. LISTAR TODOS ---
 @posts.route('/api/posts', methods=['GET'])
@@ -60,23 +74,20 @@ def ver_posts_usuario_api(id_usuario):
 def ver_posts_modulo_api(codigo_modulo):
     try:
         lista = PostService.ver_posts_por_modulo(codigo_modulo)
-        
         return jsonify([p.to_dict() for p in lista]), 200
-        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-# --- 6. MODIFICAR O ELIMINAR POR ID (CON VERIFICACIÓN DE ROL Y PROPIEDAD) ---
+# --- 6. MODIFICAR O ELIMINAR POR ID ---
 @posts.route('/api/posts/<int:id_post>', methods=['PUT', 'DELETE'])
 def gestionar_post_api(id_post):
     try:
-
         usuario_id_solicitante = request.headers.get('X-User-Id')
-        usuario_rol = request.headers.get('X-User-Role') # 'ALUMNO', 'PROFESOR', 'ADMINISTRADOR'
+        usuario_rol = request.headers.get('X-User-Role')
         
         if not usuario_id_solicitante or not usuario_rol:
-            return jsonify({"error": "Autenticación requerida. Falta X-User-Id o X-User-Role en los Headers."}), 401
+            return jsonify({"error": "Autenticación requerida. Falta X-User-Id o X-User-Role."}), 401
 
         usuario_id_solicitante = int(usuario_id_solicitante)
 
@@ -84,12 +95,9 @@ def gestionar_post_api(id_post):
         if not post:
             return jsonify({"error": f"No se encontró el post con ID {id_post}"}), 404
 
-
         es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (post.id_usuario == usuario_id_solicitante)
-        
         if not es_autorizado:
             return jsonify({"error": "No tienes permisos para modificar o borrar este post."}), 403
-
 
         if request.method == 'DELETE':
             PostService.eliminar_post(id_post)
@@ -111,9 +119,9 @@ def gestionar_post_api(id_post):
         return jsonify({"error": str(e)}), 500
     
 
-
-# RUTAS PARA EL FRONTEND
-
+# ==========================================
+# --- RUTAS PARA VISTAS (FRONTEND HTML) ---
+# ==========================================
 
 @posts.route('/posts', methods=['GET'])
 def posts_por_modulo():
@@ -130,14 +138,11 @@ def post_respuesta(id_post):
         if not post_encontrado:
             return render_template('errors/404.html', mensaje='Post no encontrado'), 404
         
-        # Obtenemos las respuestas de forma independiente
         respuestas_post = RespuestaService.obtener_respuestas_de_post(id_post)
-
-        # Pasamos AMBOS elementos por separado a la plantilla
         return render_template('post_detail.html', post=post_encontrado, respuestas=respuestas_post)
-
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
+
  
 @posts.route('/destacados', methods=['GET'])
 def destacados_page():
@@ -153,5 +158,39 @@ def recientes_page():
         return render_template('recientes.html', posts=PostService.listar_recientes())
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
+
+
+
     
+@posts.route('/post/crear', methods=['GET', 'POST'])
+@AuthService.token_required
+def crear_post():
+    """Muestra el formulario y procesa la inserción de una nueva pregunta."""
+    usuario = getattr(g, 'current_user', None)
+    if not usuario:
+        if _wants_json():
+            return jsonify({'error': 'No autenticado'}), 401
+        return redirect(url_for('auth.login'))
     
+    lista_modulos = PostService.obtener_todos_los_modulos()
+
+    if request.method == 'GET':
+        return render_template('question_form.html', usuario=usuario, modulos=lista_modulos)
+
+    try:
+        titulo = request.form.get('titulo_post')
+        contenido = request.form.get('contenido_post')
+        modulo = request.form.get('codigo_modulo')
+        
+        PostService.crear_post(
+            titulo=titulo,
+            contenido=contenido,
+            id_usuario=usuario.id_usuario, 
+            codigo_modulo=modulo,
+            imagen=None 
+        )
+        
+        return redirect(url_for('posts.posts_por_modulo'))
+
+    except Exception as e:
+        return f"Error al guardar en la base de datos: {str(e)}", 500
