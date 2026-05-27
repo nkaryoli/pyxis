@@ -1,7 +1,4 @@
 from src.repositories.modulo_repository import ModuloRepository
-from src.services.post_service import PostService
-from src.services.respuesta_service import RespuestaService
-from src.services.usuario_service import UsuarioService
 
 class ModuloService:
     """Servicio de lógica de negocio para la gestión de Módulos académicos."""
@@ -34,8 +31,8 @@ class ModuloService:
 
     @staticmethod
     def obtener_posts_por_modulo(codigo_modulo):
-        posts_list = PostService.ver_posts_por_modulo(codigo_modulo)
-        return posts_list
+        from src.services.post_service import PostService
+        return PostService.ver_posts_por_modulo(codigo_modulo)
 
     @staticmethod
     def obtener_detalle_modulo(nombre_modulo):

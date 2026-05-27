@@ -1,4 +1,5 @@
 from src.repositories.post_repository import PostRepository
+from src.services.modulo_service import ModuloService
 
 class PostService:
 
@@ -37,3 +38,11 @@ class PostService:
     @staticmethod
     def listar_recientes():
         return PostRepository.get_recent()
+    
+    @staticmethod
+    def obtener_todos_los_modulos():
+        lista_modulos = ModuloService.obtener_todos_los_modulos()
+        return lista_modulos
+    
+
+
