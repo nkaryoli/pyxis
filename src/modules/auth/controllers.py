@@ -134,9 +134,14 @@ def login():
 			return jsonify({'error': 'Error interno del servidor'}), 500
 		return render_template('login.html', error='Error interno del servidor'), 500
 
-@auth.route('/auth/logout', methods=['GET', 'POST'])
+@auth.route('/auth/logout', methods=['POST'])
 def logout():
-	"""Cierra la sesión activa y redirige al login."""
+	"""Cierra la sesión activa y redirige al login.
+
+	Nota: se acepta solo POST para evitar CSRF desde enlaces GET. Para
+	protección completa, añade un token CSRF (Flask-WTF/Flask-SeaSurf) e
+	verifica el token en las peticiones.
+	"""
 	response = make_response(
 		jsonify({'mensaje': 'Sesión cerrada correctamente'}) if _wants_json() else redirect(url_for('auth.login'))
 	)

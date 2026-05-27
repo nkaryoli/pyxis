@@ -69,11 +69,11 @@
 			>
 			</li>
 			<li>
-			<a
-				href="{{ url_for('auth.logout') }}"
-				class="transition hover:text-cyan-300"
-				>Cerrar sesión</a
-			>
+				<form method="POST" action="{{ url_for('auth.logout') }}" class="inline">
+					<button type="submit" class="transition hover:text-cyan-300 bg-transparent p-0">
+						Cerrar sesión
+					</button>
+				</form>
 			</li>
 		</ul>
 		</div>
