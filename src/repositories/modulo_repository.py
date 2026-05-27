@@ -6,6 +6,27 @@ from sqlalchemy import func
 class ModuloRepository:
     "Repositorio para operaciones CRUD de Modulo en la BD."
 
+    _ICONOS_POR_MODULO = {
+        "MOD-BBDD": "database",
+        "MOD-PROG": "code",
+        "MOD-LM": "file-text",
+        "MOD-ED": "spark",
+        "MOD-DEPLOY": "rocket",
+        "MOD-DI": "layout",
+        "MOD-DWEC": "monitor",
+        "MOD-DWES": "server",
+        "MOD-FOL": "briefcase",
+        "MOD-LMSGI": "file-text",
+        "MOD-SI": "shield",
+    }
+
+    @staticmethod
+    def _asignar_icono(modulo):
+        """Asigna un icono visual al módulo según su código."""
+        icono = ModuloRepository._ICONOS_POR_MODULO.get(modulo.codigo_modulo, "star")
+        setattr(modulo, "icono", icono)
+        return modulo
+
     @staticmethod
     def get_all():
         """Obtiene todos los modulos de la BD (Todos los Usuarios)."""
@@ -27,7 +48,7 @@ class ModuloRepository:
                 setattr(modulo, 'posts_count', count)
                 # Algunas plantillas o servicios usan `numero_posts`; mantenemos ambos
                 setattr(modulo, 'numero_posts', count)
-                modulos.append(modulo)
+                modulos.append(ModuloRepository._asignar_icono(modulo))
 
             session.expunge_all()
             return modulos

@@ -1,14 +1,20 @@
 from datetime import datetime, timedelta
 from src.extensions import get_session
 from src.models.post import Post
+from sqlalchemy.orm import selectinload
 
 class PostRepository:
+    """Repositorio de acceso a datos para la entidad Post."""
 
     @staticmethod
     def get_all():
+        """Devuelve todos los posts ordenados por fecha de creación descendente."""
         session = get_session()
         try:
-            posts = session.query(Post).order_by(Post.fecha_creacion_post.desc()).all()
+            posts = session.query(Post).options(
+                selectinload(Post.respuestas_relacion),
+                selectinload(Post.modulo),
+            ).order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
@@ -16,9 +22,13 @@ class PostRepository:
 
     @staticmethod
     def get_by_id(id_post):
+        """Busca un post por su identificador."""
         session = get_session()
         try:
-            post = session.query(Post).filter_by(id_post=id_post).first()
+            post = session.query(Post).options(
+                selectinload(Post.respuestas_relacion),
+                selectinload(Post.modulo),
+            ).filter_by(id_post=id_post).first()
             if post:
                 session.expunge(post)
             return post
@@ -27,9 +37,13 @@ class PostRepository:
 
     @staticmethod
     def get_by_user_id(id_usuario):
+        """Devuelve todos los posts de un usuario concreto."""
         session = get_session()
         try:
-            posts = session.query(Post).filter_by(id_usuario=id_usuario).all()
+            posts = session.query(Post).options(
+                selectinload(Post.respuestas_relacion),
+                selectinload(Post.modulo),
+            ).filter_by(id_usuario=id_usuario).all()
             session.expunge_all()
             return posts
         finally:
@@ -37,12 +51,13 @@ class PostRepository:
 
     @staticmethod
     def create(titulo, contenido, id_usuario, codigo_modulo, imagen=None):
+        """Crea un nuevo post y devuelve la entidad persistida."""
         session = get_session()
         try:
             nuevo_post = Post(
                 titulo_post=titulo,
                 contenido_post=contenido,
-                id_usuario=id_usuario, # Corregido de id_usuario1 a id_usuario
+                id_usuario=id_usuario,
                 codigo_modulo=codigo_modulo,
                 imagen_post=imagen
             )
@@ -59,6 +74,7 @@ class PostRepository:
 
     @staticmethod
     def delete(id_post):
+        """Elimina un post por su identificador y devuelve si la operación tuvo éxito."""
         session = get_session()
         try:
             post = session.query(Post).filter_by(id_post=id_post).first()
@@ -75,6 +91,7 @@ class PostRepository:
 
     @staticmethod
     def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
+        """Actualiza los campos enviados de un post existente."""
         session = get_session()
         try:
             post = session.query(Post).filter_by(id_post=id_post).first()
@@ -106,10 +123,14 @@ class PostRepository:
             
     @staticmethod
     def get_by_modulo_code(codigo_modulo):
+        """Devuelve los posts asociados a un código de módulo."""
         session = get_session()
         try:
             codigo_limpio = (codigo_modulo or "").strip().upper()
-            posts = session.query(Post).filter_by(codigo_modulo=codigo_limpio).order_by(Post.fecha_creacion_post.desc()).all()
+            posts = session.query(Post).options(
+                selectinload(Post.respuestas_relacion),
+                selectinload(Post.modulo),
+            ).filter_by(codigo_modulo=codigo_limpio).order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
@@ -117,9 +138,13 @@ class PostRepository:
             
     @staticmethod
     def get_recent():
+        """Devuelve los posts recientes publicados en los últimos días."""
         session = get_session()
         try:
-            posts = session.query(Post).order_by(Post.fecha_creacion_post.desc()).limit(10).all()
+            posts = session.query(Post).options(
+                selectinload(Post.respuestas_relacion),
+                selectinload(Post.modulo),
+            ).order_by(Post.fecha_creacion_post.desc()).limit(10).all()
             session.expunge_all()
             limite_tres_dias = datetime.now() - timedelta(days=3)
             posts_filtrados = [
