@@ -155,3 +155,8 @@ def recientes_page():
         return render_template('errors/error.html', error=str(e)), 500
     
     
+@posts.route('/post/crear', methods=['GET'])
+def crear_post():
+    return 1
+    
+    
