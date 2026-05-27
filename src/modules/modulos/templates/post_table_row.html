@@ -5,7 +5,5 @@
 	</td>
 	<td class="px-6 py-4 align-top text-sm text-zinc-300">{{ post.autor }}</td>
 	<td class="px-0 py-4 align-top text-sm text-zinc-300"><p class="text-center">{{ post.respuestas_count }}</p></td>
-	<td class="px-3 py-4 align-top text-sm text-zinc-300">
-		<p class="text-center">{{ (post.respuestas_count * 123) | int }}</p></td>
-	<td class="pr-6 py-4 align-top text-sm text-zinc-300">{{ post.created_at.strftime('%b %Y') }}</td>
+	<td class="px-6 py-4 align-top text-sm text-zinc-300">{{ post.created_at.strftime('%b %Y') }}</td>
 </tr>

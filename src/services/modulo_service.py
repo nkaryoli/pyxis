@@ -1,4 +1,7 @@
 from src.repositories.modulo_repository import ModuloRepository
+from src.services.post_service import PostService
+from src.services.respuesta_service import RespuestaService
+from src.services.usuario_service import UsuarioService
 
 class ModuloService:
     """Servicio de lógica de negocio para la gestión de Módulos académicos."""
@@ -17,6 +20,39 @@ class ModuloService:
         if not modulo:
             raise ValueError(f"Módulo con código '{codigo_modulo}' no encontrado.")
         return modulo
+
+    @staticmethod
+    def obtener_modulo_por_nombre_modulo(nombre_modulo):
+        """Busca una asignatura por su clave primaria string y valida su existencia."""
+        if not nombre_modulo:
+            raise ValueError("El nombre del módulo no puede estar vacío.")
+        nombre_limpio = nombre_modulo.strip()
+        modulo = ModuloRepository.get_by_name(nombre_limpio)
+        if not modulo:
+            raise ValueError(f"Módulo con nombre'{nombre_modulo}' no encontrado.")
+        return modulo
+
+    @staticmethod
+    def obtener_posts_por_modulo(codigo_modulo):
+        posts_list = PostService.ver_posts_por_modulo(codigo_modulo)
+        for post in posts_list:
+            respuestas = RespuestaService.obtener_respuestas_de_post(post.id_post)
+            try:
+                post.autor = UsuarioService.obtener_usuario_por_id(post.id_usuario).username
+            except Exception:
+                post.autor = f"Usuario #{post.id_usuario}"
+            post.respuestas_count = len(respuestas)
+            post.created_at = post.fecha_creacion_post
+
+        return posts_list
+
+    @staticmethod
+    def obtener_detalle_modulo(nombre_modulo):
+        """Devuelve el módulo resuelto y los posts preparados para la vista."""
+        modulo = ModuloService.obtener_modulo_por_nombre_modulo(nombre_modulo)
+        posts = ModuloService.obtener_posts_por_modulo(modulo.codigo_modulo)
+        modulo.numero_posts = len(posts)
+        return modulo, posts
     
     @staticmethod
     def crear_nuevo_modulo(codigo_modulo, nombre_asignatura, curso_modulo, rol_usuario):

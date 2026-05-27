@@ -1,5 +1,5 @@
-<header class="border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
-	<div class="mx-auto flex max-w-7xl items-center justify-between py-3">
+<header class="border-b border-zinc-800 backdrop-blur">
+	<div class="mx-auto flex flex-col-reverse md:flex-row max-w-7xl items-center justify-between py-3 gap-12">
 		<nav class="flex items-center gap-6 text-sm text-zinc-300">
 			<a href="{{ url_for('modulos.listar_modulos') }}" class="uppercase hover:text-white">Módulos</a>
 			<a href="{{ url_for('posts.destacados_page') }}"  class="uppercase  hover:text-white">Destacados</a>
@@ -7,7 +7,7 @@
 			<a href="{{ url_for('posts.posts_por_modulo') }}" class="uppercase hover:text-white">Posts</a>
 		</nav>
 		
-		<a href="{{ url_for('auth.login') }}" 
+		<a href="{{ url_for('post/crear') }}" 
 			class="px-6 h-10 flex items-center justify-center rounded-sm bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-medium"
 		>
 			Hacer una pregunta

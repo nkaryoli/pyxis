@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, jsonify, request
-from src.mock_forum import get_modules, get_module_by_slug, get_posts_by_module
 from src.services.modulo_service import ModuloService
 
 modulos = Blueprint('modulos', __name__, template_folder='templates')
@@ -8,7 +7,8 @@ modulos = Blueprint('modulos', __name__, template_folder='templates')
 def listar_modulos():
     """Renderiza el muro o lista con datos de los módulos académicos."""
     try:
-        return render_template('modules.html', modulos=get_modules())
+        modulos = ModuloService.obtener_todos_los_modulos()
+        return render_template('modules.html', modulos=modulos)
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
 
@@ -16,11 +16,11 @@ def listar_modulos():
 @modulos.route('/modulos/<string:nombre_modulo>')
 def detalle_modulo(nombre_modulo):
     """Renderiza el detalle de un módulo con sus posts simulados."""
-    modulo = get_module_by_slug(nombre_modulo)
-    if not modulo:
+    try:
+        modulo, posts = ModuloService.obtener_detalle_modulo(nombre_modulo)
+    except ValueError:
         return render_template('errors/404.html', mensaje='Módulo no encontrado'), 404
-
-    posts = get_posts_by_module(modulo['codigo_modulo'])
+    
     return render_template('module_detail.html', modulo=modulo, posts=posts)
 
 
