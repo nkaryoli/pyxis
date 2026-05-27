@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from src.extensions import Base
 
@@ -9,9 +10,11 @@ class Post(Base):
     titulo_post = Column(String(150), nullable=False)
     contenido_post = Column(Text, nullable=False)
     fecha_creacion_post = Column(DateTime, default=datetime.now)
-    id_usuario = Column(Integer, nullable=False)
+    id_usuario = Column(Integer, ForeignKey('USUARIOS.id_usuario'), nullable=False)
     codigo_modulo = Column(String(50), nullable=True) 
-    imagen_post = Column(String(255), nullable=True)   
+    imagen_post = Column(String(255), nullable=True)  
+    
+    usuario = relationship("Usuario", backref="posts", lazy="joined") 
     
     def __repr__(self):
         return f"<Post {self.id_post}: {self.titulo_post}>"
@@ -22,7 +25,7 @@ class Post(Base):
 
     @property
     def autor(self):
-        return f"Usuario {self.id_usuario}"
+        return self.usuario.username if self.usuario else f"Usuario {self.id_usuario}"
 
     @property
     def respuestas(self):
