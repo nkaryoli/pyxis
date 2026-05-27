@@ -126,32 +126,15 @@ def posts_por_modulo():
 @posts.route('/posts/<int:id_post>', methods=['GET'])
 def post_respuesta(id_post):
     try:
-        # 1. Buscamos el post original en la base de datos
         post_encontrado = PostService.obtener_por_id(id_post)
         if not post_encontrado:
             return render_template('errors/404.html', mensaje='Post no encontrado'), 404
         
-        # 2. Convertimos el objeto en un diccionario plano
-        post_diccionario = post_encontrado.to_dict()
-        
-        # 3. Mapeamos TODOS los campos nativos que usa tu HTML
-        post_diccionario['titulo_post'] = post_encontrado.titulo_post
-        post_diccionario['contenido_post'] = post_encontrado.contenido_post
-        post_diccionario['codigo_modulo'] = post_encontrado.codigo_modulo
-        post_diccionario['id_usuario'] = post_encontrado.id_usuario
-        
-        # 4. SOLUCIÓN AL ERROR: Inyectamos las propiedades exactas que el HTML heredó del mock
-        post_diccionario['created_at'] = post_encontrado.fecha_creacion_post
-        post_diccionario['autor'] = f"Usuario {post_encontrado.id_usuario}"
-        
-        # 5. Buscamos las respuestas reales en la base de datos
+        # Obtenemos las respuestas de forma independiente
         respuestas_post = RespuestaService.obtener_respuestas_de_post(id_post)
- 
-        # 6. Inyectamos las respuestas en la clave que recorre el bucle del HTML
-        post_diccionario['respuestas'] = respuestas_post
 
-        # 7. Enviamos el diccionario listo a la plantilla
-        return render_template('post_detail.html', post=post_diccionario)
+        # Pasamos AMBOS elementos por separado a la plantilla
+        return render_template('post_detail.html', post=post_encontrado, respuestas=respuestas_post)
 
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
