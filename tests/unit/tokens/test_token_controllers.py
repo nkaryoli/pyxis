@@ -19,7 +19,6 @@ def client(app):
 
 @patch('src.services.tokens_service.TokensService.registrar_tokens')
 def test_crear_registro_exito(mock_registrar, client):
-    # Simulamos el objeto que devuelve el servicio y su método to_dict()
     mock_registro = MagicMock()
     mock_registro.to_dict.return_value = {
         "id": 1, "tokens": 10, "motivo": "Buen trabajo", "trimestre": "Q1", "id_usuario": 42
@@ -34,7 +33,7 @@ def test_crear_registro_exito(mock_registrar, client):
     assert response.get_json()["registro"]["id"] == 1
 
 def test_crear_registro_faltan_campos(client):
-    payload = {"tokens": 10} # Faltan campos obligatorios
+    payload = {"tokens": 10} 
     response = client.post('/api/tokens', json=payload)
 
     assert response.status_code == 400
@@ -55,7 +54,7 @@ def test_ver_historial_usuario_exito(mock_historial, client):
 
 
 def test_eliminar_tokens_sin_autenticacion(client):
-    response = client.delete('/api/tokens/1') # Sin headers
+    response = client.delete('/api/tokens/1') 
     assert response.status_code == 401
     assert "Falta X-User-Role" in response.get_json()["error"]
 
@@ -67,7 +66,7 @@ def test_eliminar_tokens_permisos_insuficientes(client):
 
 @patch('src.services.tokens_service.TokensService.eliminar_registro_tokens')
 def test_eliminar_tokens_no_encontrado(mock_eliminar, client):
-    mock_eliminar.return_value = False # Simula que no existía el ID
+    mock_eliminar.return_value = False
     headers = {'X-User-Role': 'PROFESOR'}
     
     response = client.delete('/api/tokens/999', headers=headers)
@@ -109,7 +108,6 @@ def test_ver_todos_los_tokens_profesor_exito(mock_todos, client):
 
 @patch('src.services.tokens_service.TokensService.obtener_todos_los_tokens')
 def test_error_interno_servidor_500(mock_todos, client):
-    # Forzamos una excepción genérica en el servicio para activar el bloque 'except'
     mock_todos.side_effect = Exception("Error inesperado en la base de datos")
     
     headers = {'X-User-Role': 'ADMINISTRADOR'}

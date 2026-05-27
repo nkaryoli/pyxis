@@ -45,7 +45,6 @@ def test_crear_respuesta_faltan_campos_obligatorios(client):
     """Comprueba que devuelve 400 si faltan datos requeridos en el JSON."""
     payload = {
         "id_usuario": 10
-        # Falta contenido_respuesta
     }
 
     response = client.post('/api/posts/5/respuestas', json=payload)
@@ -131,7 +130,6 @@ def test_eliminar_respuesta_denegada_no_es_dueno(client, monkeypatch):
         lambda id_respuesta: respuesta_mock
     )
 
-    # El solicitante en las cabeceras es el usuario 99
     headers = {'X-User-Id': '99', 'X-User-Role': 'ALUMNO'}
     response = client.delete('/api/respuestas/1', headers=headers)
     body = response.get_json()

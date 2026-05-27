@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from src.extensions import get_session
 from src.models.post import Post
 
@@ -7,8 +8,7 @@ class PostRepository:
     def get_all():
         session = get_session()
         try:
-            posts = session.query(Post).all()
-            # Hacemos expunge_all para poder usar los objetos fuera de la sesión abierta
+            posts = session.query(Post).order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
@@ -74,7 +74,7 @@ class PostRepository:
             session.close()
 
     @staticmethod
-    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):
+    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
         session = get_session()
         try:
             post = session.query(Post).filter_by(id_post=id_post).first()
@@ -90,6 +90,8 @@ class PostRepository:
                 post.codigo_modulo = codigo_modulo
             if imagen is not None:
                 post.imagen_post = imagen
+            if fecha_creacion is not None: 
+                post.fecha_creacion_post = fecha_creacion 
 
             session.commit()
             session.refresh(post)
@@ -106,9 +108,28 @@ class PostRepository:
     def get_by_modulo_code(codigo_modulo):
         session = get_session()
         try:
-            # Filtramos en la base de datos por el campo codigo_modulo
-            posts = session.query(Post).filter_by(codigo_modulo=codigo_modulo).all()
+            codigo_limpio = (codigo_modulo or "").strip().upper()
+            posts = session.query(Post).filter_by(codigo_modulo=codigo_limpio).order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
             session.close()
+            
+    @staticmethod
+    def get_recent():
+        session = get_session()
+        try:
+            posts = session.query(Post).order_by(Post.fecha_creacion_post.desc()).limit(10).all()
+            session.expunge_all()
+            limite_tres_dias = datetime.now() - timedelta(days=3)
+            posts_filtrados = [
+                p for p in posts 
+                if p.fecha_creacion_post and p.fecha_creacion_post >= limite_tres_dias
+            ]
+            
+            return posts_filtrados
+
+        finally:
+            session.close()
+    
+    

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, render_template, request
-from src.mock_forum import get_posts, get_featured_posts, get_recent_posts, get_post_by_id
 from src.services.post_service import PostService
+from src.services.respuesta_service import RespuestaService
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
@@ -71,7 +71,7 @@ def ver_posts_modulo_api(codigo_modulo):
 @posts.route('/api/posts/<int:id_post>', methods=['PUT', 'DELETE'])
 def gestionar_post_api(id_post):
     try:
-        # Extraemos las credenciales desde las cabeceras (Headers) de Postman
+
         usuario_id_solicitante = request.headers.get('X-User-Id')
         usuario_rol = request.headers.get('X-User-Role') # 'ALUMNO', 'PROFESOR', 'ADMINISTRADOR'
         
@@ -80,7 +80,6 @@ def gestionar_post_api(id_post):
 
         usuario_id_solicitante = int(usuario_id_solicitante)
 
-        # Buscamos el post primero para comprobar quién es el dueño original
         post = PostService.obtener_por_id(id_post)
         if not post:
             return jsonify({"error": f"No se encontró el post con ID {id_post}"}), 404
@@ -91,7 +90,7 @@ def gestionar_post_api(id_post):
         if not es_autorizado:
             return jsonify({"error": "No tienes permisos para modificar o borrar este post."}), 403
 
-        # Si pasa la regla, ejecutamos la acción correspondiente al método HTTP
+
         if request.method == 'DELETE':
             PostService.eliminar_post(id_post)
             return jsonify({"mensaje": f"Post {id_post} eliminado con éxito"}), 200
@@ -103,18 +102,23 @@ def gestionar_post_api(id_post):
                 titulo=data.get('titulo_post'),
                 contenido=data.get('contenido_post'),
                 codigo_modulo=data.get('codigo_modulo'),
-                imagen=data.get('imagen_post')
+                imagen=data.get('imagen_post'),
+                fecha_creacion=data.get('fecha_creacion_post')
             )
             return jsonify(post_actualizado.to_dict()), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    
+
+
+# RUTAS PARA EL FRONTEND
+
+
 @posts.route('/posts', methods=['GET'])
 def posts_por_modulo():
     try:
-        return render_template('posts.html', posts=get_posts())
+        return render_template('posts.html', posts=PostService.listar_todos())
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
@@ -122,19 +126,23 @@ def posts_por_modulo():
 @posts.route('/posts/<int:id_post>', methods=['GET'])
 def post_respuesta(id_post):
     try:
-        post_encontrado = get_post_by_id(id_post)
+        post_encontrado = PostService.obtener_por_id(id_post)
         if not post_encontrado:
             return render_template('errors/404.html', mensaje='Post no encontrado'), 404
- 
-        return render_template('post_detail.html', post=post_encontrado)
+        
+        # Obtenemos las respuestas de forma independiente
+        respuestas_post = RespuestaService.obtener_respuestas_de_post(id_post)
+
+        # Pasamos AMBOS elementos por separado a la plantilla
+        return render_template('post_detail.html', post=post_encontrado, respuestas=respuestas_post)
+
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
- 
  
 @posts.route('/destacados', methods=['GET'])
 def destacados_page():
     try:
-        return render_template('destacados.html', posts=get_featured_posts())
+        return render_template('destacados.html', posts=PostService.listar_todos())
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
@@ -142,9 +150,8 @@ def destacados_page():
 @posts.route('/recientes', methods=['GET'])
 def recientes_page():
     try:
-        return render_template('recientes.html', posts=get_recent_posts())
+        return render_template('recientes.html', posts=PostService.listar_recientes())
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
-    
     
     

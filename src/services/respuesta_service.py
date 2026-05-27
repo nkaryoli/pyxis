@@ -16,7 +16,6 @@ class RespuestaService:
 
     @staticmethod
     def obtener_por_id(id_respuesta):
-        # Este método es el que usa el controlador para verificar quién es el dueño
         return RespuestaRepository.get_by_id(id_respuesta)
 
     @staticmethod

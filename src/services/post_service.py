@@ -26,10 +26,14 @@ class PostService:
         return PostRepository.get_by_id(id_post)
     
     @staticmethod
-    def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None):
-        return PostRepository.update(id_post, titulo, contenido, codigo_modulo, imagen)
+    def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
+        return PostRepository.update(id_post, titulo, contenido, codigo_modulo, imagen, fecha_creacion)
     
     
     @staticmethod
     def ver_posts_por_modulo(codigo_modulo):
         return PostRepository.get_by_modulo_code(codigo_modulo)
+    
+    @staticmethod
+    def listar_recientes():
+        return PostRepository.get_recent()
