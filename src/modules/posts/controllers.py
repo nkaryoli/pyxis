@@ -203,7 +203,9 @@ def crear_post():
 def buscar_posts():
     try:
         query = request.args.get('q', '').strip()
-        page = int(request.args.get('page', 1))
+        page = request.args.get('page', 1, type=int)
+        if page is None or page < 1:
+            page = 1
         per_page = 5 
         if not query:
             return render_template('navbar_busqueda.html', posts=[], query="", page=1, total_pages=1, total_items=0)
