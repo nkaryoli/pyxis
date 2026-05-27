@@ -1,7 +1,7 @@
 <tr class="group bg-transparent hover:bg-zinc-900/60">
 	<td class="px-6 py-4 align-top">
 		<a href="{{ url_for('posts.post_respuesta', id_post=post.id_post) }}" class="block text-sm font-medium text-white hover:text-cyan-300">{{ post.titulo_post }}</a>
-		<div class="mt-1 text-xs text-zinc-400">{{ post.modulo_nombre }} · {{ post.contenido_post[:140] }}{% if post.contenido_post|length > 140 %}...{% endif %}</div>
+		<div class="mt-1 text-xs text-zinc-400">{{ post.contenido_post[:140] }}{% if post.contenido_post|length > 140 %}...{% endif %}</div>
 	</td>
 	<td class="px-6 py-4 align-top text-sm text-zinc-300">{{ post.autor }}</td>
 	<td class="px-0 py-4 align-top text-sm text-zinc-300"><p class="text-center">{{ post.respuestas_count }}</p></td>
