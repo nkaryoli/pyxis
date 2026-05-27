@@ -1,5 +1,6 @@
 from src.extensions import get_session
 from src.models.modulo import Modulo
+from src.models.post import Post
 from sqlalchemy import func
 
 class ModuloRepository:
@@ -10,7 +11,26 @@ class ModuloRepository:
         """Obtiene todos los modulos de la BD (Todos los Usuarios)."""
         session = get_session()
         try:
-            return session.query(Modulo).all()
+            # Hacemos una consulta con LEFT OUTER JOIN para obtener el número de posts
+            # por cada módulo en la misma consulta y evitar N+1 queries.
+            rows = (
+                session.query(Modulo, func.count(Post.id_post).label('posts_count'))
+                .outerjoin(Post, Modulo.codigo_modulo == Post.codigo_modulo)
+                .group_by(Modulo.codigo_modulo)
+                .all()
+            )
+
+            modulos = []
+            for modulo, posts_count in rows:
+                # Anexamos atributos dinámicos para compatibilidad con plantillas
+                count = int(posts_count or 0)
+                setattr(modulo, 'posts_count', count)
+                # Algunas plantillas o servicios usan `numero_posts`; mantenemos ambos
+                setattr(modulo, 'numero_posts', count)
+                modulos.append(modulo)
+
+            session.expunge_all()
+            return modulos
         finally:
             session.close()
 
