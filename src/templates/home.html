@@ -2,29 +2,29 @@
 {% block content %}
 <section class="space-y-9">
 
-    <div class="rounded-3xl py-6 shadow-2xl shadow-cyan-950/10">
-		<p class="text-sm uppercase tracking-[0.35em] text-cyan-400">
+    <div class="pt-6 flex flex-col items-center md:items-start">
+		<p class="text-sm text-center md:text-start uppercase tracking-[0.35em] text-cyan-400">
 			Foro de estudiantes IT de Monlau
 		</p>
 		<h1
-			class="mt-4 max-w-2xl text-4xl font-bold leading-tight text-white sm:text-4xl"
+			class="text-center md:text-start mt-4 max-w-2xl text-4xl font-bold leading-tight text-white sm:text-4xl"
 		>
 			Una comunidad para preguntar, responder y aprender en cada módulo.
 		</h1>
-		<p class="mt-4 max-w-2xl text-zinc-300">
-			Esta versión usa datos mockup para enseñar la estructura visual del foro
-			mientras completamos los endpoints reales.
+		<p class="text-center md:text-start mt-4 max-w-lg md:max-w-2xl text-zinc-300">
+			Explora los módulos disponibles, entra en cada categoría y revisa los posts
+			publicados por la comunidad.
 		</p>
     </div>
 	
 	{% include 'partials/header.html' %} 
 
     <section>
-		<div class="mb-4 flex items-end justify-between gap-4">
+		<div class="mb-6 flex items-end justify-between gap-4">
 			<div>
 				<h2 class="text-2xl font-semibold text-white">Módulos</h2>
 				<p class="mt-1 text-sm text-zinc-400">
-					Busca respuesuestas a tus dudas por cada módulo
+					Encuentra respuestas a tus dudas en cada módulo.
 				</p>
 			</div>
 			<a
@@ -35,9 +35,9 @@
 			</a>
 		</div>
 
-		<div class="grid gap-6 lg:grid-cols-2">
+		<div class="grid gap-6 md:grid-cols-2">
 			{% for modulo in modulos %}
-				<div class="col-span-1">
+				<div class="col-span-1 h-full">
 					{% include 'partials/category_card.html' %}
 				</div>
 			{% endfor %}
