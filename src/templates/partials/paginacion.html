@@ -2,13 +2,13 @@
     <div class="flex items-center justify-center gap-4 mt-8 pt-4 border-t border-zinc-800/60">
         
         {% if page > 1 %}
-            <a href="{{ url_for('posts.buscar_posts', q=query, page=page-1) }}" 
+            <a href="{{ url_for(request.endpoint, q=query, page=page-1) }}" 
                class="px-4 py-2 text-sm rounded-sm bg-zinc-900 border border-zinc-800 text-cyan-400 hover:bg-zinc-800 transition">
-                ← Anterior
+                &larr; Anterior
             </a>
         {% else %}
             <span class="px-4 py-2 text-sm rounded-sm bg-zinc-950 border border-zinc-900 text-zinc-600 cursor-not-allowed">
-                ← Anterior
+                &larr; Anterior
             </span>
         {% endif %}
 
@@ -17,14 +17,15 @@
         </span>
 
         {% if page < total_pages %}
-            <a href="{{ url_for('posts.buscar_posts', q=query, page=page+1) }}" 
+            <a href="{{ url_for(request.endpoint, q=query, page=page+1) }}" 
                class="px-4 py-2 text-sm rounded-sm bg-zinc-900 border border-zinc-800 text-cyan-400 hover:bg-zinc-800 transition">
-                Siguiente →
+                Siguiente &rarr;
             </a>
         {% else %}
             <span class="px-4 py-2 text-sm rounded-sm bg-zinc-950 border border-zinc-900 text-zinc-600 cursor-not-allowed">
-                Siguiente →
+                Siguiente &rarr;
             </span>
         {% endif %}
-</div>
+
+    </div>
 {% endif %}

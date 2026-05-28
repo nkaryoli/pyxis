@@ -166,7 +166,35 @@ def post_respuesta(id_post):
 @posts.route('/destacados', methods=['GET'])
 def destacados_page():
     try:
-        return render_template('destacados.html', posts=PostService.listar_todos())
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+        per_page = 5  
+
+        todos_los_posts = PostService.listar_todos()
+
+        posts_ordenados = sorted(
+            todos_los_posts, 
+            key=lambda p: len(RespuestaService.obtener_respuestas_de_post(p.id_post)), 
+            reverse=True
+        )
+        top_10_destacados = posts_ordenados[:10]
+
+        total_items = len(top_10_destacados)
+        total_pages = math.ceil(total_items / per_page) or 1
+
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = top_10_destacados[inicio:fin]
+
+        return render_template(
+            'destacados.html',
+            posts=posts_paginados,
+            page=page,
+            total_pages=total_pages,
+            query="" 
+        )
+
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
@@ -174,10 +202,31 @@ def destacados_page():
 @posts.route('/recientes', methods=['GET'])
 def recientes_page():
     try:
-        return render_template('recientes.html', posts=PostService.listar_recientes())
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+            
+        per_page = 5  
+        
+        todos_resultados = PostService.listar_recientes()
+        total_items = len(todos_resultados)
+        
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = todos_resultados[inicio:fin]
+
+        return render_template(
+            'recientes.html', 
+            posts=posts_paginados, 
+            page=page, 
+            total_pages=total_pages, 
+            query="" 
+        )
+        
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
-
 
 
     
