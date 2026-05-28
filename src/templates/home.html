@@ -1,5 +1,5 @@
-{% extends 'base.html' %} {% block title %}Inicio | Pyxis Forum{% endblock %} 
-{% block content %}
+{% extends 'layout.html' %} {% block title %}Inicio | Pyxis Forum{% endblock %} 
+{% block page_content %}
 <section class="space-y-9">
 
     <div class="pt-6 flex flex-col items-center md:items-start">
@@ -16,8 +16,6 @@
 			publicados por la comunidad.
 		</p>
     </div>
-	
-	{% include 'partials/header.html' %} 
 
     <section>
 		<div class="mb-6 flex items-end justify-between gap-4">

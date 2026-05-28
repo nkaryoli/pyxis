@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 
 {% block title %}{{ modulo.nombre_asignatura }} | Pyxis Forum{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <section class="space-y-8">
     <div class="py-8">
         <div class="flex flex-wrap items-center gap-3 text-sm text-zinc-400">
@@ -58,7 +58,7 @@
             <div class="flex gap-2">
                 {% if page > 1 %}
                     <a href="{{ url_for('modulos.detalle_modulo', nombre_modulo=modulo.nombre_asignatura, page=page-1) }}" 
-                       class="rounded-md border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-zinc-800">
+                    class="rounded-md border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-zinc-800">
                         Anterior
                     </a>
                 {% else %}
@@ -69,7 +69,7 @@
 
                 {% if page < total_pages %}
                     <a href="{{ url_for('modulos.detalle_modulo', nombre_modulo=modulo.nombre_asignatura, page=page+1) }}" 
-                       class="rounded-md border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-zinc-800">
+                    class="rounded-md border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-zinc-800">
                         Siguiente
                     </a>
                 {% else %}
