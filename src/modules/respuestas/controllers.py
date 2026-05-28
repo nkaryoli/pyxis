@@ -1,14 +1,13 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, redirect, url_for, render_template, g
 from src.services.respuesta_service import RespuestaService 
+from src.services.auth_service import AuthService
 
-respuestas = Blueprint('respuestas', __name__)
+respuestas = Blueprint('respuestas', __name__, template_folder='templates')
 
-# --- 1. CREAR RESPUESTA (POST) ---
 @respuestas.route('/api/posts/<int:id_post>/respuestas', methods=['POST'])
 def crear_respuesta_api(id_post):
     datos = request.get_json()
     
-    # Validación con las nuevas columnas
     if not datos or 'contenido_respuesta' not in datos or 'id_usuario' not in datos:
         return jsonify({"error": "Faltan campos obligatorios: contenido_respuesta o id_usuario"}), 400
         
@@ -25,7 +24,6 @@ def crear_respuesta_api(id_post):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 2. GET RESPUESTAS POR ID_POST ---
 @respuestas.route('/api/posts/<int:id_post>/respuestas', methods=['GET'])
 def listar_respuestas_post_api(id_post):
     try:
@@ -35,7 +33,6 @@ def listar_respuestas_post_api(id_post):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 3. GET RESPUESTAS POR ID_USUARIO ---
 @respuestas.route('/api/usuarios/<int:id_usuario>/respuestas', methods=['GET'])
 def ver_respuestas_usuario_api(id_usuario):
     try:
@@ -45,31 +42,26 @@ def ver_respuestas_usuario_api(id_usuario):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 4. GESTIONAR RESPUESTA POR ID (PUT y DELETE con verificación de Rol y Propiedad) ---
 @respuestas.route('/api/respuestas/<int:id_respuesta>', methods=['PUT', 'DELETE'])
 def gestionar_respuesta_api(id_respuesta):
     try:
-        # Extraemos las credenciales desde las cabeceras (Headers) de Postman
         usuario_id_solicitante = request.headers.get('X-User-Id')
-        usuario_rol = request.headers.get('X-User-Role') # 'ALUMNO', 'PROFESOR', 'ADMINISTRADOR'
+        usuario_rol = request.headers.get('X-User-Role') 
         
         if not usuario_id_solicitante or not usuario_rol:
             return jsonify({"error": "Autenticación requerida. Falta X-User-Id o X-User-Role en los Headers."}), 401
 
         usuario_id_solicitante = int(usuario_id_solicitante)
 
-        # Buscamos la respuesta primero para comprobar quién es el dueño original
         respuesta = RespuestaService.obtener_por_id(id_respuesta)
         if not respuesta:
             return jsonify({"error": f"No se encontró ninguna respuesta con el ID {id_respuesta}"}), 404
 
-        # REGLA DE AUTORIZACIÓN: ¿Es Admin? ¿Es Profesor? ¿O es el dueño de la respuesta?
         es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (respuesta.id_usuario == usuario_id_solicitante)
         
         if not es_autorizado:
             return jsonify({"error": "No tienes permisos para modificar o borrar esta respuesta."}), 403
 
-        # Si pasa el filtro de seguridad, ejecutamos según el método HTTP
         if request.method == 'DELETE':
             RespuestaService.eliminar_respuesta(id_respuesta)
             return jsonify({"mensaje": f"Respuesta con ID {id_respuesta} eliminada correctamente"}), 200
@@ -85,3 +77,57 @@ def gestionar_respuesta_api(id_respuesta):
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+
+
+@respuestas.route('/respuestas/<int:id_respuesta>/editar', methods=['GET', 'POST'])
+@AuthService.token_required
+def editar_respuesta(id_respuesta):
+    """Muestra el formulario de edición y actualiza la respuesta."""
+    usuario = getattr(g, 'current_user', None)
+    if not usuario:
+        return redirect(url_for('auth.login'))
+        
+    try:
+        respuesta = RespuestaService.obtener_por_id(id_respuesta)
+        if not respuesta:
+            return render_template('errors/404.html', mensaje='Respuesta no encontrada'), 404
+
+        if respuesta.id_usuario != usuario.id_usuario:
+            return render_template('errors/error.html', error='No tienes autorización para modificar contenido ajeno.'), 403
+            
+        if request.method == 'POST':
+            nuevo_contenido = request.form.get('contenido_respuesta')
+            RespuestaService.modificar_respuesta(id_respuesta, contenido=nuevo_contenido)
+            return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+            
+        return render_template('editar_respuesta.html', respuesta=respuesta, usuario=usuario)
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
+
+
+@respuestas.route('/respuestas/<int:id_respuesta>/borrar', methods=['POST'])
+@AuthService.token_required
+def borrar_respuesta(id_respuesta):
+    """Elimina físicamente una respuesta y redirige de vuelta al post."""
+    usuario = getattr(g, 'current_user', None)
+    if not usuario:
+        return redirect(url_for('auth.login'))
+    
+    try:
+        respuesta = RespuestaService.obtener_por_id(id_respuesta)
+        if not respuesta:
+            return render_template('errors/404.html', mensaje='Respuesta no encontrada'), 404
+            
+        # Control estricto de seguridad en el servidor
+        if respuesta.id_usuario != usuario.id_usuario:
+            return render_template('errors/error.html', error='No tienes permisos para borrar esta respuesta.'), 403
+            
+        id_post_original = respuesta.id_post
+        RespuestaService.eliminar_respuesta(id_respuesta)
+        
+        return redirect(url_for('posts.post_respuesta', id_post=id_post_original))
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500

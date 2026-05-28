@@ -3,7 +3,7 @@ from src.modules.auth.controllers import _wants_json
 from src.services.auth_service import AuthService
 from src.services.post_service import PostService
 from src.services.respuesta_service import RespuestaService
-# from datetime import datetime
+import math
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
@@ -14,11 +14,36 @@ def _extraer_datos_request():
         datos = request.form.to_dict()
     return datos or {}
 
-# ==========================================
-# --- APIS (RETORNAN JSON) ---
-# ==========================================
+class CustomPagination:
+    """Clase para emular la paginación de SQLAlchemy usando listas de servicios."""
+    def __init__(self, items, page, per_page):
+        self.total_items = len(items)
+        self.page = max(1, page)
+        self.per_page = per_page
+        self.pages = math.ceil(self.total_items / per_page) or 1
+        
+        inicio = (self.page - 1) * per_page
+        fin = inicio + per_page
+        self.items = items[inicio:fin]
+        
+        self.has_prev = self.page > 1
+        self.prev_num = self.page - 1 if self.has_prev else 1
+        self.has_next = self.page < self.pages
+        self.next_num = self.page + 1 if self.has_next else self.pages
 
-# --- 1. LISTAR TODOS ---
+    def iter_pages(self, left_edge=1, right_edge=1, left_current=1, right_current=2):
+        """Recrea los saltos de números de página (ej: 1 ... 4 5 [6] 7 8 ... 12)."""
+        last = 0
+        for num in range(1, self.pages + 1):
+            if num <= left_edge or \
+               (num >= self.page - left_current and num <= self.page + right_current) or \
+               num > self.pages - right_edge:
+                if last + 1 != num:
+                    yield None
+                yield num
+                last = num
+
+
 @posts.route('/api/posts', methods=['GET'])
 def listar_todos_api():
     try:
@@ -28,7 +53,6 @@ def listar_todos_api():
         return jsonify({"error": str(e)}), 500
 
 
-# --- 2. CREAR ---
 @posts.route('/api/posts', methods=['POST'])
 def crear_post_api():
     try:
@@ -46,7 +70,6 @@ def crear_post_api():
         return jsonify({"error": str(e)}), 500
 
 
-# --- 3. VER POST POR ID ---
 @posts.route('/api/posts/<int:id_post>', methods=['GET'])
 def ver_post_por_id_api(id_post):
     try:
@@ -59,7 +82,6 @@ def ver_post_por_id_api(id_post):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 4. VER POSTS POR ID DE USUARIO ---
 @posts.route('/api/usuarios/<int:id_usuario>/posts', methods=['GET'])
 def ver_posts_usuario_api(id_usuario):
     try:
@@ -68,8 +90,7 @@ def ver_posts_usuario_api(id_usuario):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    
-# --- 5. VER POSTS POR CÓDIGO DE MÓDULO ---
+
 @posts.route('/api/modulos/<string:codigo_modulo>/posts', methods=['GET'])
 def ver_posts_modulo_api(codigo_modulo):
     try:
@@ -79,14 +100,13 @@ def ver_posts_modulo_api(codigo_modulo):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 6. MODIFICAR O ELIMINAR POR ID ---
 @posts.route('/api/posts/<int:id_post>', methods=['PUT', 'DELETE'])
 def gestionar_post_api(id_post):
     try:
         usuario_id_solicitante = request.headers.get('X-User-Id')
-        usuario_rol = request.headers.get('X-User-Role')
+        usuario_role = request.headers.get('X-User-Role')
         
-        if not usuario_id_solicitante or not usuario_rol:
+        if not usuario_id_solicitante or not usuario_role:
             return jsonify({"error": "Autenticación requerida. Falta X-User-Id o X-User-Role."}), 401
 
         usuario_id_solicitante = int(usuario_id_solicitante)
@@ -95,7 +115,7 @@ def gestionar_post_api(id_post):
         if not post:
             return jsonify({"error": f"No se encontró el post con ID {id_post}"}), 404
 
-        es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (post.id_usuario == usuario_id_solicitante)
+        es_autorizado = (usuario_role in ['ADMINISTRADOR', 'PROFESOR']) or (post.id_usuario == usuario_id_solicitante)
         if not es_autorizado:
             return jsonify({"error": "No tienes permisos para modificar o borrar este post."}), 403
 
@@ -119,14 +139,19 @@ def gestionar_post_api(id_post):
         return jsonify({"error": str(e)}), 500
     
 
-# ==========================================
-# --- RUTAS PARA VISTAS (FRONTEND HTML) ---
-# ==========================================
-
 @posts.route('/posts', methods=['GET'])
 def posts_por_modulo():
     try:
-        return render_template('posts.html', posts=PostService.listar_todos())
+        todos_posts = PostService.listar_todos() or []
+
+        todos_posts.sort(key=lambda p: getattr(p, 'fecha_creacion_post', 0) or getattr(p, 'id_post', 0), reverse=True)
+        
+        page = request.args.get('page', 1, type=int)
+        pagination = CustomPagination(todos_posts, page, per_page=10)
+        
+        is_authenticated = True if getattr(g, 'current_user', None) else False
+        
+        return render_template('posts.html', posts=pagination.items, pagination=pagination, is_authenticated=is_authenticated)
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
@@ -138,8 +163,25 @@ def post_respuesta(id_post):
         if not post_encontrado:
             return render_template('errors/404.html', mensaje='Post no encontrado'), 404
         
-        respuestas_post = RespuestaService.obtener_respuestas_de_post(id_post)
-        return render_template('post_detail.html', post=post_encontrado, respuestas=respuestas_post)
+        respuestas_post = RespuestaService.obtener_respuestas_de_post(id_post) or []
+
+        respuestas_post.sort(key=lambda r: getattr(r, 'fecha_respuesta', 0) or getattr(r, 'id_respuesta', 0))
+
+        respuestas_post.sort(key=lambda r: getattr(r, 'es_mejor_respuesta', False) or getattr(r, 'es_mejor', 0) == 1, reverse=True)
+
+        page = request.args.get('page', 1, type=int)
+
+        pagination = CustomPagination(respuestas_post, page, per_page=5)
+        
+        is_authenticated = True if getattr(g, 'current_user', None) else False
+        
+        return render_template(
+            'post_detail.html', 
+            post=post_encontrado, 
+            respuestas=pagination.items, 
+            pagination=pagination, 
+            is_authenticated=is_authenticated
+        )
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
 
@@ -160,8 +202,6 @@ def recientes_page():
         return render_template('errors/error.html', error=str(e)), 500
 
 
-
-    
 @posts.route('/post/crear', methods=['GET', 'POST'])
 @AuthService.token_required
 def crear_post():
@@ -194,10 +234,59 @@ def crear_post():
 
     except Exception as e:
         return f"Error al guardar en la base de datos: {str(e)}", 500
-    
 
 
-    # NAVBAR
+@posts.route('/posts/<int:id_post>/editar', methods=['GET', 'POST'])
+@AuthService.token_required
+def editar_post(id_post):
+    usuario = getattr(g, 'current_user', None)
+    if not usuario:
+        return redirect(url_for('auth.login'))
+        
+    post = PostService.obtener_por_id(id_post)
+    if not post:
+        return render_template('errors/404.html', mensaje='Post no encontrado'), 404
+        
+    if post.id_usuario != usuario.id_usuario:
+        return render_template('errors/error.html', error='No tienes permisos para modificar este post'), 403
+        
+    if request.method == 'POST':
+        try:
+            PostService.modificar_post(
+                id_post=id_post,
+                titulo=request.form.get('titulo_post'),
+                contenido=request.form.get('contenido_post'),
+                codigo_modulo=request.form.get('codigo_modulo', post.codigo_modulo),
+                imagen=getattr(post, 'imagen_post', None)
+            )
+            return redirect(url_for('posts.post_respuesta', id_post=id_post))
+        except Exception as e:
+            return render_template('errors/error.html', error=str(e)), 500
+            
+    lista_modulos = PostService.obtener_todos_los_modulos()
+    return render_template('question_form.html', usuario=usuario, modulos=lista_modulos, post=post, edit_mode=True)
+
+
+@posts.route('/posts/<int:id_post>/borrar', methods=['POST'])
+@AuthService.token_required
+def borrar_post(id_post):
+    usuario = getattr(g, 'current_user', None)
+    if not usuario:
+        return redirect(url_for('auth.login'))
+        
+    post = PostService.obtener_por_id(id_post)
+    if not post:
+        return render_template('errors/404.html', mensaje='Post no encontrado'), 404
+        
+    if post.id_usuario != usuario.id_usuario:
+        return render_template('errors/error.html', error='No tienes permisos para eliminar este post'), 403
+        
+    try:
+        PostService.eliminar_post(id_post)
+        return redirect(url_for('posts.posts_por_modulo'))
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
+
 
 @posts.route('/search', methods=['GET'])
 def buscar_posts():
@@ -211,7 +300,7 @@ def buscar_posts():
             return render_template('navbar_busqueda.html', posts=[], query="", page=1, total_pages=1, total_items=0)
         todos_resultados = PostService.buscar_por_relevancia(query)
         total_items = len(todos_resultados)
-        import math
+        
         total_pages = math.ceil(total_items / per_page) or 1
         
         inicio = (page - 1) * per_page
@@ -226,6 +315,32 @@ def buscar_posts():
             total_pages=total_pages,
             total_items=total_items  
         )
+        
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
+    
+@posts.route('/posts/<int:id_post>/responder', methods=['POST'])
+@AuthService.token_required
+def crear_respuesta(id_post):
+    """Procesa el formulario clásico de HTML para añadir una respuesta."""
+    usuario = getattr(g, 'current_user', None)
+    if not usuario:
+        return redirect(url_for('auth.login'))
+        
+    contenido = request.form.get('contenido_respuesta')
+    
+    if not contenido or not contenido.strip():
+        return redirect(url_for('posts.post_respuesta', id_post=id_post))
+        
+    try:
+        RespuestaService.crear_respuesta(
+            id_post=id_post,
+            id_usuario=usuario.id_usuario,
+            contenido=contenido.strip(),
+            es_mejor=0,
+            imagen=None
+        )
+        return redirect(url_for('posts.post_respuesta', id_post=id_post))
         
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500

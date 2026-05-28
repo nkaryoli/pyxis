@@ -1,0 +1,104 @@
+<div class="space-y-6">
+    <div>
+        <p class="text-xs uppercase tracking-[0.25em] text-cyan-400 font-semibold">Comunidad Pyxis</p>
+        <h2 class="text-xl font-bold text-white mt-1">Respuestas ({{ pagination.total_items }})</h2>
+    </div>
+
+    <div class="space-y-4">
+        {% if respuestas %}
+        {% for r in respuestas %}
+        {% set es_mejor = r.es_mejor or r.es_mejor_respuesta %}
+        <div
+            class="rounded-md border transition {{ 'border-emerald-500/40 bg-emerald-950/20' if es_mejor else 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700' }} p-5">
+            <div class="flex gap-4 items-start">
+                <div
+                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm {{ 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400' if es_mejor else 'bg-orange-600/20 border border-orange-500/40 text-orange-400' }}">
+                    {{ '🏆' if es_mejor else '🤖' }}
+                </div>
+                <div class="space-y-2 w-full">
+                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                        <div class="text-xs text-zinc-500 uppercase tracking-wider">
+                            Respondido por: <span class="font-semibold text-zinc-300">{% if r.usuario %}{{
+                                r.usuario.nombre_usuario }}{% else %}Usuario #{{ r.id_usuario }}{% endif %}</span>
+                            <span class="mx-2">•</span>
+                            <span>{{ r.created_at.strftime('%d/%m/%Y %H:%M') if r.created_at else 'Reciente' }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            {% if es_mejor %}
+                            <span
+                                class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-500/20 shadow-sm"><svg
+                                    xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg> Mejor Respuesta</span>
+                            {% endif %}
+                            {% if g.current_user and g.current_user.id_usuario == r.id_usuario %}
+                            <div class="flex items-center gap-3 text-[11px] border-l border-zinc-800 pl-3">
+                                <a href="{{ url_for('respuestas.editar_respuesta', id_respuesta=r.id_respuesta) }}"
+                                    class="text-zinc-400 hover:text-cyan-400 transition"> Editar</a>
+                                <form action="{{ url_for('respuestas.borrar_respuesta', id_respuesta=r.id_respuesta) }}"
+                                    method="POST" onsubmit="return confirm('¿Seguro?');" class="inline"><button
+                                        type="submit" class="text-zinc-500 hover:text-red-400 transition">
+                                        Borrar</button></form>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{{ r.contenido_respuesta or
+                        r.contenido }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if pagination.pages > 1 %}
+        <nav class="flex justify-center items-center gap-2 mt-8">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=pagination.prev_num) }}"
+                class="px-4 py-2 bg-zinc-900 border border-zinc-700 text-zinc-300 rounded hover:bg-zinc-800">&laquo;</a>
+            {% endif %}
+            {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+            <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page_num) }}"
+                class="px-4 py-2 border rounded {% if page_num == pagination.page %}bg-cyan-600 text-white{% else %}bg-zinc-900 border-zinc-700 text-zinc-400{% endif %}">{{
+                page_num }}</a>
+            {% else %} <span class="px-2 text-zinc-600">...</span> {% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}
+            <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=pagination.next_num) }}"
+                class="px-4 py-2 bg-zinc-900 border border-zinc-700 text-zinc-300 rounded hover:bg-zinc-800">&raquo;</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+        {% else %}
+        <div
+            class="rounded-xl border border-dashed border-zinc-800 p-8 text-center text-sm text-zinc-500 bg-zinc-950/20">
+            Nadie ha respondido todavía.</div>
+        {% endif %}
+    </div>
+
+    <div class="mt-12 pt-8 border-t border-zinc-800">
+        {% if g.current_user %}
+        <form action="{{ url_for('posts.crear_respuesta', id_post=post.id_post) }}" method="POST"
+            class="rounded-md border border-zinc-800 bg-zinc-900/40 p-5 transition-all hover:border-zinc-700">
+
+            <textarea name="contenido_respuesta" rows="3"
+                class="w-full bg-transparent border-none text-zinc-300 placeholder:text-zinc-600 focus:ring-0 outline-none text-sm leading-relaxed p-0"
+                placeholder="Escribe tu respuesta..." required></textarea>
+
+            <div class="flex justify-end mt-4 pt-4 border-t border-zinc-800">
+                <button type="submit"
+                    class="bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-bold py-2 px-6 rounded-md transition-all duration-200">
+                    Publicar respuesta
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <div
+            class="rounded-md border border-dashed border-zinc-800 p-5 text-center text-sm text-zinc-500 bg-zinc-950/20">
+            <p>Debes <a href="{{ url_for('auth.login') }}" class="text-cyan-400 hover:underline">iniciar sesión</a> para
+                participar en la comunidad.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
