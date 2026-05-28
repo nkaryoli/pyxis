@@ -43,8 +43,8 @@ class Respuesta(Base):
             "contenido_respuesta": self.contenido_respuesta,
             "id_post": self.id_post,
             "id_usuario": self.id_usuario,
-            "username_autor": self.autor
-            
+            "username_autor": self.autor,
+            "fecha_respuesta": self.fecha_respuesta.isoformat() if self.fecha_respuesta else None
         }
 
     

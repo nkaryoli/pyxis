@@ -75,21 +75,25 @@
 	<div class="mt-8">
 		<div class="flex gap-8 border-b border-zinc-800 mb-6">
 			<button onclick="cambiarTab('destacados')" id="btn-destacados"
-				class="pb-2 border-b-2 border-cyan-500 text-white font-bold transition-all cursor-pointer">Destacados</button>
+				class="pb-2 border-b-2 border-cyan-500 text-white font-bold transition-all cursor-pointer">Notificaciones</button>
 			<button onclick="cambiarTab('posts')" id="btn-posts"
 				class="pb-2 text-zinc-500 hover:text-white transition-all cursor-pointer">Posts</button>
 			<button onclick="cambiarTab('respuestas')" id="btn-respuestas"
 				class="pb-2 text-zinc-500 hover:text-white transition-all cursor-pointer">Respuestas</button>
 		</div>
 
-		<div id="content-destacados">
-			<p class="text-zinc-500 text-center py-10"></p>
+		<div id="content-destacados" class="space-y-4">
+			<div class="text-center py-10">
+				<div class="inline-block">
+					<div class="w-8 h-8 border-4 border-zinc-700 border-t-cyan-500 rounded-full animate-spin"></div>
+				</div>
+			</div>
 		</div>
 
-		<div id="content-posts" class="hidden">
+		<div id="content-posts" class="space-y-4 hidden">
 		</div>
 
-		<div id="content-respuestas" class="hidden">
+		<div id="content-respuestas" class="space-y-4 hidden">
 		</div>
 	</div>
 </section>
