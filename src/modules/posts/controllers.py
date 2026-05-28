@@ -149,15 +149,47 @@ def posts_por_modulo():
         return render_template('errors/error.html', error=str(e)), 500
  
  
+import math
+from flask import render_template, request
+
 @posts.route('/posts/<int:id_post>', methods=['GET'])
 def post_respuesta(id_post):
     try:
+
         post_encontrado = PostService.obtener_por_id(id_post)
         if not post_encontrado:
             return render_template('errors/404.html', mensaje='Post no encontrado'), 404
         
-        respuestas_post = RespuestaService.obtener_respuestas_de_post(id_post)
-        return render_template('post_detail.html', post=post_encontrado, respuestas=respuestas_post)
+
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+            
+        per_page = 7
+        
+
+        todas_las_respuestas = RespuestaService.obtener_respuestas_de_post(id_post)
+        
+        respuestas_ordenadas = sorted(
+            todas_las_respuestas,
+            key=lambda r: getattr(r, 'es_mejor_respuesta', 0),
+            reverse=True
+        )
+        
+        total_items = len(respuestas_ordenadas)
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        respuestas_paginadas = respuestas_ordenadas[inicio:fin]
+        
+        return render_template(
+            'post_detail.html', 
+            post=post_encontrado, 
+            respuestas=respuestas_paginadas, 
+            page=page,
+            total_pages=total_pages
+        )
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
 
