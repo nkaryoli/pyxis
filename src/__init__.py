@@ -1,9 +1,39 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, g, request
 from config import Config
 from src.extensions import init_db
 import os
 
 from src.services.modulo_service import ModuloService
+from src.services.auth_service import AuthService
+from src.repositories.usuario_repository import UsuarioRepository
+
+
+def _cargar_usuario_actual():
+    """Carga el usuario autenticado en `g.current_user` si existe un token válido."""
+    if getattr(g, 'current_user', None):
+        return g.current_user
+
+    token = request.cookies.get('auth_token')
+    if not token:
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header.startswith('Bearer '):
+            token = auth_header.split(' ', 1)[1].strip()
+
+    if not token:
+        return None
+
+    try:
+        payload = AuthService.validar_token(token)
+        id_usuario = payload.get('id_usuario')
+        if not id_usuario:
+            return None
+
+        usuario = UsuarioRepository.get_by_id(id_usuario)
+        if usuario:
+            g.current_user = usuario
+        return usuario
+    except Exception:
+        return None
 
 def create_app():
     app = Flask(__name__)
@@ -28,6 +58,17 @@ def create_app():
     
     # Inicializamos la base de datos
     init_db(db_url)
+
+    @app.before_request
+    def cargar_usuario_en_g():
+        _cargar_usuario_actual()
+
+    @app.context_processor
+    def inyectar_usuario_actual():
+        return {
+            'current_user': getattr(g, 'current_user', None),
+            'is_authenticated': getattr(g, 'current_user', None) is not None,
+        }
         
     @app.route('/')
     def home():
