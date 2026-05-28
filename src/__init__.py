@@ -59,15 +59,12 @@ def create_app():
     # Inicializamos la base de datos
     init_db(db_url)
 
-    @app.before_request
-    def cargar_usuario_en_g():
-        _cargar_usuario_actual()
-
     @app.context_processor
     def inyectar_usuario_actual():
+        current_user = _cargar_usuario_actual()
         return {
-            'current_user': getattr(g, 'current_user', None),
-            'is_authenticated': getattr(g, 'current_user', None) is not None,
+            'current_user': current_user,
+            'is_authenticated': current_user is not None,
         }
         
     @app.route('/')
