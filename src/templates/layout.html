@@ -1,0 +1,11 @@
+{% extends "base.html" %} 
+{% block title %}Nueva Pregunta | Pyxis{% endblock %}
+
+{% block content %}
+<section class="grid grid-cols-[250px_1fr] gap-6 h-full">
+	<div class="relative h-full border-r border-zinc-800 ">{% include 'partials/sidebar.html' %} </div>
+	<div class="space-y-9 py-6">
+		{% block page_content %}{% endblock %}
+	</div>
+</section>
+{% endblock %}

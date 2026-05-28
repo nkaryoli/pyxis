@@ -1,17 +1,12 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 
 {% block title %}Recientes | Pyxis Forum{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <section class="space-y-8">
-		{% include 'partials/header.html' %} 
-	<div class="rounded-md bg-linear-to-br from-cyan-500/10 via-zinc-900 to-zinc-950 p-8">
+	<div class="">
 		<p class="text-sm uppercase tracking-[0.35em] text-cyan-300">Actividad reciente</p>
 		<h1 class="mt-3 text-3xl font-bold text-white">Posts recientes</h1>
-		<p class="mt-3 max-w-2xl text-zinc-400">
-			Vista cronológica para entrar rápido a lo último que está activo en el
-			foro.
-		</p>
 	</div>
 
 	<div class="grid gap-4">
