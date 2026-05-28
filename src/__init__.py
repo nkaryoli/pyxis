@@ -32,7 +32,7 @@ def _cargar_usuario_actual():
         if usuario:
             g.current_user = usuario
         return usuario
-    except Exception:
+    except ValueError:
         return None
 
 def create_app():
