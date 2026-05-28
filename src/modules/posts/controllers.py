@@ -14,9 +14,8 @@ def _extraer_datos_request():
         datos = request.form.to_dict()
     return datos or {}
 
-# ==========================================
-# --- APIS (RETORNAN JSON) ---
-# ==========================================
+
+# --- APIS 
 
 # --- 1. LISTAR TODOS ---
 @posts.route('/api/posts', methods=['GET'])

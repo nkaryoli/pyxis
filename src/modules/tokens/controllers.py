@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.services.tokens_service import TokensService
 
-# 1. Definimos el Blueprint con el nombre que busca tu __init__.py
 tokens = Blueprint('tokens', __name__)
 
 # --- 1. CREAR REGISTRO DE TOKENS (POST) ---

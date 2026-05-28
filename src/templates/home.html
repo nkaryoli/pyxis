@@ -36,10 +36,12 @@
 		</div>
 
 		<div class="grid gap-6 md:grid-cols-2">
-			{% for modulo in modulos %}
-				<div class="col-span-1 h-full">
-					{% include 'partials/category_card.html' %}
-				</div>
+			{% for modulo in modulos | sort(attribute='posts_count', reverse=true) %}
+				{% if loop.index <= 4 %}
+					<div class="col-span-1 h-full">
+						{% include 'partials/category_card.html' %}
+					</div>
+				{% endif %}
 			{% endfor %}
 		</div>
     </section>
