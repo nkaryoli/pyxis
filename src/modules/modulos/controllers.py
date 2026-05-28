@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request
 from src.services.modulo_service import ModuloService
+import math
 
 modulos = Blueprint('modulos', __name__, template_folder='templates')
 
@@ -13,15 +14,35 @@ def listar_modulos():
         return render_template('errors/error.html', error=str(e)), 500
 
 
-@modulos.route('/modulos/<string:nombre_modulo>')
+@modulos.route('/modulos/<string:nombre_modulo>', methods=['GET'])
 def detalle_modulo(nombre_modulo):
-    """Renderiza el detalle de un módulo con sus posts simulados."""
     try:
-        modulo, posts = ModuloService.obtener_detalle_modulo(nombre_modulo)
-    except ValueError:
-        return render_template('errors/404.html', mensaje='Módulo no encontrado'), 404
-    
-    return render_template('module_detail.html', modulo=modulo, posts=posts)
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+            
+        per_page = 10  
+        
+        modulo, todos_los_posts = ModuloService.obtener_detalle_modulo(nombre_modulo)
+        
+        total_items = len(todos_los_posts)
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = todos_los_posts[inicio:fin]
+        
+        return render_template(
+            'module_detail.html', 
+            modulo=modulo, 
+            posts=posts_paginados,  
+            page=page,
+            total_pages=total_pages
+        )
+    except ValueError as e:
+        return render_template('errors/404.html', mensaje=str(e)), 404
+    except Exception as e:
+        return render_template('errors/error.html', error=str(e)), 500
 
 
 @modulos.route('/api/modulos', methods=['GET'])
