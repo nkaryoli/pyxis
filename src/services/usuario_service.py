@@ -15,8 +15,7 @@ class UsuarioService:
             raise ValueError(f"El usuario con ID {id_usuario} no existe.")
         posts = PostService.ver_posts_por_usuario(id_usuario)
         if not posts:
-            print("No se encontraron posts")
-        print(posts)
+            posts = []        
         return usuario, posts
 
     @staticmethod
