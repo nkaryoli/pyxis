@@ -3,7 +3,7 @@ from src.modules.auth.controllers import _wants_json
 from src.services.auth_service import AuthService
 from src.services.post_service import PostService
 from src.services.respuesta_service import RespuestaService
-# from datetime import datetime
+import math
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
@@ -126,7 +126,26 @@ def gestionar_post_api(id_post):
 @posts.route('/posts', methods=['GET'])
 def posts_por_modulo():
     try:
-        return render_template('posts.html', posts=PostService.listar_todos())
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+        per_page = 5 
+        todos_resultados = PostService.listar_todos()
+        total_items = len(todos_resultados)
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = todos_resultados[inicio:fin]
+        
+        return render_template(
+            'posts.html', 
+            posts=posts_paginados, 
+            page=page, 
+            total_pages=total_pages, 
+            query="" 
+        )
+        
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
