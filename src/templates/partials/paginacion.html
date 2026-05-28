@@ -1,0 +1,31 @@
+{% if total_pages > 1 %}
+    <div class="flex items-center justify-center gap-4 mt-8 pt-4 border-t border-zinc-800/60">
+        
+        {% if page > 1 %}
+            <a href="{{ url_for(request.endpoint, q=query, page=page-1) }}" 
+               class="px-4 py-2 text-sm rounded-sm bg-zinc-900 border border-zinc-800 text-cyan-400 hover:bg-zinc-800 transition">
+                &larr; Anterior
+            </a>
+        {% else %}
+            <span class="px-4 py-2 text-sm rounded-sm bg-zinc-950 border border-zinc-900 text-zinc-600 cursor-not-allowed">
+                &larr; Anterior
+            </span>
+        {% endif %}
+
+        <span class="text-sm text-zinc-400">
+            Página <span class="text-white font-medium">{{ page }}</span> de {{ total_pages }}
+        </span>
+
+        {% if page < total_pages %}
+            <a href="{{ url_for(request.endpoint, q=query, page=page+1) }}" 
+               class="px-4 py-2 text-sm rounded-sm bg-zinc-900 border border-zinc-800 text-cyan-400 hover:bg-zinc-800 transition">
+                Siguiente &rarr;
+            </a>
+        {% else %}
+            <span class="px-4 py-2 text-sm rounded-sm bg-zinc-950 border border-zinc-900 text-zinc-600 cursor-not-allowed">
+                Siguiente &rarr;
+            </span>
+        {% endif %}
+
+    </div>
+{% endif %}

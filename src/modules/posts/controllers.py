@@ -3,7 +3,7 @@ from src.modules.auth.controllers import _wants_json
 from src.services.auth_service import AuthService
 from src.services.post_service import PostService
 from src.services.respuesta_service import RespuestaService
-# from datetime import datetime
+import math
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
@@ -14,9 +14,8 @@ def _extraer_datos_request():
         datos = request.form.to_dict()
     return datos or {}
 
-# ==========================================
-# --- APIS (RETORNAN JSON) ---
-# ==========================================
+
+# --- APIS 
 
 # --- 1. LISTAR TODOS ---
 @posts.route('/api/posts', methods=['GET'])
@@ -126,20 +125,71 @@ def gestionar_post_api(id_post):
 @posts.route('/posts', methods=['GET'])
 def posts_por_modulo():
     try:
-        return render_template('posts.html', posts=PostService.listar_todos())
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+        per_page = 5 
+        todos_resultados = PostService.listar_todos()
+        total_items = len(todos_resultados)
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = todos_resultados[inicio:fin]
+        
+        return render_template(
+            'posts.html', 
+            posts=posts_paginados, 
+            page=page, 
+            total_pages=total_pages, 
+            query="" 
+        )
+        
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
  
+import math
+from flask import render_template, request
+
 @posts.route('/posts/<int:id_post>', methods=['GET'])
 def post_respuesta(id_post):
     try:
+
         post_encontrado = PostService.obtener_por_id(id_post)
         if not post_encontrado:
             return render_template('errors/404.html', mensaje='Post no encontrado'), 404
         
-        respuestas_post = RespuestaService.obtener_respuestas_de_post(id_post)
-        return render_template('post_detail.html', post=post_encontrado, respuestas=respuestas_post)
+
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+            
+        per_page = 7
+        
+
+        todas_las_respuestas = RespuestaService.obtener_respuestas_de_post(id_post)
+        
+        respuestas_ordenadas = sorted(
+            todas_las_respuestas,
+            key=lambda r: getattr(r, 'es_mejor_respuesta', 0),
+            reverse=True
+        )
+        
+        total_items = len(respuestas_ordenadas)
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        respuestas_paginadas = respuestas_ordenadas[inicio:fin]
+        
+        return render_template(
+            'post_detail.html', 
+            post=post_encontrado, 
+            respuestas=respuestas_paginadas, 
+            page=page,
+            total_pages=total_pages
+        )
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
 
@@ -147,7 +197,35 @@ def post_respuesta(id_post):
 @posts.route('/destacados', methods=['GET'])
 def destacados_page():
     try:
-        return render_template('destacados.html', posts=PostService.listar_todos())
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+        per_page = 5  
+
+        todos_los_posts = PostService.listar_todos()
+
+        posts_ordenados = sorted(
+            todos_los_posts, 
+            key=lambda p: len(RespuestaService.obtener_respuestas_de_post(p.id_post)), 
+            reverse=True
+        )
+        top_10_destacados = posts_ordenados[:10]
+
+        total_items = len(top_10_destacados)
+        total_pages = math.ceil(total_items / per_page) or 1
+
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = top_10_destacados[inicio:fin]
+
+        return render_template(
+            'destacados.html',
+            posts=posts_paginados,
+            page=page,
+            total_pages=total_pages,
+            query="" 
+        )
+
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
  
@@ -155,10 +233,31 @@ def destacados_page():
 @posts.route('/recientes', methods=['GET'])
 def recientes_page():
     try:
-        return render_template('recientes.html', posts=PostService.listar_recientes())
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+            
+        per_page = 5  
+        
+        todos_resultados = PostService.listar_recientes()
+        total_items = len(todos_resultados)
+        
+        total_pages = math.ceil(total_items / per_page) or 1
+        
+        inicio = (page - 1) * per_page
+        fin = inicio + per_page
+        posts_paginados = todos_resultados[inicio:fin]
+
+        return render_template(
+            'recientes.html', 
+            posts=posts_paginados, 
+            page=page, 
+            total_pages=total_pages, 
+            query="" 
+        )
+        
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
-
 
 
     
