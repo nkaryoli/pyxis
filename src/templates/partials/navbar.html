@@ -5,21 +5,70 @@
 		</a>
 		<nav class="flex items-center gap-3 text-sm text-zinc-300">
 			
-			<form action="{{ url_for('posts.buscar_posts') }}" method="GET" class="w-full">
-				<input 
-					type="text" 
-					name="q" 
-					value="{{ request.args.get('q', '') }}"
-					placeholder="Buscar..." 
-					class="w-full h-9 rounded-sm border border-cyan-400/30 bg-white/5 px-4 py-1 text-sm text-white placeholder:text-zinc-500 focus:border-cyan-300 focus:outline-none"
-				>
+			<form action="{{ url_for('posts.buscar_posts') }}" method="GET" class="w-full max-w-64">
+				<div class="relative">
+					<span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-zinc-500">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+							<circle cx="11" cy="11" r="7"></circle>
+							<path d="m20 20-3.5-3.5"></path>
+						</svg>
+					</span>
+					<input 
+						type="text" 
+						name="q" 
+						value="{{ request.args.get('q', '') }}"
+						placeholder="Buscar..." 
+						class="w-full h-9 rounded-sm border border-cyan-400/30 bg-white/5 px-4 py-1 pl-9 text-sm text-white placeholder:text-zinc-500 focus:border-cyan-300 focus:outline-none"
+					>
+				</div>
 			</form>
 
-			<a href="{{ url_for('auth.login') }}" 
-				class="min-w-28 h-9 flex items-center justify-center rounded-sm border hover:border-cyan-200 border-cyan-400/30 bg-zinc-900 hover:bg-zinc-800 text-sm text-cyan-400 transition"
-			>
-				Iniciar sesion
-			</a>
+			{% if current_user %}
+				<details class="relative shrink-0">
+					<summary class="list-none cursor-pointer rounded-full border border-cyan-400/30 bg-zinc-900 p-1 transition hover:border-cyan-300">
+						<div class="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-zinc-800 text-xs font-semibold text-cyan-300">
+							{% if current_user.imagen_usuario %}
+								<img
+									src="{{ current_user.imagen_usuario }}"
+									alt="Avatar de {{ current_user.username }}"
+									class="h-full w-full object-cover"
+								>
+							{% else %}
+								<span>{{ current_user.username[:1] | upper }}</span>
+							{% endif %}
+						</div>
+					</summary>
+
+					<div class="absolute right-0 mt-2 w-52 overflow-hidden rounded-md border border-zinc-900 bg-zinc-950/95 shadow-xl shadow-black/40 backdrop-blur">
+						<div class="border-b border-zinc-900 px-4 py-3">
+							<p class="text-sm font-semibold text-white">{{ current_user.username }}</p>
+							<p class="text-xs text-zinc-500 flex-1 min-w-0 truncate">{{ current_user.email_usuario }}</p>
+						</div>
+
+						<a
+							href="{{ url_for('usuarios.ver_perfil', id_usuario=current_user.id_usuario) }}"
+							class="block px-4 py-3 text-sm text-zinc-200 transition hover:bg-zinc-900 hover:text-cyan-300"
+						>
+							Ver perfil
+						</a>
+
+						<form action="{{ url_for('auth.logout') }}" method="POST">
+							<button
+								type="submit"
+								class="block w-full px-4 py-3 text-left text-sm text-zinc-200 transition hover:bg-zinc-900 hover:text-cyan-300"
+							>
+								Cerrar sesion
+							</button>
+						</form>
+					</div>
+				</details>
+			{% else %}
+				<a href="{{ url_for('auth.login') }}"
+					class="min-w-28 h-9 flex items-center justify-center rounded-sm border hover:border-cyan-200 border-cyan-400/30 bg-zinc-900 hover:bg-zinc-800 text-sm text-cyan-400 transition"
+				>
+					Iniciar sesion
+				</a>
+			{% endif %}
 		</nav>
 	</div>
 </header>

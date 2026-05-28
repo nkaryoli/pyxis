@@ -143,7 +143,7 @@ def logout():
 	verifica el token en las peticiones.
 	"""
 	response = make_response(
-		jsonify({'mensaje': 'Sesión cerrada correctamente'}) if _wants_json() else redirect(url_for('auth.login'))
+		jsonify({'mensaje': 'Sesión cerrada correctamente'}) if _wants_json() else redirect('/')
 	)
 	response.delete_cookie('auth_token')
 

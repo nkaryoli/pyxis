@@ -2,72 +2,78 @@
 Forum{% endblock %} {% block content %}
 <section class="space-y-8">
 	<div class="py-6">
-		<div class="grid grid-cols-[72px_1fr_60px] gap-6">
+		<div class="grid grid-cols-[72px_1fr_120px] gap-6">
 			<div class="flex flex-col items-center">
-				<div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-zinc-800 bg-zinc-950 text-zinc-500"
+				<div class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-cyan-300/50 bg-zinc-950 text-zinc-500"
 				>
-				<svg
-					width="48"
-					height="48"
-					viewBox="0 0 24 24"
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-					class="text-zinc-500"
-				>
-					<circle
-						cx="12"
-						cy="8"
-						r="3"
-						stroke="currentColor"
-						stroke-width="1.5"
-						fill="rgba(255,255,255,0.03)"
-					/>
-					<path
-						d="M4 20c0-3.3137 2.6863-6 6-6h4c3.3137 0 6 2.6863 6 6"
-						stroke="currentColor"
-						stroke-width="1.2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
+					<svg
+						width="48"
+						height="48"
+						viewBox="0 0 24 24"
 						fill="none"
-					/>
-				</svg>
-			</div>
-			<div class="mt-3 text-center text-xs text-zinc-400">
-				{{ post.autor }}
-			</div>
-		</div>
-
-		<div>
-			<div class="flex items-center gap-3 text-sm text-zinc-400">
-				<a href="{{ url_for('modulos.detalle_modulo', nombre_modulo=post.modulo_nombre) }}"
-					class="text-cyan-400 hover:text-cyan-300"
-				>
-					{{ post.modulo_nombre }}
-				</a>
-				<span>/</span>
-				<span>Detalle del post</span>
-			</div>
-			<h1 class="mt-3 text-2xl font-bold text-white">
-				{{ post.titulo_post }}
-			</h1>
-			<div class="mt-3 text-sm text-zinc-400">
-				{{ post.created_at.strftime('%d %b %Y %H:%M') }} · {{ post.respuestas_count }} respuestas
-			</div>
-			<p class="mt-5 text-zinc-300">{{ post.contenido_post }}</p>
-		</div>
-
-		<div class="flex flex-col items-center">
-			<div class="h-full">
-			<div class="relative h-full">
-				<div class="absolute right-6 top-0 h-full">
-				<div class="h-full w-0.5 bg-zinc-800"></div>
+						xmlns="http://www.w3.org/2000/svg"
+						class="text-cyan-300/50"
+					>
+						<circle
+							cx="12"
+							cy="8"
+							r="3"
+							stroke="currentColor"
+							stroke-width="1.5"
+							fill="rgba(255,255,255,0.03)"
+						/>
+						<path
+							d="M4 20c0-3.3137 2.6863-6 6-6h4c3.3137 0 6 2.6863 6 6"
+							stroke="currentColor"
+							stroke-width="1.2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							fill="none"
+						/>
+					</svg>
 				</div>
-				<div class="absolute right-0 top-2 text-xs text-zinc-400">
-				{{ post.created_at.strftime('%H:%M') }}
+				
+			</div>
+
+			<div class="w-full">
+				<div class="flex items-center gap-3 text-sm text-zinc-400">
+					<a href="{{ url_for('modulos.detalle_modulo', nombre_modulo=post.modulo_nombre) }}"
+						class="text-cyan-400 hover:text-cyan-300"
+					>
+						{{ post.modulo_nombre }}
+					</a>
+					<span>/</span>
+					<span>Detalle del post</span>
+				</div>
+				
+				<div class="flex items-center justify-between gap-9 mt-3 text-sm text-zinc-400">
+					<h1 class="text-2xl font-bold text-white">
+						{{ post.titulo_post }}
+					</h1>
+					<span>{{ post.respuestas_count }} respuestas</span>
+					
+				</div>
+				{% if post.usuario and post.usuario.email_usuario %}
+					<div class="flex gap-2 items-center mt-2">
+						<span  class="text-sm text-zinc-300">Autor: </span>
+						<span class="text-center text-xs text-zinc-400">
+							{{ post.autor }}
+						</span>
+						<span class="h-1 w-1 rounded-full bg-zinc-400"></span>
+						<p class="text-sm text-zinc-400">{{ post.usuario.email_usuario }}</p>
+					</div>
+				{% endif %}
+				<p class="mt-5 text-zinc-300">{{ post.contenido_post }}</p>
+			</div>
+
+			<div class="flex h-full w-full flex-col justify-center border-l-[3px] border-cyan-300/30 pl-3">
+				<div class="mt-3 text-sm text-zinc-400">
+					{{ post.created_at.strftime('%d %b %Y') }}
+				</div>
+				<div class="mt-3 text-xs text-zinc-400">
+					{{ post.created_at.strftime('%H:%M') }}h
 				</div>
 			</div>
-			</div>
-		</div>
 		</div>
 	</div>
 
