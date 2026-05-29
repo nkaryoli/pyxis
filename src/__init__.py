@@ -47,6 +47,10 @@ def create_app():
     # Asegurar SameSite y HttpOnly por defecto para sesiones
     app.config.setdefault('SESSION_COOKIE_SAMESITE', 'Lax')
     app.config.setdefault('SESSION_COOKIE_HTTPONLY', True)
+
+    @app.before_request
+    def cargar_usuario_actual_request():
+        _cargar_usuario_actual()
     
     # Construimos la URL de conexión a la BD
     db_url = (

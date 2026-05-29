@@ -172,8 +172,9 @@ def post_respuesta(id_post):
         if page < 1:
             page = 1
             
-        per_page = 7
+        per_page = 10
         
+        edit_respuesta_id = request.args.get('edit_respuesta', type=int)
 
         todas_las_respuestas = RespuestaService.obtener_respuestas_de_post(id_post)
         
@@ -189,13 +190,24 @@ def post_respuesta(id_post):
         inicio = (page - 1) * per_page
         fin = inicio + per_page
         respuestas_paginadas = respuestas_ordenadas[inicio:fin]
+
+        edit_respuesta = None
+        if edit_respuesta_id:
+            posible_edicion = RespuestaService.obtener_por_id(edit_respuesta_id)
+            usuario_actual = getattr(g, 'current_user', None)
+            if posible_edicion and usuario_actual and (
+                posible_edicion.id_usuario == usuario_actual.id_usuario or
+                usuario_actual.rol in ['PROFESOR', 'ADMINISTRADOR']
+            ):
+                edit_respuesta = posible_edicion
         
         return render_template(
             'post_detail.html', 
             post=post_encontrado, 
             respuestas=respuestas_paginadas, 
             page=page,
-            total_pages=total_pages
+            total_pages=total_pages,
+            edit_respuesta=edit_respuesta
         )
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
