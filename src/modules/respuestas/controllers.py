@@ -1,8 +1,18 @@
+import os
+import uuid
 from flask import Blueprint, jsonify, request, redirect, url_for, g, flash
+from werkzeug.utils import secure_filename
 from src.services.respuesta_service import RespuestaService 
 from src.services.usuario_service import UsuarioService
 
 respuestas = Blueprint('respuestas', __name__)
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+RESPUESTA_UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'static', 'uploads', 'respuestas')
+ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif', '.webp'}
+
+def allowed_image(filename):
+    return '.' in filename and os.path.splitext(filename)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 @respuestas.route('/posts/<int:id_post>/publicar', methods=['POST'])
 def crear_respuesta_web(id_post):
@@ -26,12 +36,27 @@ def crear_respuesta_web(id_post):
     if not contenido or contenido.strip() == "":
         flash("La respuesta no puede estar vacía.")
         return redirect(url_for('posts.post_respuesta', id_post=id_post))
+
+    imagen_url = None
+    if 'imagen_respuesta' in request.files:
+        file = request.files['imagen_respuesta']
+        if file and file.filename != '':
+            if not allowed_image(file.filename):
+                flash("Solo se permiten imágenes PNG, JPG, JPEG, GIF o WEBP.")
+                return redirect(url_for('posts.post_respuesta', id_post=id_post))
+
+            filename = secure_filename(f"respuesta_{id_post}_{id_usuario}_{uuid.uuid4().hex}{os.path.splitext(file.filename)[1].lower()}")
+            os.makedirs(RESPUESTA_UPLOAD_FOLDER, exist_ok=True)
+            filepath = os.path.join(RESPUESTA_UPLOAD_FOLDER, filename)
+            file.save(filepath)
+            imagen_url = f"/static/uploads/respuestas/{filename}"
     
     try:
         RespuestaService.crear_respuesta(
             id_post=id_post,
             id_usuario=id_usuario,
-            contenido=contenido
+            contenido=contenido,
+            imagen=imagen_url
         )
         flash("Respuesta publicada con éxito.")
     except Exception as e:
@@ -57,8 +82,22 @@ def editar_respuesta_web(id_respuesta):
         flash("La respuesta no puede estar vacía.")
         return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post, edit_respuesta=id_respuesta))
 
+    imagen_url = None
+    if 'imagen_respuesta' in request.files:
+        file = request.files['imagen_respuesta']
+        if file and file.filename != '':
+            if not allowed_image(file.filename):
+                flash("Solo se permiten imágenes PNG, JPG, JPEG, GIF o WEBP.")
+                return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post, edit_respuesta=id_respuesta))
+
+            filename = secure_filename(f"respuesta_{respuesta.id_post}_{respuesta.id_usuario}_{uuid.uuid4().hex}{os.path.splitext(file.filename)[1].lower()}")
+            os.makedirs(RESPUESTA_UPLOAD_FOLDER, exist_ok=True)
+            filepath = os.path.join(RESPUESTA_UPLOAD_FOLDER, filename)
+            file.save(filepath)
+            imagen_url = f"/static/uploads/respuestas/{filename}"
+
     try:
-        RespuestaService.modificar_respuesta(id_respuesta, contenido=contenido)
+        RespuestaService.modificar_respuesta(id_respuesta, contenido=contenido, imagen=imagen_url)
         flash("Respuesta actualizada con éxito.")
     except Exception as e:
         flash(f"Error al actualizar: {str(e)}")
