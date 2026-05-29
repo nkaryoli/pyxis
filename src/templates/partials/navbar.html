@@ -46,10 +46,10 @@
 						</div>
 
 						<a
-							href="{{ url_for('usuarios.ver_perfil', id_usuario=current_user.id_usuario) }}"
+							href="{{ url_for('usuarios.dashboard') if current_user.rol in ['PROFESOR', 'ADMINISTRADOR'] else url_for('usuarios.ver_perfil', id_usuario=current_user.id_usuario) }}"
 							class="block px-4 py-3 text-sm text-zinc-200 transition hover:bg-zinc-900 hover:text-cyan-300"
 						>
-							Ver perfil
+							{{ 'Dashboard' if current_user.rol in ['PROFESOR', 'ADMINISTRADOR'] else 'Ver perfil' }}
 						</a>
 
 						<form action="{{ url_for('auth.logout') }}" method="POST">
