@@ -25,7 +25,14 @@ async function requestJson<T>(
 	const response = await fetch(url, requestInit);
 
 	if (!response.ok) {
-		throw new Error(`Request failed with status ${response.status}`);
+		let message = `Request failed with status ${response.status}`;
+		try {
+			const errBody = await response.json() as { error?: string };
+			if (errBody && errBody.error) {
+				message = errBody.error;
+			}
+		} catch {}
+		throw new Error(message);
 	}
 
 	return (await response.json()) as T;
