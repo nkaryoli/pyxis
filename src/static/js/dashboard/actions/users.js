@@ -16,12 +16,14 @@ form === null || form === void 0 ? void 0 : form.addEventListener('submit', (e) 
     const email = mInputEmail.value.trim();
     const password = mInputPassword.value;
     const rolUsuario = mInputRol.value;
+    const modulosSeleccionados = Array.from(form.querySelectorAll('input[name="modulos_seleccionados"]:checked')).map((cb) => cb.value);
     if (!email || !rolUsuario)
         return;
     if (id) {
         const payload = {
             email_usuario: email,
-            rol: rolUsuario
+            rol: rolUsuario,
+            modulos: modulosSeleccionados
         };
         const root = document.querySelector("[data-dashboard-root]");
         const solicitanteId = (_a = root === null || root === void 0 ? void 0 : root.dataset.userId) !== null && _a !== void 0 ? _a : "";
@@ -37,7 +39,12 @@ form === null || form === void 0 ? void 0 : form.addEventListener('submit', (e) 
             mInputPassword.required = true;
             return;
         }
-        void crearUsuario({ email_usuario: email, password_usuario: password, rol: rolUsuario })
+        void crearUsuario({
+            email_usuario: email,
+            password_usuario: password,
+            rol: rolUsuario,
+            modulos: modulosSeleccionados
+        })
             .then(() => {
             modal.close();
             location.reload();
@@ -50,6 +57,8 @@ export function handleUserAction(button, context) {
     if (action === "crear-usuario") {
         form.reset();
         mInputId.value = "";
+        const checkboxes = form.querySelectorAll('input[name="modulos_seleccionados"]');
+        checkboxes.forEach((cb) => cb.checked = false);
         passWrapper === null || passWrapper === void 0 ? void 0 : passWrapper.classList.remove("hidden");
         mInputPassword.required = true;
         mTxtTitulo.textContent = "Crear Nuevo Usuario";
@@ -71,6 +80,15 @@ export function handleUserAction(button, context) {
             mInputId.value = id;
             mInputEmail.value = user.email;
             mInputRol.value = user.rol;
+            const checkboxes = form.querySelectorAll('input[name="modulos_seleccionados"]');
+            checkboxes.forEach((cb) => cb.checked = false);
+            if (user.modulos && Array.isArray(user.modulos)) {
+                user.modulos.forEach((codigo) => {
+                    const cb = form.querySelector(`input[name="modulos_seleccionados"][value="${codigo}"]`);
+                    if (cb)
+                        cb.checked = true;
+                });
+            }
             passWrapper === null || passWrapper === void 0 ? void 0 : passWrapper.classList.add("hidden");
             mInputPassword.value = "";
             mInputPassword.required = false;

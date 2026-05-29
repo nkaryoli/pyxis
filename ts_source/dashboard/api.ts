@@ -78,6 +78,7 @@ export function crearUsuario(payload: {
 	email_usuario: string;
 	password_usuario: string;
 	rol: string;
+	modulos?: string[];
 }): Promise<unknown> {
 	return requestJson("/api/usuarios", {
 		method: "POST",
@@ -87,7 +88,7 @@ export function crearUsuario(payload: {
 
 export function actualizarUsuario(
 	idUsuario: string,
-	payload: Record<string, string>,
+	payload: Record<string, unknown>,
 	usuarioIdSolicitante: string,
 ): Promise<unknown> {
 	return requestJson(`/api/usuarios/${encodeURIComponent(idUsuario)}`, {
