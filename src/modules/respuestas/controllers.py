@@ -31,6 +31,84 @@ def crear_respuesta_web(id_post):
         
     return redirect(url_for('posts.post_respuesta', id_post=id_post))
 
+@respuestas.route('/respuestas/<int:id_respuesta>/editar', methods=['POST'])
+def editar_respuesta_web(id_respuesta):
+    contenido = request.form.get('contenido_respuesta')
+
+    usuario_actual = getattr(g, 'current_user', None)
+    respuesta = RespuestaService.obtener_por_id(id_respuesta)
+    if not usuario_actual or not respuesta:
+        flash("No tienes permiso para editar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if respuesta.id_usuario != usuario_actual.id_usuario and usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
+        flash("No tienes permiso para editar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
+    if not contenido or contenido.strip() == "":
+        flash("La respuesta no puede estar vacía.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post, edit_respuesta=id_respuesta))
+
+    try:
+        RespuestaService.modificar_respuesta(id_respuesta, contenido=contenido)
+        flash("Respuesta actualizada con éxito.")
+    except Exception as e:
+        flash(f"Error al actualizar: {str(e)}")
+
+    return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
+@respuestas.route('/respuestas/<int:id_respuesta>/eliminar', methods=['POST'])
+def eliminar_respuesta_web(id_respuesta):
+    usuario_actual = getattr(g, 'current_user', None)
+    respuesta = RespuestaService.obtener_por_id(id_respuesta)
+    if not usuario_actual or not respuesta:
+        flash("No tienes permiso para eliminar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if respuesta.id_usuario != usuario_actual.id_usuario and usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
+        flash("No tienes permiso para eliminar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
+    try:
+        RespuestaService.eliminar_respuesta(id_respuesta)
+        flash("Respuesta eliminada correctamente.")
+    except Exception as e:
+        flash(f"Error al eliminar: {str(e)}")
+
+    return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
+@respuestas.route('/respuestas/<int:id_respuesta>/validar', methods=['POST'])
+def validar_respuesta_web(id_respuesta):
+    usuario_actual = getattr(g, 'current_user', None)
+    respuesta = RespuestaService.obtener_por_id(id_respuesta)
+    if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
+        flash("No tienes permiso para validar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    try:
+        RespuestaService.modificar_respuesta(id_respuesta, es_mejor=1)
+        flash("Respuesta validada como Mejor Respuesta.")
+    except Exception as e:
+        flash(f"Error al validar: {str(e)}")
+
+    return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
+@respuestas.route('/respuestas/<int:id_respuesta>/desvalidar', methods=['POST'])
+def desvalidar_respuesta_web(id_respuesta):
+    usuario_actual = getattr(g, 'current_user', None)
+    respuesta = RespuestaService.obtener_por_id(id_respuesta)
+    if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
+        flash("No tienes permiso para desvalidar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    try:
+        RespuestaService.modificar_respuesta(id_respuesta, es_mejor=0)
+        flash("Respuesta desvalidada.")
+    except Exception as e:
+        flash(f"Error al desvalidar: {str(e)}")
+
+    return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
 @respuestas.route('/api/posts/<int:id_post>/respuestas', methods=['POST'])
 def crear_respuesta_api(id_post):
     datos = request.get_json()

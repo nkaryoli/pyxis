@@ -49,7 +49,7 @@
 
     <div class="space-y-4">
         {% for respuesta in respuestas %}
-        <div class="rounded-md border transition {{ 'border-emerald-500/40 bg-emerald-950/20' if respuesta.mejor else 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700' }} p-5">
+        <div class="rounded-xl border transition {{ 'border-emerald-500/40 bg-emerald-950/20 ring-2 ring-emerald-500/25 shadow-[0_0_20px_rgba(16,185,129,0.14)]' if respuesta.mejor else 'border-zinc-800 bg-zinc-900/40 hover:border-zinc-700' }} p-5">
             <div class="flex gap-4 items-start">
                 
                 <div class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-sm {{ 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400' if respuesta.mejor else 'bg-orange-600/20 border border-orange-500/40 text-orange-400' }}">
@@ -60,15 +60,15 @@
                     {% endif %}
                 </div>
                 
-                <div class="space-y-2 w-full">
-                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                <div class="space-y-3 w-full">
+                    <div class="flex items-start justify-between gap-4 flex-wrap">
                         <div class="text-xs text-zinc-500 uppercase tracking-wider">
                             Respondido por: <span class="font-semibold text-zinc-300">@{{ respuesta.autor }}</span>
                             <span class="mx-2">•</span>
                             <span>{{ respuesta.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
                         </div>
                         
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 flex-wrap">
                             {% if respuesta.mejor %}
                             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-500/20 shadow-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -76,9 +76,37 @@
                                 </svg> Mejor Respuesta
                             </span>
                             {% endif %}
+
+                            {% if current_user and (current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') and not respuesta.mejor %}
+                            <form action="{{ url_for('respuestas.validar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
+                                <button type="submit" class="text-xs font-semibold text-cyan-300 hover:text-cyan-200">Validar</button>
+                            </form>
+                            {% elif current_user and (current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') and respuesta.mejor %}
+                            <form action="{{ url_for('respuestas.desvalidar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
+                                <button type="submit" class="text-xs font-semibold text-emerald-300 hover:text-emerald-100">Desvalidar</button>
+                            </form>
+                            {% endif %}
+
+                            {% if current_user and (respuesta.id_usuario == current_user.id_usuario or current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') %}
+                            <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page, edit_respuesta=respuesta.id_respuesta) }}" class="text-xs font-semibold text-cyan-300 hover:text-cyan-200">Editar</a>
+                            <form action="{{ url_for('respuestas.eliminar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
+                                <button type="submit" class="text-xs font-semibold text-cyan-300 hover:text-cyan-200">Eliminar</button>
+                            </form>
+                            {% endif %}
                         </div>
                     </div>
+
+                    {% if edit_respuesta and edit_respuesta.id_respuesta == respuesta.id_respuesta %}
+                    <form action="{{ url_for('respuestas.editar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="space-y-3">
+                        <textarea name="contenido_respuesta" rows="4" required class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/15">{{ respuesta.contenido }}</textarea>
+                        <div class="flex flex-wrap gap-3">
+                            <button type="submit" class="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-cyan-400">Guardar</button>
+                            <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page) }}" class="rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:border-zinc-600 hover:text-white">Cancelar</a>
+                        </div>
+                    </form>
+                    {% else %}
                     <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{{ respuesta.contenido }}</p>
+                    {% endif %}
                 </div>
 
             </div>

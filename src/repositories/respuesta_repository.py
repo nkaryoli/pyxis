@@ -73,7 +73,7 @@ class RespuestaRepository:
             session.close()
 
     @staticmethod
-    def update(id_respuesta, contenido=None, imagen=None):
+    def update(id_respuesta, contenido=None, imagen=None, es_mejor=None):
         session = get_session()
         try:
             respuesta = session.query(Respuesta).filter_by(id_respuesta=id_respuesta).first()
@@ -85,6 +85,8 @@ class RespuestaRepository:
                 respuesta.contenido_respuesta = contenido
             if imagen is not None:
                 respuesta.imagen_respuesta = imagen # Ajusta a tu columna exacta del modelo si varía
+            if es_mejor is not None:
+                respuesta.es_mejor_respuesta = es_mejor
 
             session.commit()
             session.refresh(respuesta)
