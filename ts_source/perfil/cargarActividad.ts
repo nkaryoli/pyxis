@@ -1,4 +1,5 @@
 import { PostType } from "../types/perfil.interface";
+import { renderizarPaginador } from '../utils/paginacion.js';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -154,7 +155,16 @@ function renderizarNotificaciones(items: Item[], containerSelector: string) {
     const contenedor = document.getElementById(containerSelector);
     if (!contenedor) return;
     contenedor.innerHTML = '';
-    const notificacionesArray = items.filter(i => i.type === 'respuesta');
+    const normalizedNotifications = items.map((i: any) => ({
+        ...i,
+        type: i.type || 'respuesta',
+        id: i.id ?? i.id_respuesta,
+        titulo: i.titulo || i.titulo_post || i.contenido_respuesta || i.contenido || 'Notificación',
+        contenido: i.contenido || i.contenido_respuesta || '',
+        fecha: i.fecha || i.fecha_respuesta || '',
+        usuario_respondedor: i.usuario_respondedor || i.username_autor || i.autor || 'Usuario'
+    }));
+    const notificacionesArray = normalizedNotifications.filter(i => i.type === 'respuesta');
     
     if (notificacionesArray.length === 0) {
         contenedor.innerHTML = `<div class="text-center py-10 border border-dashed border-zinc-800 rounded-xl"><p class="text-zinc-500">No hay notificaciones.</p></div>`;
@@ -190,73 +200,119 @@ function renderizarNotificaciones(items: Item[], containerSelector: string) {
         element?.remove();
     };
 }
-export async function cargarActividad(idUsuario: number) {
+export async function cargarActividad(idUsuario: number, page: number = 1) {
     try {
         await cargarModulos();
-        const [postsRes, respRes, userRes] = await Promise.all([
-            fetch(`/api/usuarios/${idUsuario}/posts`).then(r => r.json()),
-            fetch(`/api/usuarios/${idUsuario}/respuestas`).then(r => r.json()),
+        
+        const [postsData, respData, notifData, userRes] = await Promise.all([
+            fetch(`/api/usuarios/${idUsuario}/posts?page=${page}`).then(r => r.json()),
+            fetch(`/api/usuarios/${idUsuario}/respuestas?page=${page}`).then(r => r.json()),
+            fetch(`/api/usuarios/${idUsuario}/notificaciones?page=${page}`).then(r => r.json()),
             fetch('/auth/me', { headers: { 'Accept': 'application/json' } }).then(r => r.json())
         ]);
-        
-        const postsItems: Item[] = postsRes.map((p: any) => {
-    // Ahora podemos ejecutar código antes del return
-        console.log("Post recibido de la API:", p); 
-    
-        return {
-            type: 'post', 
-            id: p.id_post, 
-            titulo: p.titulo_post, 
-            contenido: p.contenido_post,
+
+        const postsArray = Array.isArray(postsData) ? postsData : postsData.items || [];
+        const respArray = Array.isArray(respData) ? respData : respData.items || [];
+        const notifArray = Array.isArray(notifData) ? notifData : notifData.items || [];
+
+        const postsTotal = Array.isArray(postsData) ? 1 : (postsData.total_pages || 1);
+        const respTotal = Array.isArray(respData) ? 1 : (respData.total_pages || 1);
+        const notifTotal = Array.isArray(notifData) ? 1 : (notifData.total_pages || 1);
+
+        const postsItems: Item[] = postsArray.map((p: any) => ({
+            type: 'post', id: p.id_post, titulo: p.titulo_post || p.titulo || 'Post', contenido: p.contenido_post,
             fecha: p.fecha_creacion || p.fecha_creacion_post || p.created_at,
-            modulo: p.codigo_modulo, 
-            autor: userRes.username, 
-            respuestas_count: 0
-        };
-});
-        
+            modulo: p.codigo_modulo, autor: userRes.username, respuestas_count: p.respuestas_count || 0
+        }));
 
-        for (const item of postsItems) {
-            const r = await fetch(`/api/posts/${item.id}/respuestas`).then(res => res.json());
-            item.respuestas_count = r.length;
-        }
+        const respuestasItems: Item[] = respArray.map((r: any) => ({
+            type: 'respuesta', id: r.id_respuesta, titulo: r.titulo_post || r.contenido_respuesta || 'Respuesta',
+            contenido: r.contenido_respuesta, fecha: r.fecha_respuesta, id_post: r.id_post,
+            autor: userRes.username, modulo: r.codigo_modulo
+        }));
 
-        const respuestasItems: Item[] = [];
-        for (const r of respRes) {
-            const post = await fetch(`/api/posts/${r.id_post}`).then(res => res.json());
-            respuestasItems.push({
-                type: 'respuesta', id: r.id_respuesta, titulo: post.titulo_post, contenido: r.contenido_respuesta,
-                fecha: r.fecha_respuesta, id_post: r.id_post, autor: userRes.username, 
-                modulo: post.codigo_modulo
-            });
-        }
+        const notifItems: Item[] = notifArray.map((n: any) => ({
+            type: 'respuesta',
+            id: n.id ?? n.id_respuesta,
+            titulo: n.titulo || n.titulo_post || 'Respuesta',
+            contenido: n.contenido || n.contenido_respuesta || '',
+            fecha: n.fecha || n.fecha_respuesta || '',
+            id_post: n.id_post,
+            autor: n.usuario_respondedor || n.username_autor || userRes.username,
+            modulo: n.codigo_modulo
+        }));
 
-        const notifs: Item[] = [];
-        for (const post of postsRes) {
-            const resps = await fetch(`/api/posts/${post.id_post}/respuestas`).then(r => r.json());
-            for (const r of resps) {
-                if (r.id_usuario !== idUsuario) {
-                    notifs.push({ 
-                        type: 'respuesta', id: r.id_respuesta, titulo: post.titulo_post, 
-                        contenido: r.contenido_respuesta, fecha: r.fecha_respuesta, 
-                        id_post: post.id_post, usuario_respondedor: r.username_autor 
-                    });
-                }
-            }
-        }
-
-        renderizarNotificaciones(notifs, 'content-destacados');
         renderizarItems(postsItems, 'content-posts');
-        renderizarItems(respuestasItems, 'content-respuestas');
+        renderizarPaginador('content-posts', page, postsTotal, idUsuario);
 
-        
+        renderizarItems(respuestasItems, 'content-respuestas');
+        renderizarPaginador('content-respuestas', page, respTotal, idUsuario);
+
+        renderizarNotificaciones(notifItems, 'content-destacados');
+        renderizarPaginador('content-destacados', page, notifTotal, idUsuario);
 
     } catch (e) {
-        console.error(e);
+        console.error("Error al cargar actividad:", e);
         ['content-destacados', 'content-posts', 'content-respuestas'].forEach(s => {
             const c = document.getElementById(s);
             if (c) c.innerHTML = '<p class="text-red-500 text-center py-10">Error al cargar.</p>';
         });
     }
 }
+
+
+export async function cargarDatos(containerId: string, page: number, idUsuario: number): Promise<void> {
+    const contenedor = document.getElementById(containerId);
+    if (contenedor) contenedor.innerHTML = '<div class="text-center p-4">Cargando...</div>';
+
+    try {
+        let endpoint = '';
+        if (containerId === 'content-posts') endpoint = `/api/usuarios/${idUsuario}/posts?page=${page}`;
+        else if (containerId === 'content-respuestas') endpoint = `/api/usuarios/${idUsuario}/respuestas?page=${page}`;
+        else if (containerId === 'content-destacados') endpoint = `/api/usuarios/${idUsuario}/notificaciones?page=${page}`;
+
+        const response = await fetch(endpoint);
+        const data = await response.json();
+
+        const itemsArray = Array.isArray(data) ? data : data.items || [];
+        const totalPages = Array.isArray(data) ? 1 : (data.total_pages || 1);
+
+        let itemsRender: Item[] = [];
+        
+        if (containerId === 'content-posts') {
+            itemsRender = itemsArray.map((p: any) => ({
+                type: 'post', id: p.id_post, titulo: p.titulo_post || p.titulo || 'Post', contenido: p.contenido_post,
+                fecha: p.fecha_creacion || p.fecha_creacion_post || p.created_at,
+                modulo: p.codigo_modulo, respuestas_count: p.respuestas_count || 0
+            }));
+            renderizarItems(itemsRender, containerId);
+        } else if (containerId === 'content-respuestas') {
+            itemsRender = itemsArray.map((r: any) => ({
+                type: 'respuesta', id: r.id_respuesta, titulo: r.titulo_post || r.contenido_respuesta || 'Respuesta',
+                contenido: r.contenido_respuesta, fecha: r.fecha_respuesta, id_post: r.id_post, modulo: r.codigo_modulo
+            }));
+            renderizarItems(itemsRender, containerId);
+        } else {
+            const notifItems: Item[] = itemsArray.map((n: any) => ({
+                type: 'respuesta',
+                id: n.id ?? n.id_respuesta,
+                titulo: n.titulo || n.titulo_post || 'Respuesta',
+                contenido: n.contenido || n.contenido_respuesta || '',
+                fecha: n.fecha || n.fecha_respuesta || '',
+                id_post: n.id_post,
+                autor: n.usuario_respondedor || n.username_autor || 'Usuario',
+                modulo: n.codigo_modulo
+            }));
+            renderizarNotificaciones(notifItems, containerId);
+        }
+
+        renderizarPaginador(containerId, page, totalPages, idUsuario);
+    } catch (error) {
+        console.error("Error al paginar:", error);
+        if (contenedor) contenedor.innerHTML = '<p class="text-red-500">Error al cargar.</p>';
+    }
+}
+
+(window as any).cargarDatos = cargarDatos;
+(window as any).cargarActividad = cargarActividad;
 

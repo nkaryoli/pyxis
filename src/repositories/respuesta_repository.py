@@ -97,3 +97,25 @@ class RespuestaRepository:
             raise e
         finally:
             session.close()
+    
+    
+    @staticmethod
+    def get_by_user_paginated(id_usuario, limit, offset):
+        session = get_session()
+        try:
+            # Ordenamos por fecha de respuesta, asumiendo que el campo existe
+            respuestas = session.query(Respuesta).filter_by(id_usuario=id_usuario)\
+                .order_by(Respuesta.fecha_respuesta.desc())\
+                .limit(limit).offset(offset).all()
+            session.expunge_all()
+            return respuestas
+        finally:
+            session.close()
+
+    @staticmethod
+    def count_by_user(id_usuario):
+        session = get_session()
+        try:
+            return session.query(Respuesta).filter_by(id_usuario=id_usuario).count()
+        finally:
+            session.close()

@@ -3,6 +3,7 @@ from src.modules.auth.controllers import _wants_json
 from src.services.auth_service import AuthService
 from src.services.post_service import PostService
 from src.services.respuesta_service import RespuestaService
+from src.services.usuario_service import UsuarioService
 import math
 
 posts = Blueprint('posts', __name__, template_folder='templates')
@@ -62,8 +63,14 @@ def ver_post_por_id_api(id_post):
 @posts.route('/api/usuarios/<int:id_usuario>/posts', methods=['GET'])
 def ver_posts_usuario_api(id_usuario):
     try:
-        lista = PostService.ver_posts_por_usuario(id_usuario)
-        return jsonify([p.to_dict() for p in lista]), 200
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+        items, total_pages = UsuarioService.obtener_posts_paginados(id_usuario, page)
+        return jsonify({
+            'items': items,
+            'total_pages': total_pages
+        }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     

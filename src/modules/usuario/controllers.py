@@ -107,3 +107,41 @@ def modificar_usuario(id_usuario):
         return jsonify({'mensaje': 'Actualización realizada correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 403
+    
+    
+    
+@usuarios_bp.route('/api/usuarios/<int:id_usuario>/posts', methods=['GET'])
+def get_posts_api(id_usuario):
+    page = request.args.get('page', 1, type=int)
+    # Llama al servicio que ya actualizaste
+    items, total_pages = UsuarioService.obtener_posts_paginados(id_usuario, page)
+    
+    return jsonify({
+        'items': items,
+        'total_pages': total_pages
+    })
+    
+    
+@usuarios_bp.route('/api/usuarios/<int:id_usuario>/respuestas', methods=['GET'])
+def get_respuestas_api(id_usuario):
+    page = request.args.get('page', 1, type=int)
+    # Usamos el servicio que ya tienes en UsuarioService
+    items, total_pages = UsuarioService.obtener_respuestas_paginadas(id_usuario, page)
+    
+    return jsonify({
+        'items': items,
+        'total_pages': total_pages
+    })
+    
+    
+@usuarios_bp.route('/api/usuarios/<int:id_usuario>/notificaciones', methods=['GET'])
+def get_notificaciones_api(id_usuario):
+    page = request.args.get('page', 1, type=int)
+    if page < 1:
+        page = 1
+
+    items, total_pages = UsuarioService.obtener_notificaciones_paginadas(id_usuario, page)
+    return jsonify({
+        'items': items,
+        'total_pages': total_pages
+    }), 200
