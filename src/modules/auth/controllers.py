@@ -4,6 +4,13 @@ from src.services.auth_service import AuthService
 
 auth = Blueprint('auth', __name__, template_folder='templates')
 
+
+def _url_destino_post_login(usuario):
+	"""Devuelve la URL de aterrizaje tras el login según el rol del usuario."""
+	if getattr(usuario, 'rol', '').upper() in ('PROFESOR', 'ADMINISTRADOR'):
+		return url_for('usuarios.dashboard')
+	return url_for('usuarios.ver_perfil', id_usuario=usuario.id_usuario)
+
 def _extraer_datos_request():
 	"""Obtiene los datos de la petición como JSON o como formulario HTML."""
 	datos = request.get_json(silent=True)
@@ -52,7 +59,7 @@ def me():
 		return jsonify(respuesta), 200
 
 	# Para navegación web, redirigimos al perfil público/privado
-	return redirect(url_for('usuarios.ver_perfil', id_usuario=usuario.id_usuario))
+	return redirect(_url_destino_post_login(usuario))
 
 @auth.route('/auth/register', methods=['GET', 'POST'])
 def register():
@@ -114,7 +121,7 @@ def login():
 		if _wants_json():
 			return _crear_respuesta_con_token(jsonify(respuesta), 200, token)
 
-		response = redirect(url_for('usuarios.ver_perfil', id_usuario=usuario.id_usuario))
+		response = redirect(_url_destino_post_login(usuario))
 		response.set_cookie(
 			'auth_token',
 			token,
