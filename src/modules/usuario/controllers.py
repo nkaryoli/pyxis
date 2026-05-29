@@ -1,8 +1,11 @@
 import os
-from flask import Blueprint, render_template, jsonify, request, g, current_app
+from flask import Blueprint, render_template, jsonify, request, g, current_app, url_for
 from werkzeug.utils import secure_filename
 from src.services.usuario_service import UsuarioService
 from src.services.auth_service import AuthService
+from src.services.modulo_service import ModuloService
+from src.services.post_service import PostService
+from src.services.tokens_service import TokensService
 
 usuarios_bp = Blueprint('usuarios', __name__, template_folder='templates')
 
@@ -31,12 +34,129 @@ def ver_perfil(id_usuario):
         
         if not usuario:
             return render_template('404.html', mensaje="Usuario no encontrado"), 404
-            
-       
+
         return render_template('perfil.html', usuario=usuario, post=posts)
         
     except Exception as e:
         return render_template('errors/error.html', error=str(e))
+
+
+@usuarios_bp.route('/dashboard', methods=['GET'])
+@AuthService.token_required
+def dashboard():
+    usuario_actual = getattr(g, 'current_user', None)
+    if not usuario_actual:
+        return render_template('errors/401.html'), 401
+
+    rol = (usuario_actual.rol or '').upper()
+    if rol not in ['PROFESOR', 'ADMINISTRADOR']:
+        return render_template('errors/403.html'), 403
+
+    modulos = ModuloService.obtener_todos_los_modulos()
+    usuarios = UsuarioService.obtener_todos_los_usuarios()
+    posts = PostService.listar_todos()
+    tokens = TokensService.obtener_todos_los_tokens()
+
+    if rol == 'ADMINISTRADOR':
+        accesos_rapidos = [
+            {
+                'titulo': 'Control administrativo',
+                'descripcion': 'Bajar directamente al bloque de supervisión global.',
+                'enlace': url_for('usuarios.dashboard') + '#control-administrativo',
+            },
+            {
+                'titulo': 'Gestionar usuarios',
+                'descripcion': 'Revisar perfiles y controlar permisos.',
+                'enlace': url_for('usuarios.ver_perfil', id_usuario=usuario_actual.id_usuario),
+            },
+            {
+                'titulo': 'Ver módulos',
+                'descripcion': 'Inspeccionar el catálogo completo de módulos.',
+                'enlace': url_for('modulos.listar_modulos'),
+            },
+        ]
+    else:
+        accesos_rapidos = [
+            {
+                'titulo': 'Gestionar módulos',
+                'descripcion': 'Crear, editar y revisar módulos activos.',
+                'enlace': url_for('modulos.listar_modulos'),
+            },
+            {
+                'titulo': 'Ver posts recientes',
+                'descripcion': 'Detectar preguntas activas y participar rápido.',
+                'enlace': url_for('posts.destacados_page'),
+            },
+            {
+                'titulo': 'Abrir perfil',
+                'descripcion': 'Actualizar tu foto y revisar tu actividad.',
+                'enlace': url_for('usuarios.ver_perfil', id_usuario=usuario_actual.id_usuario),
+            },
+        ]
+
+    resumen = {
+        'modulos': len(modulos),
+        'posts': len(posts),
+        'tokens': len(tokens),
+    }
+
+    return render_template(
+        'dashboard.html',
+        usuario=usuario_actual,
+        rol=rol,
+        resumen=resumen,
+        accesos_rapidos=accesos_rapidos,
+        modulos=modulos,
+        usuarios=usuarios,
+        posts=posts,
+        tokens=tokens[:6],
+    )
+
+
+@usuarios_bp.route('/api/usuarios', methods=['POST'])
+@AuthService.token_required
+def crear_usuario_api():
+    usuario_actual = getattr(g, 'current_user', None)
+    rol = (usuario_actual.rol or '').upper() if usuario_actual else ''
+    if rol != 'ADMINISTRADOR':
+        return jsonify({'error': 'No tienes permisos para crear usuarios'}), 403
+
+    datos = request.get_json(silent=True) or {}
+    try:
+        usuario = AuthService.registrar_usuario_con_rol(datos, datos.get('rol', 'ALUMNO'))
+        return jsonify({
+            'mensaje': 'Usuario creado correctamente',
+            'usuario': {
+                'id_usuario': usuario.id_usuario,
+                'username': usuario.username,
+                'email_usuario': usuario.email_usuario,
+                'rol': usuario.rol,
+                'tokens': usuario.tokens,
+            }
+        }), 201
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@usuarios_bp.route('/api/usuarios/<int:id_usuario>', methods=['DELETE'])
+@AuthService.token_required
+def eliminar_usuario_api(id_usuario):
+    usuario_actual = getattr(g, 'current_user', None)
+    rol = (usuario_actual.rol or '').upper() if usuario_actual else ''
+    if rol != 'ADMINISTRADOR':
+        return jsonify({'error': 'No tienes permisos para eliminar usuarios'}), 403
+
+    try:
+        eliminado = UsuarioService.eliminar_usuario(id_usuario, rol)
+        if not eliminado:
+            return jsonify({'error': f'No se encontró ningún usuario con el ID {id_usuario}'}), 404
+        return jsonify({'mensaje': f'Usuario {id_usuario} eliminado correctamente'}), 200
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 ### Endpoints de API (Backend)
 

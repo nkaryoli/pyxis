@@ -36,6 +36,11 @@ class AuthService:
     @classmethod
     def registrar_usuario(cls, datos):
         """Valida los datos y crea un usuario nuevo con contraseña hasheada."""
+        return cls.registrar_usuario_con_rol(datos, cls.ROL_POR_DEFECTO)
+
+    @classmethod
+    def registrar_usuario_con_rol(cls, datos, rol):
+        """Crea un usuario permitiendo definir el rol explícitamente."""
         email = cls._normalizar_email(datos.get('email_usuario') or datos.get('email'))
         password = datos.get('password_usuario') or datos.get('password')
         confirmacion = datos.get('confirm_password_usuario') or datos.get('confirm_password')
@@ -54,8 +59,9 @@ class AuthService:
 
         username = cls._generar_username(email)
         password_hash = generate_password_hash(password)
+        rol_normalizado = (rol or cls.ROL_POR_DEFECTO).upper()
 
-        return UsuarioRepository.create(username, email, password_hash, cls.ROL_POR_DEFECTO)
+        return UsuarioRepository.create(username, email, password_hash, rol_normalizado)
 
     @classmethod
     def autenticar_usuario(cls, datos):

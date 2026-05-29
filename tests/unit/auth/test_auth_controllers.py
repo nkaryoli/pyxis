@@ -73,6 +73,98 @@ def test_login_post_html_redirige_y_setea_cookie(client, monkeypatch):
     assert "/perfil" in response.headers.get("Location", "") or "usuario" in response.headers.get("Location", "")
 
 
+def test_login_post_html_redirige_a_dashboard_para_profesor(client, monkeypatch):
+    """Comprueba que el login de profesor redirige al dashboard compartido."""
+
+    usuario = SimpleNamespace(
+        id_usuario=44,
+        username="profesor",
+        email_usuario="profesor@monlau.com",
+        rol="PROFESOR",
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.autenticar_usuario",
+        lambda datos: {"usuario": usuario, "token": "token-profesor"},
+    )
+
+    response = client.post(
+        "/auth/login",
+        data={
+            "email": "profesor@monlau.com",
+            "password": "Secreta123",
+        },
+    )
+
+    assert response.status_code in (301, 302)
+    assert "auth_token=token-profesor" in response.headers.get("Set-Cookie", "")
+    assert "/dashboard" in response.headers.get("Location", "")
+
+
+def test_me_get_html_redirige_a_dashboard_para_profesor(client, monkeypatch):
+    """Comprueba que /auth/me en modo HTML redirige al dashboard para profesor."""
+
+    usuario = SimpleNamespace(
+        id_usuario=44,
+        username="profesor",
+        email_usuario="profesor@monlau.com",
+        rol="PROFESOR",
+        tokens=120,
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.validar_token",
+        lambda token, max_age=86400: {
+            "id_usuario": 44,
+            "email_usuario": "profesor@monlau.com",
+            "rol": "PROFESOR",
+        },
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_id",
+        lambda id_usuario: usuario,
+    )
+
+    client.set_cookie("auth_token", "token-prueba")
+    response = client.get("/auth/me")
+
+    assert response.status_code in (301, 302)
+    assert "/dashboard" in response.headers.get("Location", "")
+
+
+def test_me_get_html_redirige_a_dashboard_para_administrador(client, monkeypatch):
+    """Comprueba que /auth/me en modo HTML redirige al dashboard para administrador."""
+
+    usuario = SimpleNamespace(
+        id_usuario=55,
+        username="admin",
+        email_usuario="admin@monlau.com",
+        rol="ADMINISTRADOR",
+        tokens=220,
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.AuthService.validar_token",
+        lambda token, max_age=86400: {
+            "id_usuario": 55,
+            "email_usuario": "admin@monlau.com",
+            "rol": "ADMINISTRADOR",
+        },
+    )
+
+    monkeypatch.setattr(
+        "src.services.auth_service.UsuarioRepository.get_by_id",
+        lambda id_usuario: usuario,
+    )
+
+    client.set_cookie("auth_token", "token-admin")
+    response = client.get("/auth/me")
+
+    assert response.status_code in (301, 302)
+    assert "/dashboard" in response.headers.get("Location", "")
+
+
 # =========================================================
 # ....................... REGISTER ........................
 # =========================================================
