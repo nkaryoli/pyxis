@@ -3,6 +3,15 @@ from src.models.usuario import Usuario
 
 class UsuarioRepository:
     """Repositorio para operaciones CRUD de la tabla USUARIOS."""
+
+    @staticmethod
+    def get_all():
+        """Obtiene todos los usuarios de la base de datos."""
+        session = get_session()
+        try:
+            return session.query(Usuario).order_by(Usuario.id_usuario.asc()).all()
+        finally:
+            session.close()
     
     @staticmethod
     def get_by_id(id_usuario):
