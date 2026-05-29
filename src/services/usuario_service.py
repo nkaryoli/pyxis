@@ -79,7 +79,7 @@ class UsuarioService:
 
         elif solicitante.rol in ['PROFESOR', 'ADMINISTRADOR']:           
             campos_prohibidos = ['id_usuario', 'fecha_alta', 'password_usuario']
-            datos_filtrados = {k: v for k, v in datos.items() if k not in campos_prohibidos}                
+            datos_filtrados = {k: v for k, v in datos.items() if k not in campos_prohibidos and k != 'modulos'}                
             
             nuevo_email = datos_filtrados.get('email_usuario')
             if nuevo_email and nuevo_email != destino.email_usuario:
@@ -95,10 +95,29 @@ class UsuarioService:
                 parte_local = nuevo_email_lower.split('@', 1)[0]
                 datos_filtrados['username'] = parte_local[:-6] if len(parte_local) > 6 else parte_local            
         
-        if not datos_filtrados:
+        codigos_modulos = datos.get('modulos')
+
+        if not datos_filtrados and codigos_modulos is None:
             raise ValueError("No se han proporcionado datos válidos para actualizar.")
             
-        return UsuarioRepository.update(id_usuario_destino, datos_filtrados)
+        if codigos_modulos is not None:
+            from src.repositories.matricula_repository import MatriculaRepository
+            from datetime import datetime, timedelta
+            MatriculaRepository.delete_all_by_usuario_id(id_usuario_destino)
+            fecha_inicio = datetime.now()
+            fecha_final = fecha_inicio + timedelta(days=365)
+            for cod in codigos_modulos:
+                if cod and str(cod).strip():
+                    MatriculaRepository.create(
+                        id_usuario=id_usuario_destino,
+                        codigo_modulo=str(cod).strip(),
+                        fecha_inicio=fecha_inicio,
+                        fecha_final=fecha_final
+                    )
+
+        if datos_filtrados:
+            return UsuarioRepository.update(id_usuario_destino, datos_filtrados)
+        return destino
 
     @staticmethod
     def eliminar_usuario(id_usuario, usuario_rol):

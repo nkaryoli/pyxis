@@ -149,6 +149,20 @@ def crear_usuario_api():
     datos = request.get_json(silent=True) or {}
     try:
         usuario = AuthService.registrar_usuario_con_rol(datos, datos.get('rol', 'ALUMNO'))
+        codigos_modulos = datos.get('modulos')
+        if codigos_modulos and isinstance(codigos_modulos, list):
+            from src.repositories.matricula_repository import MatriculaRepository
+            from datetime import datetime, timedelta
+            fecha_inicio = datetime.now()
+            fecha_final = fecha_inicio + timedelta(days=365)
+            for cod in codigos_modulos:
+                if cod and str(cod).strip():
+                    MatriculaRepository.create(
+                        id_usuario=usuario.id_usuario,
+                        codigo_modulo=str(cod).strip(),
+                        fecha_inicio=fecha_inicio,
+                        fecha_final=fecha_final
+                    )
         return jsonify({
             'mensaje': 'Usuario creado correctamente',
             'usuario': {
@@ -249,13 +263,16 @@ def get_info_usuario(id_usuario):
         JSON: Atributos básicos (email, username, rol, tokens) del usuario (200), o error (500).
     """
     try:        
+        from src.repositories.matricula_repository import MatriculaRepository
         usuario, _ = UsuarioService.obtener_usuario_por_id(id_usuario)
+        matriculas = MatriculaRepository.get_by_usuario_id(id_usuario)
         return jsonify({
             'id_usuario': usuario.id_usuario,
             'username': usuario.username,
             'email': usuario.email_usuario,
             'rol': usuario.rol,
-            'tokens': usuario.tokens
+            'tokens': usuario.tokens,
+            'modulos': [m.codigo_modulo for m in matriculas]
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
