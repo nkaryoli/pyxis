@@ -15,11 +15,11 @@ def crear_respuesta_web(id_post):
         return redirect(url_for('auth.login'))
 
     id_usuario = usuario_actual.id_usuario
-    
+    contenido = request.form.get('contenido_respuesta')
     # Verificar matriculación antes de crear la respuesta
     from src.services.post_service import PostService
     post = PostService.obtener_por_id(id_post)
-    if post and post.codigo_modulo and not UsuarioService.esta_matriculado(id_usuario, post.codigo_modulo):
+    if post and post.codigo_modulo and not UsuarioService.esta_matriculado(usuario_actual, post.codigo_modulo):
         flash("No estás matriculado en el módulo de este post. Solo puedes responder en posts de módulos donde estés matriculado.")
         return redirect(url_for('posts.post_respuesta', id_post=id_post))
 
