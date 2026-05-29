@@ -10,6 +10,11 @@ class UsuarioService:
     """Servicio de lógica de negocio para la gestión de Usuarios."""
 
     @staticmethod
+    def obtener_todos_los_usuarios():
+        """Devuelve todos los usuarios para vistas de administración."""
+        return UsuarioRepository.get_all()
+
+    @staticmethod
     def obtener_usuario_por_id(id_usuario):
         """Busca un usuario y lanza error si no existe."""
         # Cambio: Validamos que id_usuario no sea None antes de ir al Repository
