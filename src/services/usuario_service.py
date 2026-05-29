@@ -2,6 +2,7 @@ from src.repositories.usuario_repository import UsuarioRepository
 from src.services.post_service import PostService
 from src.repositories.respuesta_repository import RespuestaRepository
 from src.repositories.post_repository import PostRepository
+from src.repositories.matricula_repository import MatriculaRepository
 from math import ceil
 
 ITEMS_PER_PAGE = 5
@@ -147,3 +148,16 @@ class UsuarioService:
 
         inicio = (page - 1) * per_page
         return notificaciones[inicio:inicio + per_page], total_pages
+    
+    @staticmethod
+    def esta_matriculado(usuario, codigo_modulo):
+        if usuario.rol in ['ADMINISTRADOR', 'PROFESOR']:
+            return True
+        return MatriculaRepository.verificar_matricula(usuario.id_usuario, codigo_modulo)
+
+    @staticmethod
+    def obtener_modulos_usuario(usuario):
+        return MatriculaRepository.get_modulos_para_usuario(usuario)
+    
+    
+    

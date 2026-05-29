@@ -15,6 +15,13 @@ def crear_respuesta_web(id_post):
         return redirect(url_for('auth.login'))
 
     id_usuario = usuario_actual.id_usuario
+    contenido = request.form.get('contenido_respuesta')
+    # Verificar matriculación antes de crear la respuesta
+    from src.services.post_service import PostService
+    post = PostService.obtener_por_id(id_post)
+    if post and post.codigo_modulo and not UsuarioService.esta_matriculado(usuario_actual, post.codigo_modulo):
+        flash("No estás matriculado en el módulo de este post. Solo puedes responder en posts de módulos donde estés matriculado.")
+        return redirect(url_for('posts.post_respuesta', id_post=id_post))
 
     if not contenido or contenido.strip() == "":
         flash("La respuesta no puede estar vacía.")
@@ -115,11 +122,23 @@ def crear_respuesta_api(id_post):
     datos = request.get_json()
     if not datos or 'contenido_respuesta' not in datos or 'id_usuario' not in datos:
         return jsonify({"error": "Faltan campos obligatorios"}), 400
-        
+    
     try:
+        from src.services.post_service import PostService
+        id_usuario = datos['id_usuario']
+        
+        # Obtener el post para verificar su módulo
+        post = PostService.obtener_por_id(id_post)
+        if not post:
+            return jsonify({"error": "El post no existe"}), 404
+        
+        # Validar que el usuario esté matriculado en el módulo del post
+        if post.codigo_modulo and not UsuarioService.esta_matriculado(id_usuario, post.codigo_modulo):
+            return jsonify({"error": "No estás matriculado en el módulo de este post. Solo puedes responder en posts de módulos donde estés matriculado."}), 403
+        
         nueva = RespuestaService.crear_respuesta(
             id_post=id_post,
-            id_usuario=datos['id_usuario'],
+            id_usuario=id_usuario,
             contenido=datos['contenido_respuesta']
         )
         return jsonify({"mensaje": "Respuesta creada", "respuesta": nueva.to_dict()}), 201

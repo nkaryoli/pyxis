@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Base class para todos los modelos
@@ -25,8 +25,15 @@ def init_db(database_url):
     # Crear la sesión
     Session = sessionmaker(bind=engine)
     
-    # Crear todas las tablas definidas en los modelos
-    Base.metadata.create_all(engine)
+    # NOTA: No usamos create_all() porque causa circular imports.
+    # El esquema de BD ya existe (ver sql/BBDD.sql)
+    # Esta línea solo verifica que la conexión sea válida
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        print("✓ Conexión a base de datos exitosa")
+    except Exception as e:
+        print(f"✗ Error de conexión: {e}")
 
 
 def get_session():

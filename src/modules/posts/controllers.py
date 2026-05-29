@@ -33,12 +33,18 @@ def listar_todos_api():
 def crear_post_api():
     try:
         data = request.get_json() 
+        id_usuario = data.get('id_usuario')
+        codigo_modulo = data.get('codigo_modulo')
+        
+        # Validar que el usuario esté matriculado en el módulo
+        if codigo_modulo and not UsuarioService.esta_matriculado(id_usuario, codigo_modulo):
+            return jsonify({"error": "No estás matriculado en este módulo. Solo puedes hacer posts en módulos donde estés matriculado."}), 403
         
         nuevo_post = PostService.crear_post(
             titulo=data.get('titulo_post'),
             contenido=data.get('contenido_post'),
-            id_usuario=data.get('id_usuario'),
-            codigo_modulo=data.get('codigo_modulo'),
+            id_usuario=id_usuario,
+            codigo_modulo=codigo_modulo,
             imagen=data.get('imagen_post')
         )
         return jsonify(nuevo_post.to_dict()), 201
@@ -156,8 +162,6 @@ def posts_por_modulo():
         return render_template('errors/error.html', error=str(e)), 500
  
  
-import math
-from flask import render_template, request
 
 @posts.route('/posts/<int:id_post>', methods=['GET'])
 def post_respuesta(id_post):
@@ -290,7 +294,13 @@ def crear_post():
             return jsonify({'error': 'No autenticado'}), 401
         return redirect(url_for('auth.login'))
     
-    lista_modulos = PostService.obtener_todos_los_modulos()
+    lista_modulos = UsuarioService.obtener_modulos_usuario(usuario)
+    
+    if request.method == 'POST':
+        codigo_modulo = request.form.get('codigo_modulo')
+        
+        if not UsuarioService.esta_matriculado(usuario, codigo_modulo):
+            return "Acceso denegado: No estás matriculado en este módulo.", 403
 
     if request.method == 'GET':
         return render_template('question_form.html', usuario=usuario, modulos=lista_modulos)
