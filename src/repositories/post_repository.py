@@ -156,5 +156,27 @@ class PostRepository:
 
         finally:
             session.close()
+            
+            
+            
+    @staticmethod
+    def get_by_user_paginated(id_usuario, limit, offset):
+        session = get_session()
+        try:
+            posts = session.query(Post).filter_by(id_usuario=id_usuario)\
+                .order_by(Post.fecha_creacion_post.desc())\
+                .limit(limit).offset(offset).all()
+            session.expunge_all()
+            return posts
+        finally:
+            session.close()
+
+    @staticmethod
+    def count_by_user(id_usuario):
+        session = get_session()
+        try:
+            return session.query(Post).filter_by(id_usuario=id_usuario).count()
+        finally:
+            session.close()
     
     

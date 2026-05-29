@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.services.respuesta_service import RespuestaService 
+from src.services.usuario_service import UsuarioService
 
 respuestas = Blueprint('respuestas', __name__)
 
@@ -39,8 +40,14 @@ def listar_respuestas_post_api(id_post):
 @respuestas.route('/api/usuarios/<int:id_usuario>/respuestas', methods=['GET'])
 def ver_respuestas_usuario_api(id_usuario):
     try:
-        lista = RespuestaService.obtener_respuestas_de_usuario(id_usuario)
-        return jsonify([r.to_dict() for r in lista]), 200
+        page = request.args.get('page', 1, type=int)
+        if page < 1:
+            page = 1
+        items, total_pages = UsuarioService.obtener_respuestas_paginadas(id_usuario, page)
+        return jsonify({
+            'items': items,
+            'total_pages': total_pages
+        }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
