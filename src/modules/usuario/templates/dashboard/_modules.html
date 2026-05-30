@@ -7,7 +7,7 @@
 				<p class="text-sm text-zinc-400 w-full">Listado completo de módulos disponibles.</p>
 			</div>
 			<div class="w-full flex items-center justify-end ">
-				<button class="rounded bg-amber-600 px-3 py-2 text-sm font-medium text-white action-btn" data-action="crear-modulo">Crear módulo</button>
+				<button class="rounded bg-amber-600 px-3 py-2 text-sm font-medium text-white action-btn cursor-pointer" data-action="crear-modulo">Crear módulo</button>
 			</div>
 		</div>
 		{% endif %}
@@ -16,13 +16,13 @@
 			<thead class="text-zinc-400">
 				<tr>
 					{% if rol == 'ADMINISTRADOR' %}
-						<th class="py-3 pr-4 font-medium">Código</th>
+						<th class="py-3 px-3 font-medium">Código</th>
 					{% endif %}
-					<th class="py-3 pr-4 font-medium">Asignatura</th>
-					<th class="py-3 pr-4 font-medium w-20 text-center">Curso</th>
-					<th class="py-3 pr-4 font-medium w-24 text-center">Alumnos</th>
+					<th class="py-3 px-3 font-medium">Asignatura</th>
+					<th class="py-3 pr-3 font-medium w-20 text-center">Curso</th>
+					<th class="py-3 pr-3 font-medium w-24 text-center">Alumnos</th>
 					{% if rol == 'ADMINISTRADOR' %}
-						<th class="py-3 text-right font-medium">Acciones</th>
+						<th class="py-3 pr-3 text-right font-medium">Acciones</th>
 					{% endif %}
 				</tr>
 			</thead>
@@ -30,16 +30,16 @@
 				{% for modulo in modulos %}
 				<tr class="hover:bg-zinc-900/40">
 					{% if rol == 'ADMINISTRADOR' %}
-						<td class="py-3 pr-4 font-mono text-xs text-cyan-300">{{ modulo.codigo_modulo }}</td>
+						<td class="py-3 px-4 font-mono text-xs text-cyan-300">{{ modulo.codigo_modulo }}</td>
 					{% endif %}
-					<td class="py-3 pr-4">{{ modulo.nombre_asignatura }}</td>
-					<td class="py-3 pr-4 text-zinc-400 w-20 text-center">{{ modulo.curso_modulo }}</td>
-					<td class="py-3 pr-4 w-24 flex justify-center">{{ modulo.alumnos_count }}</td>
+					<td class="py-3 px-3">{{ modulo.nombre_asignatura }}</td>
+					<td class="py-3 pr-3 text-zinc-400 w-20 text-center">{{ modulo.curso_modulo }}</td>
+					<td class="py-3 pr-3 w-24 flex justify-center">{{ modulo.alumnos_count }}</td>
 					{% if rol == 'ADMINISTRADOR' %}
-					<td class="py-3 text-right">
+					<td class="py-3 pr-3 text-right">
 						<details class="relative inline-block text-left">
-						<summary class="list-none cursor-pointer rounded-sm bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-400  hover:bg-cyan-500/20 border border-cyan-500/20">Acciones</summary>
-						<div class="absolute right-0 z-10 mt-2 w-40 rounded border border-zinc-800 bg-zinc-950 p-1 shadow-lg shadow-black/40">
+						<summary class="list-none cursor-pointer rounded-sm bg-zinc-500/5 px-3 py-2 text-xs font-medium text-cyan-500 hover:text-cyan-300 hover:border-cyan-500/70 border border-cyan-500/20">Acciones</summary>
+						<div class="absolute right-0 z-10 mt-2 w-32 rounded border border-cyan-500/20 bg-zinc-950 p-1 shadow-lg shadow-black/40">
 							<button class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn" data-action="editar-modulo" data-codigo="{{ modulo.codigo_modulo }}">Editar</button>
 							<button class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn" data-action="ver-alumnos-modulo" data-codigo="{{ modulo.codigo_modulo }}" data-nombre="{{ modulo.nombre_asignatura }}">Ver alumnos</button>
 							<button class="w-full rounded px-3 py-2 text-left text-xs text-red-500 hover:text-red-500 hover:bg-red-500/10 action-btn" data-action="eliminar-modulo" data-codigo="{{ modulo.codigo_modulo }}">Eliminar</button>
