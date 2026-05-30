@@ -6,6 +6,9 @@ block page_content %}
 	{% include 'dashboard/_modules.html' %} 
 	{% include 'dashboard/_users.html' %} 
 	{% include 'dashboard/_posts.html' %} 
+	{% include 'dashboard/modal/_modal_usuarios.html' %} 
+	{% include 'dashboard/modal/_modal_modulos.html' %} 
+	{% include 'dashboard/modal/_modal_posts.html' %} 
 </section>
 
 <script type="module" src="{{ url_for('static', filename='js/dashboard/index.js') }}"></script>

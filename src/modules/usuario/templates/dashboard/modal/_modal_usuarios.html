@@ -1,0 +1,56 @@
+<dialog id="modal-usuario" class="fixed inset-0 m-auto w-full max-w-lg rounded-lg border border-white/10 bg-zinc-950/95 p-8 shadow-2xl shadow-black/40 backdrop:bg-black/60 backdrop:backdrop-blur-sm outline-none">
+	<form method="dialog" id="form-usuario" class="space-y-4">
+		<input type="hidden" id="modal-user-id" />
+		
+		<div class="mb-6 ">
+			<h2 id="modal-titulo" class="text-2xl font-semibold text-white">---</h2>
+		</div>
+
+		<div>
+			<label for="modal-email" class="mb-2 block text-sm font-medium text-white">Correo electrónico</label>
+			<input id="modal-email" type="email" required class="text-sm w-full rounded-md border border-zinc-300/30 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="nombre@monlau.com" />
+		</div>
+		
+		<div class="w-full flex gap-3" id="modal-pass-rol-container">
+			<div class="w-full" id="modal-pass-wrapper">
+				<label id="label-password" for="modal-password" class="mb-2 block text-sm font-medium text-white">Contraseña</label>
+				<input id="modal-password" type="password" required class="w-full text-sm rounded-md border border-zinc-300/30 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="••••••••" />
+			</div>
+			<div class="w-full" id="modal-rol-wrapper ">
+				<label for="modal-rol" class="mb-2 block text-sm font-medium text-white">Rol del usuario</label>
+				<select id="modal-rol" class="w-full rounded-md border text-sm border-zinc-300/30 bg-zinc-900 px-4 py-2 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20">
+					<option value="ALUMNO" selected>ALUMNO</option>
+					<option value="PROFESOR">PROFESOR</option>
+					<option value="ADMINISTRADOR">ADMINISTRADOR</option>
+				</select>
+			</div>
+		</div>
+		
+		<div id="contenedor-modulos">
+			<label class="mb-2 block text-sm font-medium text-white">
+				Matricular en Módulos
+			</label>
+			<div class="max-h-28 overflow-y-auto rounded-md border border-cyan-400/20 bg-white/5 p-3 space-y-2 custom-scrollbar">
+				{% for modulo in todos_los_modulos %}
+				<label class="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer hover:text-white transition">
+				<input 
+					type="checkbox" 
+					name="modulos_seleccionados" 
+					value="{{ modulo.codigo_modulo }}" 
+					class="rounded border-zinc-300/30 bg-zinc-900 text-cyan-500 focus:ring-cyan-400/20 w-4 h-4"
+				/>
+				<span>{{ modulo.nombre_asignatura }}</span>
+				</label>
+				{% endfor %}
+			</div>
+		</div>
+		<div class="flex items-center justify-end gap-3 pt-4">
+			<button type="button" id="btn-cancelar-modal" class="rounded-md border border-zinc-700 bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white">
+				Cancelar
+			</button>
+			<button type="submit" id="btn-guardar-modal" class="rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-cyan-400 skeleton">
+				Guardar
+			</button>
+		</div>
+	</form>
+</dialog>

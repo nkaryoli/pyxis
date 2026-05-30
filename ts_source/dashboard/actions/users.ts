@@ -1,10 +1,68 @@
 import type { DashboardContext } from "../types.js";
 import { actualizarUsuario, crearUsuario, eliminarUsuario } from "../api.js";
 
-function promptValue(message: string, defaultValue = ""): string | null {
-	const value = prompt(message, defaultValue);
-	return value ? value.trim() : null;
-}
+const modal = document.getElementById('modal-usuario') as HTMLDialogElement;
+const form = document.getElementById('form-usuario') as HTMLFormElement;
+
+const mTxtTitulo = document.getElementById('modal-titulo')!;
+const mInputId = document.getElementById('modal-user-id') as HTMLInputElement;
+const mInputEmail = document.getElementById('modal-email') as HTMLInputElement;
+const mInputPassword = document.getElementById('modal-password') as HTMLInputElement;
+const mInputRol = document.getElementById('modal-rol') as HTMLSelectElement;
+const btnCancelar = document.getElementById('btn-cancelar-modal');
+const passWrapper = document.getElementById('modal-pass-wrapper');
+
+btnCancelar?.addEventListener('click', () => modal.close());
+
+form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const id = mInputId.value;
+    const email = mInputEmail.value.trim();
+    const password = mInputPassword.value;
+    const rolUsuario = mInputRol.value;
+
+    const modulosSeleccionados = Array.from(
+        form.querySelectorAll<HTMLInputElement>('input[name="modulos_seleccionados"]:checked')
+    ).map((cb) => cb.value);
+
+    if (!email || !rolUsuario) return;
+
+    if (id) {
+        const payload: Record<string, unknown> = {
+            email_usuario: email,
+            rol: rolUsuario,
+            modulos: modulosSeleccionados
+        };
+
+        const root = document.querySelector<HTMLElement>("[data-dashboard-root]");
+        const solicitanteId = root?.dataset.userId ?? "";
+
+        void actualizarUsuario(id, payload, solicitanteId)
+            .then(() => {
+                modal.close();
+                location.reload();
+            })
+            .catch((err: Error) => alert(`No se pudo editar el usuario: ${err.message}`));
+    } else {
+        if (!password) {
+            mInputPassword.required = true;
+            return;
+        }
+
+        void crearUsuario({
+            email_usuario: email,
+            password_usuario: password,
+            rol: rolUsuario,
+            modulos: modulosSeleccionados
+        })
+            .then(() => {
+                modal.close();
+                location.reload();
+            })
+            .catch((err: Error) => alert(`No se pudo crear el usuario: ${err.message}`));
+    }
+});
 
 export function handleUserAction(
 	button: HTMLButtonElement,
@@ -12,36 +70,58 @@ export function handleUserAction(
 ): boolean {
 	const action = button.dataset.action;
 	if (action === "crear-usuario") {
-		const email = promptValue("Email del usuario");
-		const password = promptValue("Contraseña temporal");
-		const rolUsuario = promptValue("Rol (ALUMNO, PROFESOR, ADMINISTRADOR)", "ALUMNO");
+		form.reset();
+        mInputId.value = "";
+        
+        const checkboxes = form.querySelectorAll<HTMLInputElement>('input[name="modulos_seleccionados"]');
+        checkboxes.forEach((cb) => cb.checked = false);
+        
+        passWrapper?.classList.remove("hidden");
+        mInputPassword.required = true;
 
-		if (!email || !password || !rolUsuario) return true;
-
-		void crearUsuario({	email_usuario: email, password_usuario: password, rol: rolUsuario })
-		.then(() => location.reload())
-		.catch(() => alert("No se pudo crear el usuario con la API actual."));
-
-		return true;
+        mTxtTitulo.textContent = "Crear Nuevo Usuario";
+        
+        modal.showModal();
+        return true;
 	}
 
 	if (action === "editar-usuario") {
 		const id = button.dataset.id;
 		if (!id) return true;
 
-		const email = promptValue("Nuevo email (dejar vacío para mantener)");
-		const username = promptValue("Nuevo username (dejar vacío para mantener)");
-		const rolUsuario = promptValue("Nuevo rol (dejar vacío para mantener)");
+        fetch(`/api/usuarios/${encodeURIComponent(id)}`)
+            .then((res) => {
+                if (!res.ok) throw new Error("Error al obtener la información del usuario.");
+                return res.json() as Promise<{ id_usuario: number; username: string; email: string; rol: string; modulos?: string[] }>;
+            })
+            .then((user) => {
+                form.reset();
+                mInputId.value = id;
+                mInputEmail.value = user.email;
+                mInputRol.value = user.rol;
+                
+                const checkboxes = form.querySelectorAll<HTMLInputElement>('input[name="modulos_seleccionados"]');
+                checkboxes.forEach((cb) => cb.checked = false);
 
-		const payload: Record<string, string> = {};
-		if (email) payload.email_usuario = email;
-		if (username) payload.username = username;
-		if (rolUsuario) payload.rol = rolUsuario;
-		if (Object.keys(payload).length === 0) return true;
-
-		void actualizarUsuario(id, payload, context.userId)
-		.then(() => location.reload())
-		.catch(() => alert("No se pudo editar el usuario con la API actual."));
+                if (user.modulos && Array.isArray(user.modulos)) {
+                    user.modulos.forEach((codigo) => {
+                        const cb = form.querySelector<HTMLInputElement>(`input[name="modulos_seleccionados"][value="${codigo}"]`);
+                        if (cb) cb.checked = true;
+                    });
+                }
+                
+                passWrapper?.classList.add("hidden");
+                mInputPassword.value = "";
+                mInputPassword.required = false; 
+                
+                mTxtTitulo.textContent = "Editar Usuario";
+                modal.showModal();
+            })
+            .catch((err) => {
+                console.error(err);
+                alert("No se pudo cargar la información del usuario para editar.");
+            });
+            
 		return true;
 	}
 

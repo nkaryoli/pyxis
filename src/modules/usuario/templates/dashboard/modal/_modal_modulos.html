@@ -1,0 +1,47 @@
+<dialog id="modal-modulo" class="fixed inset-0 m-auto w-full max-w-lg rounded-lg border border-white/10 bg-zinc-950/95 p-8 shadow-2xl shadow-black/40 backdrop:bg-black/60 backdrop:backdrop-blur-sm outline-none">
+	<form method="dialog" id="form-modulo" class="space-y-4">
+		<input type="hidden" id="modal-modulo-mode" value="create" />
+		
+		<div class="mb-6">
+			<h2 id="modal-modulo-titulo" class="text-2xl font-semibold text-white">---</h2>
+		</div>
+
+		<div>
+			<label for="modal-modulo-codigo" class="mb-2 block text-sm font-medium text-white">Código del módulo</label>
+			<input id="modal-modulo-codigo" type="text" required class="text-sm w-full rounded-md border border-zinc-300/30 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="ej: PRG" />
+		</div>
+
+		<div>
+			<label for="modal-modulo-nombre" class="mb-2 block text-sm font-medium text-white">Nombre de la asignatura</label>
+			<input id="modal-modulo-nombre" type="text" required class="text-sm w-full rounded-md border border-zinc-300/30 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="ej: Programación" />
+		</div>
+
+		<div>
+			<label class="mb-2 block text-sm font-medium text-white">Curso del módulo</label>
+			<div class="flex gap-3">
+				<div class="w-1/2">
+					<select id="modal-modulo-curso-anio" class="w-full rounded-md border text-sm border-zinc-300/30 bg-zinc-900 px-4 py-2 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20">
+						<option value="1º" selected>1º</option>
+						<option value="2º">2º</option>
+					</select>
+				</div>
+				<div class="w-1/2">
+					<select id="modal-modulo-curso-carrera" class="w-full rounded-md border text-sm border-zinc-300/30 bg-zinc-900 px-4 py-2 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20">
+						<option value="DAW" selected>DAW</option>
+						<option value="DAM">DAM</option>
+						<option value="ASIX">ASIX</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		
+		<div class="flex items-center justify-end gap-3 pt-4">
+			<button type="button" id="btn-cancelar-modulo" class="rounded-md border border-zinc-700 bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white">
+				Cancelar
+			</button>
+			<button type="submit" id="btn-guardar-modulo" class="rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-cyan-400">
+				Guardar
+			</button>
+		</div>
+	</form>
+</dialog>

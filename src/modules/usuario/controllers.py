@@ -1,4 +1,5 @@
 import os
+import math
 from flask import Blueprint, render_template, jsonify, request, g, current_app, url_for
 from werkzeug.utils import secure_filename
 from src.services.usuario_service import UsuarioService
@@ -9,22 +10,28 @@ from src.services.tokens_service import TokensService
 
 usuarios_bp = Blueprint('usuarios', __name__, template_folder='templates')
 
-# --- CONFIGURACIÓN DE RUTA ABSOLUTA CORREGIDA ---
-# Si este archivo está en src/controllers/controllers.py:
-# os.path.dirname(__file__) nos da '.../src/controllers'
-
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-# Ajustamos para que busque la carpeta 'static' en la raíz (sin el 'src' intermedio)
 UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'static', 'uploads', 'perfiles')
 
-# Ya que confirmaste que la carpeta existe, esta línea es opcional pero segura
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @usuarios_bp.route('/perfil/<int:id_usuario>', methods=['GET'])
 @AuthService.token_required
 def ver_perfil(id_usuario):
+    """
+    Renderiza la vista HTML del perfil público de un usuario.
+
+    Requiere autenticación. El usuario solicitante solo puede acceder a su propio perfil.
+
+    Args:
+        id_usuario (int): ID del usuario cuyo perfil se desea ver.
+
+    Returns:
+        Render: Plantilla HTML 'perfil.html' con los datos del usuario y sus posts, 
+                o una vista de error (403/404) si no está autorizado o no existe.
+    """
     try:
         usuario_actual = getattr(g, 'current_user', None)
         if not usuario_actual or int(usuario_actual.id_usuario) != int(id_usuario):
@@ -44,6 +51,16 @@ def ver_perfil(id_usuario):
 @usuarios_bp.route('/dashboard', methods=['GET'])
 @AuthService.token_required
 def dashboard():
+    """
+    Renderiza la vista principal del Dashboard de control.
+
+    Permite a los roles PROFESOR y ADMINISTRADOR supervisar las métricas de la plataforma,
+    módulos, usuarios, posts, etc.
+
+    Returns:
+        Render: Plantilla HTML 'dashboard.html' con el resumen de métricas,
+                listado de recursos y accesos rápidos según el rol.
+    """
     usuario_actual = getattr(g, 'current_user', None)
     if not usuario_actual:
         return render_template('errors/401.html'), 401
@@ -107,15 +124,25 @@ def dashboard():
         resumen=resumen,
         accesos_rapidos=accesos_rapidos,
         modulos=modulos,
+        todos_los_modulos=modulos,
         usuarios=usuarios,
         posts=posts,
-        tokens=tokens[:6],
+        tokens=tokens[:6]
     )
 
 
 @usuarios_bp.route('/api/usuarios', methods=['POST'])
 @AuthService.token_required
 def crear_usuario_api():
+    """
+    Endpoint de API para dar de alta un nuevo usuario en la plataforma.
+
+    Requiere autenticación. Solo accesible para administradores.
+
+    Returns:
+        JSON: Mensaje de confirmación y datos básicos del usuario creado (201),
+            o detalles del error (400/403/500).
+    """
     usuario_actual = getattr(g, 'current_user', None)
     rol = (usuario_actual.rol or '').upper() if usuario_actual else ''
     if rol != 'ADMINISTRADOR':
@@ -124,6 +151,20 @@ def crear_usuario_api():
     datos = request.get_json(silent=True) or {}
     try:
         usuario = AuthService.registrar_usuario_con_rol(datos, datos.get('rol', 'ALUMNO'))
+        codigos_modulos = datos.get('modulos')
+        if codigos_modulos and isinstance(codigos_modulos, list):
+            from src.repositories.matricula_repository import MatriculaRepository
+            from datetime import datetime, timedelta
+            fecha_inicio = datetime.now()
+            fecha_final = fecha_inicio + timedelta(days=365)
+            for cod in codigos_modulos:
+                if cod and str(cod).strip():
+                    MatriculaRepository.create(
+                        id_usuario=usuario.id_usuario,
+                        codigo_modulo=str(cod).strip(),
+                        fecha_inicio=fecha_inicio,
+                        fecha_final=fecha_final
+                    )
         return jsonify({
             'mensaje': 'Usuario creado correctamente',
             'usuario': {
@@ -143,6 +184,17 @@ def crear_usuario_api():
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>', methods=['DELETE'])
 @AuthService.token_required
 def eliminar_usuario_api(id_usuario):
+    """
+    Endpoint de API para eliminar físicamente a un usuario.
+
+    Requiere autenticación. Solo accesible para administradores.
+
+    Args:
+        id_usuario (int): ID del usuario a eliminar.
+
+    Returns:
+        JSON: Mensaje de confirmación del éxito (200), o detalles del error (400/403/404/500).
+    """
     usuario_actual = getattr(g, 'current_user', None)
     rol = (usuario_actual.rol or '').upper() if usuario_actual else ''
     if rol != 'ADMINISTRADOR':
@@ -163,8 +215,13 @@ def eliminar_usuario_api(id_usuario):
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>/foto', methods=['POST'])
 def subir_foto_perfil(id_usuario):
     """
-    Endpoint para subir la foto: guarda el archivo en el servidor 
-    y actualiza la URL en la base de datos.
+    Sube y guarda la foto de perfil física de un usuario, actualizando su URL en la BD.
+
+    Args:
+        id_usuario (int): ID del usuario de destino de la imagen.
+
+    Returns:
+        JSON: Confirmación y la URL lógica asignada (200), o detalles del error (400/500).
     """
     try:
         if 'foto' not in request.files:
@@ -176,23 +233,15 @@ def subir_foto_perfil(id_usuario):
 
         usuario_id_solicitante = request.headers.get('X-User-Id')
         
-        # 1. Procesar el nombre del archivo
         ext = os.path.splitext(file.filename)[1].lower()
         filename = secure_filename(f"user_{id_usuario}{ext}")
-        
-        # 2. Ruta física real para guardar el archivo
-        # Usamos la ruta absoluta construida al inicio
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         
-        # 3. Guardar archivo físicamente
         file.save(filepath)
         print(f"DEBUG: Archivo guardado en {filepath}")
 
-        # 4. URL lógica para la base de datos
-        # Flask mapea /static a src/static, así que la URL debe empezar desde /static
         url_para_db = f"/static/uploads/perfiles/{filename}"
 
-        # 5. Actualizar base de datos mediante el servicio
         UsuarioService.actualizar_usuario(id_usuario, {'imagen_usuario': url_para_db}, usuario_id_solicitante)
 
         return jsonify({
@@ -206,20 +255,41 @@ def subir_foto_perfil(id_usuario):
 
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>', methods=['GET'])
 def get_info_usuario(id_usuario):
+    """
+    Endpoint de API para consultar la información pública y perfil de un usuario concreto.
+
+    Args:
+        id_usuario (int): ID del usuario a consultar.
+
+    Returns:
+        JSON: Atributos básicos (email, username, rol, tokens) del usuario (200), o error (500).
+    """
     try:        
-        usuario = UsuarioService.obtener_usuario_por_id(id_usuario)
+        from src.repositories.matricula_repository import MatriculaRepository
+        usuario, _ = UsuarioService.obtener_usuario_por_id(id_usuario)
+        matriculas = MatriculaRepository.get_by_usuario_id(id_usuario)
         return jsonify({
             'id_usuario': usuario.id_usuario,
             'username': usuario.username,
             'email': usuario.email_usuario,
             'rol': usuario.rol,
-            'tokens': usuario.tokens
+            'tokens': usuario.tokens,
+            'modulos': [m.codigo_modulo for m in matriculas]
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>', methods=['PUT'])
 def modificar_usuario(id_usuario):
+    """
+    Endpoint de API para actualizar el perfil e información del usuario destino.
+
+    Args:
+        id_usuario (int): ID del usuario que se desea actualizar.
+
+    Returns:
+        JSON: Confirmación de actualización (200), o mensaje del error (403).
+    """
     try:
         usuario_id_solicitante = request.headers.get('X-User-Id')
         datos = request.get_json()        
@@ -229,11 +299,18 @@ def modificar_usuario(id_usuario):
         return jsonify({'error': str(e)}), 403
     
     
-    
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>/posts', methods=['GET'])
 def get_posts_api(id_usuario):
+    """
+    Endpoint de API para obtener los posts creados por un usuario paginados.
+
+    Args:
+        id_usuario (int): ID del usuario creador de los posts.
+
+    Returns:
+        JSON: Lista de posts de la página e información del total de páginas (200).
+    """
     page = request.args.get('page', 1, type=int)
-    # Llama al servicio que ya actualizaste
     items, total_pages = UsuarioService.obtener_posts_paginados(id_usuario, page)
     
     return jsonify({
@@ -244,8 +321,16 @@ def get_posts_api(id_usuario):
     
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>/respuestas', methods=['GET'])
 def get_respuestas_api(id_usuario):
+    """
+    Endpoint de API para obtener de forma paginada las respuestas de un usuario.
+
+    Args:
+        id_usuario (int): ID del usuario creador de las respuestas.
+
+    Returns:
+        JSON: Listado paginado de respuestas e información de páginas totales (200).
+    """
     page = request.args.get('page', 1, type=int)
-    # Usamos el servicio que ya tienes en UsuarioService
     items, total_pages = UsuarioService.obtener_respuestas_paginadas(id_usuario, page)
     
     return jsonify({
@@ -256,6 +341,15 @@ def get_respuestas_api(id_usuario):
     
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>/notificaciones', methods=['GET'])
 def get_notificaciones_api(id_usuario):
+    """
+    Endpoint de API para obtener las notificaciones de respuestas en los posts del usuario.
+
+    Args:
+        id_usuario (int): ID del usuario propietario de los posts con notificaciones.
+
+    Returns:
+        JSON: Listado paginado de notificaciones e información de páginas totales (200).
+    """
     page = request.args.get('page', 1, type=int)
     if page < 1:
         page = 1

@@ -19,7 +19,15 @@ function requestJson(url, options) {
         }
         const response = yield fetch(url, requestInit);
         if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`);
+            let message = `Request failed with status ${response.status}`;
+            try {
+                const errBody = yield response.json();
+                if (errBody && errBody.error) {
+                    message = errBody.error;
+                }
+            }
+            catch (_b) { }
+            throw new Error(message);
         }
         return (yield response.json());
     });

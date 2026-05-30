@@ -25,7 +25,14 @@ async function requestJson<T>(
 	const response = await fetch(url, requestInit);
 
 	if (!response.ok) {
-		throw new Error(`Request failed with status ${response.status}`);
+		let message = `Request failed with status ${response.status}`;
+		try {
+			const errBody = await response.json() as { error?: string };
+			if (errBody && errBody.error) {
+				message = errBody.error;
+			}
+		} catch {}
+		throw new Error(message);
 	}
 
 	return (await response.json()) as T;
@@ -71,6 +78,7 @@ export function crearUsuario(payload: {
 	email_usuario: string;
 	password_usuario: string;
 	rol: string;
+	modulos?: string[];
 }): Promise<unknown> {
 	return requestJson("/api/usuarios", {
 		method: "POST",
@@ -80,7 +88,7 @@ export function crearUsuario(payload: {
 
 export function actualizarUsuario(
 	idUsuario: string,
-	payload: Record<string, string>,
+	payload: Record<string, unknown>,
 	usuarioIdSolicitante: string,
 ): Promise<unknown> {
 	return requestJson(`/api/usuarios/${encodeURIComponent(idUsuario)}`, {
