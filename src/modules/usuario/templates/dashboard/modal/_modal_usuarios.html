@@ -26,24 +26,6 @@
 			</div>
 		</div>
 		
-		<div id="contenedor-modulos">
-			<label class="mb-2 block text-sm font-medium text-white">
-				Matricular en Módulos
-			</label>
-			<div class="max-h-28 overflow-y-auto rounded-md border border-cyan-400/20 bg-white/5 p-3 space-y-2 custom-scrollbar">
-				{% for modulo in todos_los_modulos %}
-				<label class="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer hover:text-white transition">
-				<input 
-					type="checkbox" 
-					name="modulos_seleccionados" 
-					value="{{ modulo.codigo_modulo }}" 
-					class="rounded border-zinc-300/30 bg-zinc-900 text-cyan-500 focus:ring-cyan-400/20 w-4 h-4"
-				/>
-				<span>{{ modulo.nombre_asignatura }}</span>
-				</label>
-				{% endfor %}
-			</div>
-		</div>
 		<div class="flex items-center justify-end gap-3 pt-4">
 			<button type="button" id="btn-cancelar-modal" class="rounded-md border border-zinc-700 bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white">
 				Cancelar

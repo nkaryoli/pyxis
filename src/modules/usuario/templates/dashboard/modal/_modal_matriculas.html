@@ -1,0 +1,37 @@
+<dialog id="modal-matricula" class="fixed inset-0 m-auto w-full max-w-lg rounded-lg border border-white/10 bg-zinc-950/95 p-8 shadow-2xl shadow-black/40 backdrop:bg-black/60 backdrop:backdrop-blur-sm outline-none">
+	<form method="dialog" id="form-matricula" class="space-y-4">
+		<input type="hidden" id="modal-matricula-user-id" />
+		
+		<div class="mb-6">
+			<h2 id="modal-matricula-titulo" class="text-2xl font-semibold text-white">Matricular Alumno</h2>
+		</div>
+
+		<div>
+			<label class="mb-2 block text-sm font-medium text-white">
+				Selecciona los Módulos Académicos
+			</label>
+			<div class="max-h-60 overflow-y-auto rounded-md border border-cyan-400/20 bg-white/5 p-3 space-y-2 custom-scrollbar">
+				{% for modulo in todos_los_modulos %}
+				<label class="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer hover:text-white transition">
+					<input 
+						type="checkbox" 
+						name="modulos_matricula" 
+						value="{{ modulo.codigo_modulo }}" 
+						class="rounded border-zinc-300/30 bg-zinc-900 text-cyan-500 focus:ring-cyan-400/20 w-4 h-4"
+					/>
+					<span>{{ modulo.nombre_asignatura }}</span>
+				</label>
+				{% endfor %}
+			</div>
+		</div>
+		
+		<div class="flex items-center justify-end gap-3 pt-4">
+			<button type="button" id="btn-cancelar-matricula" class="rounded-md border border-zinc-700 bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white">
+				Cancelar
+			</button>
+			<button type="submit" id="btn-guardar-matricula" class="rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-cyan-400">
+				Guardar Matrículas
+			</button>
+		</div>
+	</form>
+</dialog>
