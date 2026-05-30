@@ -7,8 +7,10 @@ const mInputId = document.getElementById("modal-post-id") as HTMLInputElement;
 const mInputTitulo = document.getElementById("modal-post-titulo-input") as HTMLInputElement;
 const mInputContenido = document.getElementById("modal-post-contenido-input") as HTMLTextAreaElement;
 const btnCancelar = document.getElementById("btn-cancelar-post");
+const btnCancelarTop = document.getElementById("btn-cancelar-post-top");
 
 btnCancelar?.addEventListener("click", () => modal.close());
+btnCancelarTop?.addEventListener("click", () => modal.close());
 
 form?.addEventListener("submit", (e) => {
 	e.preventDefault();

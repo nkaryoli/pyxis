@@ -8,9 +8,28 @@ const mTxtTitulo = document.getElementById('modal-titulo')!;
 const mInputId = document.getElementById('modal-user-id') as HTMLInputElement;
 const mInputEmail = document.getElementById('modal-email') as HTMLInputElement;
 const mInputPassword = document.getElementById('modal-password') as HTMLInputElement;
-const mInputRol = document.getElementById('modal-rol') as HTMLSelectElement;
+const mInputRol = document.getElementById('modal-rol') as HTMLInputElement;
 const btnCancelar = document.getElementById('btn-cancelar-modal');
+const btnCancelarTop = document.getElementById('btn-cancelar-modal-top');
 const passWrapper = document.getElementById('modal-pass-wrapper');
+
+// Elementos del selector custom de rol
+const btnCustomRol = document.getElementById('btn-custom-rol');
+const customRolValue = document.getElementById('custom-rol-value');
+const customRolOptions = document.getElementById('custom-rol-options');
+
+function updateCustomRol(val: string): void {
+	if (!mInputRol) return;
+	mInputRol.value = val;
+	if (customRolValue) {
+		const textMap: Record<string, string> = {
+			'ALUMNO': 'Alumno',
+			'PROFESOR': 'Profesor',
+			'ADMINISTRADOR': 'Administrador'
+		};
+		customRolValue.textContent = textMap[val] || val;
+	}
+}
 
 // Modal y Formulario de Matrículas (Exclusivo para alumnos)
 const modalMatricula = document.getElementById('modal-matricula') as HTMLDialogElement;
@@ -18,9 +37,34 @@ const formMatricula = document.getElementById('form-matricula') as HTMLFormEleme
 const mTxtMatriculaTitulo = document.getElementById('modal-matricula-titulo')!;
 const mInputMatriculaUserId = document.getElementById('modal-matricula-user-id') as HTMLInputElement;
 const btnCancelarMatricula = document.getElementById('btn-cancelar-matricula');
+const btnCancelarMatriculaTop = document.getElementById('btn-cancelar-matricula-top');
 
 btnCancelar?.addEventListener('click', () => modal.close());
+btnCancelarTop?.addEventListener('click', () => modal.close());
 btnCancelarMatricula?.addEventListener('click', () => modalMatricula.close());
+btnCancelarMatriculaTop?.addEventListener('click', () => modalMatricula.close());
+
+btnCustomRol?.addEventListener('click', (e) => {
+	e.stopPropagation();
+	customRolOptions?.classList.toggle('hidden');
+});
+
+customRolOptions?.addEventListener('click', (e) => {
+	const target = e.target as HTMLElement;
+	const option = target.closest('.rol-option') as HTMLElement | null;
+	if (option) {
+		const val = option.dataset.val || 'ALUMNO';
+		updateCustomRol(val);
+		customRolOptions.classList.add('hidden');
+	}
+});
+
+document.addEventListener('click', (e) => {
+	const target = e.target as Element;
+	if (customRolOptions && !customRolOptions.classList.contains('hidden') && !btnCustomRol?.contains(target)) {
+		customRolOptions.classList.add('hidden');
+	}
+});
 
 // Submit del Formulario de Usuario (Solo gestiona credenciales)
 form?.addEventListener('submit', (e) => {
@@ -98,6 +142,7 @@ export function handleUserAction(
 	if (action === "crear-usuario") {
 		form.reset();
         mInputId.value = "";
+        updateCustomRol("ALUMNO");
         
         passWrapper?.classList.remove("hidden");
         mInputPassword.required = true;
@@ -121,7 +166,7 @@ export function handleUserAction(
                 form.reset();
                 mInputId.value = id;
                 mInputEmail.value = user.email;
-                mInputRol.value = user.rol;
+                updateCustomRol(user.rol);
                 
                 passWrapper?.classList.add("hidden");
                 mInputPassword.value = "";

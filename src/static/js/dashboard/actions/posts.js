@@ -5,7 +5,9 @@ const mInputId = document.getElementById("modal-post-id");
 const mInputTitulo = document.getElementById("modal-post-titulo-input");
 const mInputContenido = document.getElementById("modal-post-contenido-input");
 const btnCancelar = document.getElementById("btn-cancelar-post");
+const btnCancelarTop = document.getElementById("btn-cancelar-post-top");
 btnCancelar === null || btnCancelar === void 0 ? void 0 : btnCancelar.addEventListener("click", () => modal.close());
+btnCancelarTop === null || btnCancelarTop === void 0 ? void 0 : btnCancelarTop.addEventListener("click", () => modal.close());
 form === null || form === void 0 ? void 0 : form.addEventListener("submit", (e) => {
     var _a, _b;
     e.preventDefault();

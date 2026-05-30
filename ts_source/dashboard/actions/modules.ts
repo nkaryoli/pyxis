@@ -7,19 +7,85 @@ const form = document.getElementById("form-modulo") as HTMLFormElement;
 const mTxtTitulo = document.getElementById("modal-modulo-titulo")!;
 const mInputCodigo = document.getElementById("modal-modulo-codigo") as HTMLInputElement;
 const mInputNombre = document.getElementById("modal-modulo-nombre") as HTMLInputElement;
-const mInputCursoAnio = document.getElementById("modal-modulo-curso-anio") as HTMLSelectElement;
-const mInputCursoCarrera = document.getElementById("modal-modulo-curso-carrera") as HTMLSelectElement;
+const mInputCursoAnio = document.getElementById("modal-modulo-curso-anio") as HTMLInputElement;
+const mInputCursoCarrera = document.getElementById("modal-modulo-curso-carrera") as HTMLInputElement;
 const mInputMode = document.getElementById("modal-modulo-mode") as HTMLInputElement;
 const btnCancelar = document.getElementById("btn-cancelar-modulo");
+const btnCancelarTop = document.getElementById("btn-cancelar-modulo-top");
+
+// Elementos del selector custom de Año
+const btnCustomCursoAnio = document.getElementById("btn-custom-curso-anio");
+const customCursoAnioValue = document.getElementById("custom-curso-anio-value");
+const customCursoAnioOptions = document.getElementById("custom-curso-anio-options");
+
+// Elementos del selector custom de Carrera
+const btnCustomCursoCarrera = document.getElementById("btn-custom-curso-carrera");
+const customCursoCarreraValue = document.getElementById("custom-curso-carrera-value");
+const customCursoCarreraOptions = document.getElementById("custom-curso-carrera-options");
+
+function updateCustomCursoAnio(val: string): void {
+	if (!mInputCursoAnio) return;
+	mInputCursoAnio.value = val;
+	if (customCursoAnioValue) customCursoAnioValue.textContent = val;
+}
+
+function updateCustomCursoCarrera(val: string): void {
+	if (!mInputCursoCarrera) return;
+	mInputCursoCarrera.value = val;
+	if (customCursoCarreraValue) customCursoCarreraValue.textContent = val;
+}
 
 // Modal de visualización de alumnos por módulo
 const modalAlumnos = document.getElementById("modal-alumnos-modulo") as HTMLDialogElement;
 const mTxtAlumnosTitulo = document.getElementById("modal-alumnos-modulo-titulo")!;
 const mContainerAlumnosLista = document.getElementById("modal-alumnos-lista")!;
 const btnCerrarAlumnos = document.getElementById("btn-cerrar-alumnos-modal");
+const btnCerrarAlumnosTop = document.getElementById("btn-cerrar-alumnos-modal-top");
 
 btnCancelar?.addEventListener("click", () => modal.close());
+btnCancelarTop?.addEventListener("click", () => modal.close());
 btnCerrarAlumnos?.addEventListener("click", () => modalAlumnos.close());
+btnCerrarAlumnosTop?.addEventListener("click", () => modalAlumnos.close());
+
+btnCustomCursoAnio?.addEventListener("click", (e) => {
+	e.stopPropagation();
+	customCursoAnioOptions?.classList.toggle("hidden");
+});
+
+customCursoAnioOptions?.addEventListener("click", (e) => {
+	const target = e.target as HTMLElement;
+	const option = target.closest(".curso-anio-option") as HTMLElement | null;
+	if (option) {
+		const val = option.dataset.val || "1º";
+		updateCustomCursoAnio(val);
+		customCursoAnioOptions.classList.add("hidden");
+	}
+});
+
+btnCustomCursoCarrera?.addEventListener("click", (e) => {
+	e.stopPropagation();
+	customCursoCarreraOptions?.classList.toggle("hidden");
+});
+
+customCursoCarreraOptions?.addEventListener("click", (e) => {
+	const target = e.target as HTMLElement;
+	const option = target.closest(".curso-carrera-option") as HTMLElement | null;
+	if (option) {
+		const val = option.dataset.val || "DAW";
+		updateCustomCursoCarrera(val);
+		customCursoCarreraOptions.classList.add("hidden");
+	}
+});
+
+document.addEventListener("click", (e) => {
+	const target = e.target as Element;
+	if (customCursoAnioOptions && !customCursoAnioOptions.classList.contains("hidden") && !btnCustomCursoAnio?.contains(target)) {
+		customCursoAnioOptions.classList.add("hidden");
+	}
+	if (customCursoCarreraOptions && !customCursoCarreraOptions.classList.contains("hidden") && !btnCustomCursoCarrera?.contains(target)) {
+		customCursoCarreraOptions.classList.add("hidden");
+	}
+});
 
 form?.addEventListener("submit", (e) => {
 	e.preventDefault();
@@ -68,6 +134,8 @@ export function handleModuleAction(
 		mInputMode.value = "create";
 		mInputCodigo.value = "";
 		mInputCodigo.readOnly = false;
+		updateCustomCursoAnio("1º");
+		updateCustomCursoCarrera("DAW");
 		mTxtTitulo.textContent = "Crear Nuevo Módulo";
 		modal.showModal();
 		return true;
@@ -90,8 +158,8 @@ export function handleModuleAction(
 				mInputNombre.value = cells[1]!.textContent?.trim() || "";
 				const cursoCell = cells[2]!.textContent?.trim() || "";
 				const parts = cursoCell.split(/\s+/);
-				mInputCursoAnio.value = parts[0] || "1º";
-				mInputCursoCarrera.value = parts[1] || "DAW";
+				updateCustomCursoAnio(parts[0] || "1º");
+				updateCustomCursoCarrera(parts[1] || "DAW");
 			}
 		}
 
