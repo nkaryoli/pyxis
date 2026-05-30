@@ -1,42 +1,93 @@
 import type { DashboardContext } from "../types.js";
 import { actualizarModulo, crearModulo, eliminarModulo } from "../api.js";
 
-function promptValue(message: string): string | null {
-	const value = prompt(message);
-	return value ? value.trim() : null;
-}
+const modal = document.getElementById("modal-modulo") as HTMLDialogElement;
+const form = document.getElementById("form-modulo") as HTMLFormElement;
+const mTxtTitulo = document.getElementById("modal-modulo-titulo")!;
+const mInputCodigo = document.getElementById("modal-modulo-codigo") as HTMLInputElement;
+const mInputNombre = document.getElementById("modal-modulo-nombre") as HTMLInputElement;
+const mInputCursoAnio = document.getElementById("modal-modulo-curso-anio") as HTMLSelectElement;
+const mInputCursoCarrera = document.getElementById("modal-modulo-curso-carrera") as HTMLSelectElement;
+const mInputMode = document.getElementById("modal-modulo-mode") as HTMLInputElement;
+const btnCancelar = document.getElementById("btn-cancelar-modulo");
 
-export function handleModuleAction(
-	button: HTMLButtonElement,
-	context: DashboardContext,
-): boolean {
-	const action = button.dataset.action;
-	if (action === "crear-modulo") {
-		const codigo = promptValue("Código del módulo");
-		const nombre = promptValue("Nombre de la asignatura");
-		const curso = promptValue("Curso del módulo");
-		if (!codigo || !nombre || !curso) return true;
+btnCancelar?.addEventListener("click", () => modal.close());
 
+form?.addEventListener("submit", (e) => {
+	e.preventDefault();
+
+	const codigo = mInputCodigo.value.trim();
+	const nombre = mInputNombre.value.trim();
+	const curso = `${mInputCursoAnio.value} ${mInputCursoCarrera.value}`;
+	const mode = mInputMode.value;
+
+	if (!codigo || !nombre || !curso) return;
+
+	if (mode === "edit") {
+		void actualizarModulo(codigo, {
+			nombre_asignatura: nombre,
+			curso_modulo: curso,
+			rol_usuario_activo: "ADMINISTRADOR",
+		})
+		.then(() => {
+			modal.close();
+			location.reload();
+		})
+		.catch((err: Error) => alert(`No se pudo editar el módulo: ${err.message}`));
+	} else {
 		void crearModulo({
 			codigo_modulo: codigo,
 			nombre_asignatura: nombre,
 			curso_modulo: curso,
 			rol_usuario_activo: "ADMINISTRADOR",
 		})
-		.then(() => location.reload())
-		.catch(() => alert("No se pudo crear el módulo con la API actual."));
+		.then(() => {
+			modal.close();
+			location.reload();
+		})
+		.catch((err: Error) => alert(`No se pudo crear el módulo: ${err.message}`));
+	}
+});
+
+export function handleModuleAction(
+	button: HTMLButtonElement,
+	context: DashboardContext,
+): boolean {
+	const action = button.dataset.action;
+
+	if (action === "crear-modulo") {
+		form.reset();
+		mInputMode.value = "create";
+		mInputCodigo.value = "";
+		mInputCodigo.readOnly = false;
+		mTxtTitulo.textContent = "Crear Nuevo Módulo";
+		modal.showModal();
 		return true;
 	}
 
 	if (action === "editar-modulo") {
 		const codigo = button.dataset.codigo;
-		const nombre = promptValue("Nuevo nombre de la asignatura");
-		const curso = promptValue("Nuevo curso del módulo");
-		if (!codigo || !nombre || !curso) return true;
+		if (!codigo) return true;
 
-		void actualizarModulo(codigo, { nombre_asignatura: nombre, curso_modulo: curso, rol_usuario_activo: "ADMINISTRADOR" })
-		.then(() => location.reload())
-		.catch(() => alert("No se pudo editar el módulo con la API actual."));
+		form.reset();
+		mInputMode.value = "edit";
+		mInputCodigo.value = codigo;
+		mInputCodigo.readOnly = true;
+		mTxtTitulo.textContent = "Editar Módulo";
+
+		const row = button.closest("tr");
+		if (row) {
+			const cells = row.querySelectorAll("td");
+			if (cells.length >= 3) {
+				mInputNombre.value = cells[1]!.textContent?.trim() || "";
+				const cursoCell = cells[2]!.textContent?.trim() || "";
+				const parts = cursoCell.split(/\s+/);
+				mInputCursoAnio.value = parts[0] || "1º";
+				mInputCursoCarrera.value = parts[1] || "DAW";
+			}
+		}
+
+		modal.showModal();
 		return true;
 	}
 
@@ -46,7 +97,7 @@ export function handleModuleAction(
 
 		void eliminarModulo(codigo, context.userRole)
 		.then(() => location.reload())
-		.catch(() => alert("No se pudo eliminar el módulo con la API actual."));
+		.catch((err: Error) => alert(`No se pudo eliminar el módulo: ${err.message}`));
 		return true;
 	}
 
