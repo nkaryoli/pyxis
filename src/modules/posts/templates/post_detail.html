@@ -38,6 +38,11 @@
                 </div>
                 {% endif %}
                 <p class="mt-5 text-zinc-300">{{ post.contenido_post }}</p>
+                {% if post.imagen_post %}
+                <div class="mt-4 overflow-hidden rounded-md border border-zinc-800 bg-zinc-950/60">
+                    <img src="{{ post.imagen_post }}" alt="Imagen del post" class="w-full object-cover max-h-96" />
+                </div>
+                {% endif %}
             </div>
 
             <div class="flex h-full w-full flex-col justify-center border-l-[3px] border-cyan-300/30 pl-3">
@@ -81,8 +86,18 @@
                     </div>
                   
                     {% if edit_respuesta and edit_respuesta.id_respuesta == respuesta.id_respuesta %}
-                    <form action="{{ url_for('respuestas.editar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="space-y-3">
-                        <textarea name="contenido_respuesta" rows="4" required class="w-full rounded-md border border-zinc-700 bg-zinc-950 px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/15">{{ respuesta.contenido }}</textarea>
+                    <form action="{{ url_for('respuestas.editar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" enctype="multipart/form-data" class="space-y-5 rounded-md border border-cyan-500/20 bg-zinc-950/90 p-5 shadow-[0_20px_45px_-25px_rgba(14,165,233,0.55)]">
+                        <textarea name="contenido_respuesta" rows="4" required class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20">{{ respuesta.contenido }}</textarea>
+                        <div class="space-y-2">
+                            <label for="imagen_respuesta_{{ respuesta.id_respuesta }}" class="block text-sm font-medium text-zinc-400">Subir nueva imagen (opcional)</label>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <label for="imagen_respuesta_{{ respuesta.id_respuesta }}" class="inline-flex cursor-pointer items-center justify-center rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/15">
+                                    Seleccionar archivo
+                                </label>
+                                <span class="text-sm text-zinc-400">PNG, JPG, GIF o WEBP</span>
+                            </div>
+                            <input type="file" name="imagen_respuesta" id="imagen_respuesta_{{ respuesta.id_respuesta }}" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="sr-only" />
+                        </div>
                         <div class="flex flex-wrap gap-3">
                             <button type="submit" class="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-cyan-400">Guardar</button>
                             <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page) }}" class="rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:border-zinc-600 hover:text-white">Cancelar</a>
@@ -90,6 +105,11 @@
                     </form>
                     {% else %}
                     <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{{ respuesta.contenido }}</p>
+                    {% if respuesta.imagen_respuesta %}
+                    <div class="mt-4 overflow-hidden rounded-md border border-zinc-800 bg-zinc-950/60">
+                        <img src="{{ respuesta.imagen_respuesta }}" alt="Imagen de la respuesta" class="w-full object-cover max-h-80" />
+                    </div>
+                    {% endif %}
                     {% endif %}
                       <div class=" w-full flex items-center justify-end gap-4">
                             {% if current_user and (current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') and not respuesta.mejor %}
@@ -147,10 +167,26 @@
     {% endif %}
 
     <div class="p-5">
-        <form action="{{ url_for('respuestas.crear_respuesta_web', id_post=post.id_post) }}" method="POST" class="rounded-md border border-zinc-800 bg-zinc-900/40 p-5 transition-all hover:border-zinc-700">
-            <textarea name="contenido_respuesta" id="contenido_respuesta" rows="4" required class="w-full bg-transparent border-none text-zinc-300 placeholder:text-zinc-600 focus:ring-0 outline-none text-sm leading-relaxed p-0" placeholder="Escribe tu respuesta aquí..."></textarea>
-            <div class="flex justify-end mt-4 pt-4 border-t border-zinc-800">
-                <button type="submit" class="bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-bold py-2 px-6 rounded-md transition-all duration-200">
+        <form action="{{ url_for('respuestas.crear_respuesta_web', id_post=post.id_post) }}" method="POST" enctype="multipart/form-data" class="rounded-md border border-cyan-500/20 bg-zinc-950/90 p-6 shadow-[0_25px_60px_-35px_rgba(14,165,233,0.8)] transition hover:border-cyan-400/30">
+            <div class="mb-5">
+                <p class="text-xs uppercase tracking-[0.35em] text-cyan-400">Responder</p>
+                <h3 class="text-lg font-semibold text-white">Añade tu respuesta</h3>
+            </div>
+
+            <textarea name="contenido_respuesta" id="contenido_respuesta" rows="5" required class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-5 py-4 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20" placeholder="Escribe tu respuesta aquí..."></textarea>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                <div>
+                    <label for="imagen_respuesta" class="mb-2 block text-sm font-medium text-zinc-300">Adjuntar imagen</label>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label for="imagen_respuesta" class="inline-flex cursor-pointer items-center justify-center rounded-md border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/15">
+                            Buscar archivo
+                        </label>
+                        <span class="text-sm text-zinc-400">PNG, JPG, GIF o WEBP</span>
+                    </div>
+                    <input type="file" name="imagen_respuesta" id="imagen_respuesta" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="sr-only" />
+                </div>
+                <button type="submit" class="inline-flex items-center justify-center rounded-md bg-cyan-500 px-6 py-3 text-sm font-semibold text-black transition hover:bg-cyan-400 shadow-lg shadow-cyan-500/20">
                     Publicar respuesta
                 </button>
             </div>

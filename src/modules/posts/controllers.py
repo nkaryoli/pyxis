@@ -1,10 +1,20 @@
+import os
+import uuid
 from flask import Blueprint, jsonify, render_template, request, url_for, redirect, g
+from werkzeug.utils import secure_filename
 from src.modules.auth.controllers import _wants_json
 from src.services.auth_service import AuthService
 from src.services.post_service import PostService
 from src.services.respuesta_service import RespuestaService
 from src.services.usuario_service import UsuarioService
 import math
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+POST_UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'static', 'uploads', 'posts')
+ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.gif', '.webp'}
+
+def allowed_post_image(filename):
+    return '.' in filename and os.path.splitext(filename)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 posts = Blueprint('posts', __name__, template_folder='templates')
 
@@ -309,13 +319,26 @@ def crear_post():
         titulo = request.form.get('titulo_post')
         contenido = request.form.get('contenido_post')
         modulo = request.form.get('codigo_modulo')
-        
+        imagen_url = None
+
+        if 'imagen_post' in request.files:
+            file = request.files['imagen_post']
+            if file and file.filename != '':
+                if not allowed_post_image(file.filename):
+                    return "Extensión de imagen no permitida. Usa PNG, JPG, JPEG, GIF o WEBP.", 400
+
+                filename = secure_filename(f"post_{usuario.id_usuario}_{uuid.uuid4().hex}{os.path.splitext(file.filename)[1].lower()}")
+                os.makedirs(POST_UPLOAD_FOLDER, exist_ok=True)
+                filepath = os.path.join(POST_UPLOAD_FOLDER, filename)
+                file.save(filepath)
+                imagen_url = f"/static/uploads/posts/{filename}"
+
         PostService.crear_post(
             titulo=titulo,
             contenido=contenido,
             id_usuario=usuario.id_usuario, 
             codigo_modulo=modulo,
-            imagen=None 
+            imagen=imagen_url 
         )
         
         return redirect(url_for('posts.posts_por_modulo'))

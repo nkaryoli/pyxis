@@ -41,6 +41,7 @@ class Respuesta(Base):
         return {
             "id_respuesta": self.id_respuesta,
             "contenido_respuesta": self.contenido_respuesta,
+            "imagen_respuesta": self.imagen_respuesta,
             "id_post": self.id_post,
             "id_usuario": self.id_usuario,
             "username_autor": self.autor,

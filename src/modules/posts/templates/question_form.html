@@ -12,7 +12,7 @@
             <h1 class="text-3xl font-semibold text-white">Crear Nueva Pregunta</h1>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 rounded-lg border border-white/10 bg-zinc-950/95 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 rounded-md border border-white/10 bg-zinc-950/95 p-6 shadow-2xl shadow-black/40 backdrop-blur">
             
             <div class="col-span-1 flex flex-row md:flex-col items-center md:items-start gap-4 md:gap-3 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-4 self-start w-full">
                 <img 
@@ -22,8 +22,8 @@
                 />
                 <div class="flex flex-col">
                     <p class="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">Publicando por:</p>
-                    <h3 class="text-base font-medium text-white truncate max-w-[150px]">{{ usuario.username }}</h3>
-                    <span class="mt-1 inline-block w-fit rounded bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-400 border border-cyan-400/20">
+                    <h3 class="text-base font-medium text-white truncate max-w-37.5">{{ usuario.username }}</h3>
+                    <span class="mt-1 inline-block w-fit rounded-md bg-cyan-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-400 border border-cyan-400/20">
                         {{ usuario.rol }}
                     </span>
                     {% if usuario.tokens is defined %}
@@ -32,61 +32,77 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ url_for('posts.crear_post') }}" class="col-span-1 md:col-span-3 flex flex-col space-y-5 w-full">
-                
-                <div class="flex flex-col">
-                    <label for="codigo_modulo" class="mb-2 text-sm font-medium text-cyan-400">
-                        ¿A qué módulo pertenece tu duda?
-                    </label>
-                    <select
-                        id="codigo_modulo"
-                        name="codigo_modulo"
-                        required
-                        class="w-full rounded-md border border-cyan-400/30 bg-zinc-900 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20 appearance-none"
-                        style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2322d3ee%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.2em;"
-                    >
-                        <option value="" disabled selected>Selecciona un módulo...</option>
-                        {% for mod in modulos %}
-                            <option value="{{ mod.codigo_modulo }}">{{ mod.nombre_asignatura }}</option>
-                        {% endfor %}
-                    </select>
+            <form method="POST" action="{{ url_for('posts.crear_post') }}" enctype="multipart/form-data" class="col-span-1 md:col-span-3 flex flex-col gap-6 w-full rounded-md border border-cyan-500/20 bg-zinc-950/95 p-8 shadow-[0_30px_60px_-30px_rgba(14,165,233,0.55)] backdrop-blur-sm">
+                <div class="space-y-2">
+                    <p class="text-xs uppercase tracking-[0.35em] text-cyan-400">Nueva pregunta</p>
+                    <h2 class="text-2xl font-semibold text-white">Publica tu duda con estilo</h2>
+                    <p class="text-sm text-zinc-400">Describe tu pregunta con claridad. Puedes añadir una imagen para que sea más fácil de entender.</p>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-2 min-w-0">
+                    <div class="flex flex-col min-w-0">
+                        <label for="codigo_modulo" class="mb-2 text-sm font-medium text-cyan-300">Módulo</label>
+                        <select
+                            id="codigo_modulo"
+                            name="codigo_modulo"
+                            required
+                            class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-4 py-3 pr-10 text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 appearance-none"
+                            style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2322d3ee%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22></polyline></svg>'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.2em;"
+                        >
+                            <option value="" disabled selected>Selecciona</option>
+                            {% for mod in modulos %}
+                                <option value="{{ mod.codigo_modulo }}">{{ mod.nombre_asignatura }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="flex flex-col">
+                        <label for="titulo_post" class="mb-2 text-sm font-medium text-cyan-300">Título</label>
+                        <input
+                            id="titulo_post"
+                            name="titulo_post"
+                            type="text"
+                            required
+                            class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-4 py-3 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20"
+                            placeholder="Ej. Error al subir imagen en Flask"
+                        />
+                    </div>
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="titulo_post" class="mb-2 text-sm font-medium text-cyan-400">
-                        Título de la pregunta
-                    </label>
-                    <input
-                        id="titulo_post"
-                        name="titulo_post"
-                        type="text"
-                        required
-                        class="w-full rounded-md border border-cyan-400/30 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-zinc-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20"
-                        placeholder="Sé claro y conciso (ej. Error de CORS al conectar Flask con React)"
-                    />
-                </div>
-
-                <div class="flex flex-col">
-                    <label for="contenido_post" class="mb-2 text-sm font-medium text-cyan-400">
-                        Explica tu duda o problema
-                    </label>
+                    <label for="contenido_post" class="mb-2 text-sm font-medium text-cyan-300">Detalle</label>
                     <textarea
                         id="contenido_post"
                         name="contenido_post"
                         rows="6"
                         required
-                        class="w-full rounded-md border border-cyan-400/30 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-zinc-600 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20 resize-none"
-                        placeholder="Escribe los detalles de tu problema, fragmentos de código o errores de la terminal..."
+                        class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-4 py-4 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 resize-none"
+                        placeholder="Incluye los detalles de tu pregunta, código y comportamiento esperado..."
                     ></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-4 border-t border-white/5 pt-4 w-full">
-                    <a href="{{ url_for('posts.posts_por_modulo') }}" class="text-sm font-medium text-zinc-400 transition hover:text-zinc-200">
-                        Cancelar
-                    </a>
+                <div class="flex flex-col">
+                    <label class="mb-2 text-sm font-medium text-cyan-300" for="imagen_post">Imagen opcional</label>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label for="imagen_post" class="inline-flex cursor-pointer items-center justify-center rounded-md border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/15">
+                            Buscar archivo
+                        </label>
+                        <span class="text-sm text-zinc-400">PNG, JPG, GIF o WEBP</span>
+                    </div>
+                    <input
+                        type="file"
+                        id="imagen_post"
+                        name="imagen_post"
+                        accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                        class="sr-only"
+                    />
+                </div>
+
+                <div class="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm text-zinc-400">Al publicar tu pregunta, la comunidad podrá ayudarte más rápido.</p>
                     <button
                         type="submit"
-                        class="rounded-md bg-cyan-500 px-6 py-2.5 font-semibold text-black transition hover:bg-cyan-400 shadow-lg shadow-cyan-500/10"
+                        class="inline-flex items-center justify-center rounded-md bg-cyan-500 px-6 py-3 text-sm font-semibold text-black transition hover:bg-cyan-400 shadow-lg shadow-cyan-500/20"
                     >
                         Publicar en el Foro
                     </button>
