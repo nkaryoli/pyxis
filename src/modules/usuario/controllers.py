@@ -1,4 +1,5 @@
 import os
+import math
 from flask import Blueprint, render_template, jsonify, request, g, current_app, url_for
 from werkzeug.utils import secure_filename
 from src.services.usuario_service import UsuarioService
@@ -123,9 +124,10 @@ def dashboard():
         resumen=resumen,
         accesos_rapidos=accesos_rapidos,
         modulos=modulos,
+        todos_los_modulos=modulos,
         usuarios=usuarios,
         posts=posts,
-        tokens=tokens[:6],
+        tokens=tokens[:6]
     )
 
 
@@ -139,7 +141,7 @@ def crear_usuario_api():
 
     Returns:
         JSON: Mensaje de confirmación y datos básicos del usuario creado (201),
-              o detalles del error (400/403/500).
+            o detalles del error (400/403/500).
     """
     usuario_actual = getattr(g, 'current_user', None)
     rol = (usuario_actual.rol or '').upper() if usuario_actual else ''
