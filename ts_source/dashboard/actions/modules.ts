@@ -1,6 +1,7 @@
 import type { DashboardContext } from "../types.js";
 import { actualizarModulo, crearModulo, eliminarModulo } from "../api.js";
 
+// Modal de edición/creación de módulos
 const modal = document.getElementById("modal-modulo") as HTMLDialogElement;
 const form = document.getElementById("form-modulo") as HTMLFormElement;
 const mTxtTitulo = document.getElementById("modal-modulo-titulo")!;
@@ -11,7 +12,14 @@ const mInputCursoCarrera = document.getElementById("modal-modulo-curso-carrera")
 const mInputMode = document.getElementById("modal-modulo-mode") as HTMLInputElement;
 const btnCancelar = document.getElementById("btn-cancelar-modulo");
 
+// Modal de visualización de alumnos por módulo
+const modalAlumnos = document.getElementById("modal-alumnos-modulo") as HTMLDialogElement;
+const mTxtAlumnosTitulo = document.getElementById("modal-alumnos-modulo-titulo")!;
+const mContainerAlumnosLista = document.getElementById("modal-alumnos-lista")!;
+const btnCerrarAlumnos = document.getElementById("btn-cerrar-alumnos-modal");
+
 btnCancelar?.addEventListener("click", () => modal.close());
+btnCerrarAlumnos?.addEventListener("click", () => modalAlumnos.close());
 
 form?.addEventListener("submit", (e) => {
 	e.preventDefault();
@@ -88,6 +96,49 @@ export function handleModuleAction(
 		}
 
 		modal.showModal();
+		return true;
+	}
+
+	if (action === "ver-alumnos-modulo") {
+		const codigo = button.dataset.codigo;
+		const nombre = button.dataset.nombre || codigo;
+		if (!codigo) return true;
+
+		mTxtAlumnosTitulo.textContent = `Alumnos matriculados en ${nombre}`;
+		mContainerAlumnosLista.innerHTML = '<p class="text-zinc-400 text-sm py-4 text-center">Cargando alumnos...</p>';
+		modalAlumnos.showModal();
+
+		fetch(`/api/modulos/${encodeURIComponent(codigo)}/alumnos`)
+		.then((res) => {
+			if (!res.ok) throw new Error("Error al cargar la lista de alumnos.");
+			return res.json() as Promise<{ id_usuario: number; username: string; email: string }[]>;
+		})
+		.then((alumnos) => {
+			mContainerAlumnosLista.innerHTML = "";
+			if (alumnos.length === 0) {
+				mContainerAlumnosLista.innerHTML = '<p class="text-zinc-500 text-sm py-4 text-center">No hay alumnos matriculados en este módulo.</p>';
+				return;
+			}
+
+			alumnos.forEach((al) => {
+				const item = document.createElement("div");
+				item.className = "flex items-center justify-between p-3 rounded bg-white/5 border border-white/5 hover:border-cyan-500/20 transition";
+				
+				item.innerHTML = `
+					<div>
+						<span class="text-xs font-mono text-cyan-300 mr-2">ID ${al.id_usuario}</span>
+						<span class="text-sm font-semibold text-white">${al.username}</span>
+					</div>
+					<div class="text-xs text-zinc-400 font-mono">${al.email}</div>
+				`;
+				mContainerAlumnosLista.appendChild(item);
+			});
+		})
+		.catch((err: Error) => {
+			console.error(err);
+			mContainerAlumnosLista.innerHTML = `<p class="text-red-400 text-sm py-4 text-center">No se pudo cargar la lista: ${err.message}</p>`;
+		});
+
 		return true;
 	}
 

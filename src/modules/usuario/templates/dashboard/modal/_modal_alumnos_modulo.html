@@ -1,0 +1,17 @@
+<dialog id="modal-alumnos-modulo" class="fixed inset-0 m-auto w-full max-w-lg rounded-md border border-white/10 bg-zinc-950/95 p-8 shadow-2xl shadow-black/40 backdrop:bg-black/60 backdrop:backdrop-blur-sm outline-none">
+	<div class="space-y-4">
+		<div class="mb-6 flex items-center justify-between border-b border-zinc-800 pb-3">
+			<h2 id="modal-alumnos-modulo-titulo" class="text-xl text-white">Alumnos Matriculados</h2>
+		</div>
+
+		<div id="modal-alumnos-lista" class="max-h-60 overflow-y-auto space-y-3 custom-scrollbar">
+			<p class="text-zinc-500 text-sm py-4 text-center">Cargando alumnos...</p>
+		</div>
+		
+		<div class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+			<button type="button" id="btn-cerrar-alumnos-modal" class="rounded-sm border border-zinc-700 bg-transparent px-5 py-2 text-sm font-semibold text-zinc-300 transition hover:bg-white/5 hover:text-white">
+				Cerrar
+			</button>
+		</div>
+	</div>
+</dialog>
