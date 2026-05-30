@@ -137,3 +137,43 @@ class MatriculaRepository:
             raise e
         finally:
             session.close()
+
+    @staticmethod
+    def get_alumnos_by_modulo(codigo_modulo):
+        """
+        Obtiene todos los usuarios con rol ALUMNO matriculados en un módulo concreto.
+
+        Args:
+            codigo_modulo (str): Código del módulo.
+
+        Returns:
+            list: Listado de objetos Usuario.
+        """
+        from src.models.usuario import Usuario
+        session = get_session()
+        try:
+            return session.query(Usuario).join(
+                Matricula, Usuario.id_usuario == Matricula.id_usuario
+            ).filter(
+                Matricula.codigo_modulo == codigo_modulo,
+                Usuario.rol == 'ALUMNO'
+            ).all()
+        finally:
+            session.close()
+
+    @staticmethod
+    def get_conteo_alumnos_por_modulo(codigo_modulo):
+        """
+        Obtiene la cantidad de alumnos matriculados en un módulo concreto.
+
+        Args:
+            codigo_modulo (str): Código del módulo.
+
+        Returns:
+            int: Cantidad de alumnos matriculados.
+        """
+        session = get_session()
+        try:
+            return session.query(Matricula).filter_by(codigo_modulo=codigo_modulo).count()
+        finally:
+            session.close()

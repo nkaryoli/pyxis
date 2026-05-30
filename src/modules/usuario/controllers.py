@@ -70,6 +70,10 @@ def dashboard():
         return render_template('errors/403.html'), 403
 
     modulos = ModuloService.obtener_todos_los_modulos()
+    from src.repositories.matricula_repository import MatriculaRepository
+    for m in modulos:
+        m.alumnos_count = MatriculaRepository.get_conteo_alumnos_por_modulo(m.codigo_modulo)
+
     usuarios = UsuarioService.obtener_todos_los_usuarios()
     posts = PostService.listar_todos()
     tokens = TokensService.obtener_todos_los_tokens()
