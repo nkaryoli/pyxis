@@ -3,9 +3,15 @@
 		<button type="button" class="dashboard-tab px-3 py-2 text-zinc-200 opacity-80 hover:bg-zinc-800/80" data-tab-target="seccion-modulos" aria-selected="true">
 			Módulos
 		</button>
+		{% if rol == 'ADMINISTRADOR' %}
 		<button type="button" class="dashboard-tab px-3 py-2 text-zinc-200 opacity-70 hover:bg-zinc-800/80" data-tab-target="seccion-usuarios" aria-selected="false">
 			Usuarios
 		</button>
+		{% elif rol == 'PROFESOR' %}
+		<button type="button" class="dashboard-tab px-3 py-2 text-zinc-200 opacity-70 hover:bg-zinc-800/80" data-tab-target="seccion-usuarios" aria-selected="false">
+			Alumnos
+		</button>
+		{% endif %}
 		<button type="button" class="dashboard-tab  px-3 py-2 text-zinc-200 opacity-80 hover:bg-zinc-800/80" data-tab-target="seccion-posts" aria-selected="false">
 			Posts
 		</button>
