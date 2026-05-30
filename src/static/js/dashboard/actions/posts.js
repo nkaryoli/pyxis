@@ -1,4 +1,5 @@
 import { actualizarPost, eliminarPost } from "../api.js";
+import { mostrarConfirmacion } from "../confirm.js";
 const modal = document.getElementById("modal-post");
 const form = document.getElementById("form-post");
 const mInputId = document.getElementById("modal-post-id");
@@ -60,11 +61,13 @@ export function handlePostAction(button, context) {
     }
     if (action === "eliminar-post") {
         const id = button.dataset.id;
-        if (!id || !confirm(`¿Eliminar el post ${id}?`))
+        if (!id)
             return true;
-        void eliminarPost(id, context.userId, context.userRole)
-            .then(() => location.reload())
-            .catch((err) => alert(`No se pudo eliminar el post: ${err.message}`));
+        mostrarConfirmacion("Eliminar Publicación", "¿Estás seguro de que deseas eliminar permanentemente esta publicación?", () => {
+            void eliminarPost(id, context.userId, context.userRole)
+                .then(() => location.reload())
+                .catch((err) => alert(`No se pudo eliminar el post: ${err.message}`));
+        });
         return true;
     }
     return false;

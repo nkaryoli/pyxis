@@ -1,5 +1,6 @@
 import type { DashboardContext } from "../types.js";
 import { actualizarModulo, crearModulo, eliminarModulo } from "../api.js";
+import { mostrarConfirmacion } from "../confirm.js";
 
 // Modal de edición/creación de módulos
 const modal = document.getElementById("modal-modulo") as HTMLDialogElement;
@@ -212,11 +213,17 @@ export function handleModuleAction(
 
 	if (action === "eliminar-modulo") {
 		const codigo = button.dataset.codigo;
-		if (!codigo || !confirm(`¿Eliminar el módulo ${codigo}?`)) return true;
+		if (!codigo) return true;
 
-		void eliminarModulo(codigo, context.userRole)
-		.then(() => location.reload())
-		.catch((err: Error) => alert(`No se pudo eliminar el módulo: ${err.message}`));
+		mostrarConfirmacion(
+			"Eliminar Asignatura",
+			"¿Estás seguro de que deseas eliminar permanentemente esta asignatura?",
+			() => {
+				void eliminarModulo(codigo, context.userRole)
+					.then(() => location.reload())
+					.catch((err: Error) => alert(`No se pudo eliminar el módulo: ${err.message}`));
+			}
+		);
 		return true;
 	}
 

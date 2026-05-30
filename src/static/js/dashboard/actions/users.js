@@ -1,4 +1,5 @@
 import { actualizarUsuario, crearUsuario, eliminarUsuario } from "../api.js";
+import { mostrarConfirmacion } from "../confirm.js";
 // Modal y Formulario de Usuario (Edición/Creación de credenciales)
 const modal = document.getElementById('modal-usuario');
 const form = document.getElementById('form-usuario');
@@ -187,11 +188,13 @@ export function handleUserAction(button, context) {
     }
     if (action === "eliminar-usuario") {
         const id = button.dataset.id;
-        if (!id || !confirm(`¿Eliminar el usuario ${id}?`))
+        if (!id)
             return true;
-        void eliminarUsuario(id)
-            .then(() => location.reload())
-            .catch(() => alert("No se pudo eliminar el usuario con la API actual."));
+        mostrarConfirmacion("Eliminar Usuario", "¿Estás seguro de que deseas eliminar permanentemente este usuario?", () => {
+            void eliminarUsuario(id)
+                .then(() => location.reload())
+                .catch(() => alert("No se pudo eliminar el usuario con la API actual."));
+        });
         return true;
     }
     return false;

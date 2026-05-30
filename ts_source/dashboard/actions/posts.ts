@@ -1,5 +1,6 @@
 import type { DashboardContext } from "../types.js";
 import { actualizarPost, eliminarPost } from "../api.js";
+import { mostrarConfirmacion } from "../confirm.js";
 
 const modal = document.getElementById("modal-post") as HTMLDialogElement;
 const form = document.getElementById("form-post") as HTMLFormElement;
@@ -73,11 +74,17 @@ export function handlePostAction(
 
 	if (action === "eliminar-post") {
 		const id = button.dataset.id;
-		if (!id || !confirm(`¿Eliminar el post ${id}?`)) return true;
+		if (!id) return true;
 
-		void eliminarPost(id, context.userId, context.userRole)
-		.then(() => location.reload())
-		.catch((err: Error) => alert(`No se pudo eliminar el post: ${err.message}`));
+		mostrarConfirmacion(
+			"Eliminar Publicación",
+			"¿Estás seguro de que deseas eliminar permanentemente esta publicación?",
+			() => {
+				void eliminarPost(id, context.userId, context.userRole)
+					.then(() => location.reload())
+					.catch((err: Error) => alert(`No se pudo eliminar el post: ${err.message}`));
+			}
+		);
 		return true;
 	}
 
