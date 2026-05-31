@@ -59,7 +59,7 @@ def test_post_modulo_endpoint_error(client, monkeypatch):
 
 def test_put_modulo_endpoint_valido(client, monkeypatch):
     """Prueba el endpoint PUT /api/modulos/<codigo> (200)"""
-    def fake_modificar(codigo, nombre, curso, rol):
+    def fake_modificar(codigo, nombre, curso, rol, *args, **kwargs):
         return FakeModulo(codigo, nombre, curso)
 
     monkeypatch.setattr(ModuloService, "modificar_modulo", staticmethod(fake_modificar))

@@ -76,7 +76,7 @@ class AuthService:
         if not usuario:
             raise ValueError('Credenciales inválidas.')
 
-        if not usuario.is_active:
+        if not getattr(usuario, 'is_active', True):
             raise ValueError('Esta cuenta de usuario se encuentra inactiva o ha sido desactivada.')
 
         if not check_password_hash(usuario.password_usuario, password):
@@ -157,7 +157,7 @@ class AuthService:
                     return redirect(url_for('auth.login'))
                 return jsonify({'error': 'Usuario no encontrado'}), 401
 
-            if not usuario.is_active:
+            if not getattr(usuario, 'is_active', True):
                 if not wants_json:
                     return redirect(url_for('auth.login'))
                 return jsonify({'error': 'Tu cuenta de usuario ha sido desactivada'}), 401

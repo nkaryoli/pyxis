@@ -63,6 +63,11 @@ def test_crear_post_api_ok(client, monkeypatch):
     )
 
     monkeypatch.setattr(
+        "src.modules.posts.controllers.UsuarioService.esta_matriculado",
+        lambda id_usuario, codigo_modulo: True
+    )
+
+    monkeypatch.setattr(
         "src.modules.posts.controllers.PostService.crear_post",
         lambda titulo, contenido, id_usuario, codigo_modulo, imagen=None: post_creado
     )
@@ -130,16 +135,16 @@ def test_ver_posts_usuario_api_ok(client, monkeypatch):
     )
 
     monkeypatch.setattr(
-        "src.modules.posts.controllers.PostService.ver_posts_por_usuario",
-        lambda id_usuario: [post_mock] if id_usuario == 10 else []
+        "src.modules.posts.controllers.UsuarioService.obtener_posts_paginados",
+        lambda id_usuario, page: ([post_mock.to_dict()], 1)
     )
 
     response = client.get('/api/usuarios/10/posts')
     body = response.get_json()
 
     assert response.status_code == 200
-    assert len(body) == 1
-    assert body[0]["id_usuario"] == 10
+    assert len(body["items"]) == 1
+    assert body["items"][0]["id_usuario"] == 10
 
 
 
@@ -166,7 +171,7 @@ def test_modificar_post_autorizado_ok(client, monkeypatch):
     )
     monkeypatch.setattr(
         "src.modules.posts.controllers.PostService.modificar_post",
-        lambda id_post, titulo, contenido, codigo_modulo, imagen: post_actualizado
+        lambda *args, **kwargs: post_actualizado
     )
 
     headers = {'X-User-Id': '10', 'X-User-Role': 'ALUMNO'}

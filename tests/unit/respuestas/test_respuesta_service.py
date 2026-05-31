@@ -40,7 +40,7 @@ def test_obtener_respuestas_de_post_service(monkeypatch):
 
     monkeypatch.setattr(
         "src.services.respuesta_service.RespuestaRepository.get_by_post_id",
-        lambda id_post: mock_lista if id_post == 5 else []
+        lambda id_post, *args, **kwargs: mock_lista if id_post == 5 else []
     )
 
     resultado = RespuestaService.obtener_respuestas_de_post(5)
@@ -58,7 +58,7 @@ def test_obtener_respuestas_de_usuario_service(monkeypatch):
 
     monkeypatch.setattr(
         "src.services.respuesta_service.RespuestaRepository.get_by_user_id",
-        lambda id_usuario: mock_lista if id_usuario == 44 else []
+        lambda id_usuario, *args, **kwargs: mock_lista if id_usuario == 44 else []
     )
 
     resultado = RespuestaService.obtener_respuestas_de_usuario(44)
@@ -102,7 +102,7 @@ def test_modificar_respuesta_service(monkeypatch):
 
     monkeypatch.setattr(
         "src.services.respuesta_service.RespuestaRepository.update",
-        lambda id_respuesta, contenido, imagen: mock_actualizada
+        lambda *args, **kwargs: mock_actualizada
     )
 
     resultado = RespuestaService.modificar_respuesta(id_respuesta=1, contenido="Contenido Modificado")

@@ -19,7 +19,7 @@ class FakeModulo:
 
 def test_obtener_todos_los_modulos(monkeypatch):
     """Asegura que devuelve la lista proporcionada por el repositorio."""
-    def fake_get_all():
+    def fake_get_all(*args, **kwargs):
         return [FakeModulo("PROG", "Programación", "1DAM")]
 
     monkeypatch.setattr(ModuloRepository, "get_all", staticmethod(fake_get_all))
@@ -30,7 +30,7 @@ def test_obtener_todos_los_modulos(monkeypatch):
 
 def test_obtener_modulo_por_codigo_valido(monkeypatch):
     """Verifica que devuelve un módulo si el código existe."""
-    def fake_get_by_codigo(codigo):
+    def fake_get_by_codigo(codigo, *args, **kwargs):
         return FakeModulo(codigo, "Sistemas", "1SMR")
 
     monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(fake_get_by_codigo))
@@ -45,7 +45,7 @@ def test_obtener_modulo_codigo_vacio():
 
 def test_obtener_modulo_no_encontrado(monkeypatch):
     """Valida que lanza error si el módulo no existe."""
-    monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(lambda x: None))
+    monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(lambda x, *args, **kwargs: None))
     with pytest.raises(ValueError, match="no encontrado"):
         ModuloService.obtener_modulo_por_codigo("FAKE")
 
@@ -54,7 +54,7 @@ def test_crear_nuevo_modulo_valido(monkeypatch):
     """Verifica la creación exitosa de un módulo con roles autorizados."""
     created = []
 
-    def fake_get_by_codigo(codigo):
+    def fake_get_by_codigo(codigo, *args, **kwargs):
         return None  # Simulamos que no existe para que permita crearlo
 
     def fake_create(codigo, nombre, curso):
@@ -87,17 +87,17 @@ def test_crear_nuevo_modulo_longitudes_cortas():
 
 def test_crear_nuevo_modulo_ya_existente(monkeypatch):
     """Valida que no permite crear si el código ya existe en BD."""
-    monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(lambda x: FakeModulo("PROG", "Prog", "1")))
+    monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(lambda x, *args, **kwargs: FakeModulo("PROG", "Prog", "1")))
     with pytest.raises(ValueError, match="ya está registrado"):
         ModuloService.crear_nuevo_modulo("PROG", "Programación", "1DAM", "PROFESOR")
 
 
 def test_modificar_modulo_valido(monkeypatch):
     """Verifica que se actualiza el módulo correctamente."""
-    def fake_get_by_codigo(codigo):
+    def fake_get_by_codigo(codigo, *args, **kwargs):
         return FakeModulo(codigo, "Antiguo", "1DAM")
 
-    def fake_update(codigo, nombre, curso):
+    def fake_update(codigo, nombre, curso, *args, **kwargs):
         return FakeModulo(codigo, nombre, curso)
 
     monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(fake_get_by_codigo))
@@ -109,7 +109,7 @@ def test_modificar_modulo_valido(monkeypatch):
 
 def test_modificar_modulo_no_existente(monkeypatch):
     """Evita modificar un módulo que no existe."""
-    monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(lambda x: None))
+    monkeypatch.setattr(ModuloRepository, "get_by_codigo", staticmethod(lambda x, *args, **kwargs: None))
     with pytest.raises(ValueError, match="no existe"):
         ModuloService.modificar_modulo("PROG", "Nuevo Nombre", "2DAM", "PROFESOR")
 
@@ -118,7 +118,7 @@ def test_eliminar_modulo_existente_valido(monkeypatch):
     """Verifica que llama al repositorio para borrar si todo es correcto."""
     deleted_called = []
 
-    def fake_get_by_codigo(codigo):
+    def fake_get_by_codigo(codigo, *args, **kwargs):
         return FakeModulo(codigo, "Antiguo", "1DAM")
 
     def fake_delete(codigo):
