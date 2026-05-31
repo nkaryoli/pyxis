@@ -30,7 +30,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-zinc-900 text-zinc-200">
-          {% for usuario_item in usuarios %}
+          {% for usuario_item in usuarios if rol == 'ADMINISTRADOR' or (usuario_item.rol or '').upper() == 'ALUMNO' %}
           <tr class="hover:bg-zinc-900/40">
             {% if rol == 'ADMINISTRADOR' %}
               <td class="py-3 px-3 font-mono text-xs text-cyan-300">{{ usuario_item.id_usuario }}</td>
@@ -58,7 +58,7 @@
           </tr>
           {% else %}
           <tr>
-            <td class="py-4 text-zinc-500" colspan="{% if rol == 'ADMINISTRADOR' %}6{% else %}4{% endif %}">No hay usuarios para mostrar.</td>
+            <td class="py-4 text-zinc-500" colspan="{% if rol == 'ADMINISTRADOR' %}6{% else %}3{% endif %}">No hay usuarios para mostrar.</td>
           </tr>
           {% endfor %}
         </tbody>

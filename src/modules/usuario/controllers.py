@@ -119,6 +119,8 @@ def dashboard():
         'modulos': len(modulos),
         'posts': len(posts),
         'tokens': len(tokens),
+        'usuarios': len(usuarios),
+        'alumnos': sum(1 for u in usuarios if (getattr(u, 'rol', '') or '').upper() == 'ALUMNO'),
     }
 
     return render_template(
