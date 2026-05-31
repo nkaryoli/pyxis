@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, DateTime, func, Boolean
 from src.extensions import Base
 
 class Usuario(Base):
@@ -13,6 +13,7 @@ class Usuario(Base):
     tokens = Column(Integer, default=0)
     rol = Column(String(50), nullable=False)
     imagen_usuario = Column(String(150), nullable=True)
+    is_active = Column(Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return f"<Usuario {self.id_usuario}: {self.username}>"
