@@ -4,9 +4,9 @@
 
 {% block content %}
 <section class="min-h-[calc(100vh-8rem)] flex items-center justify-center">
-  <div class="w-full max-w-3xl rounded-4xl border border-zinc-800/70 bg-slate-950/90 p-10 shadow-2xl shadow-fuchsia-500/10">
+  <div class="w-full max-w-3xl rounded-lg my-16 border border-zinc-800/70 bg-zinc-950/90 p-10 shadow-2xl shadow-red-500/10">
     <div class="flex flex-col gap-8 text-center">
-      <span class="mx-auto inline-flex rounded-full bg-fuchsia-500/10 px-5 py-3 text-5xl font-extrabold tracking-tight text-fuchsia-300 shadow-lg shadow-fuchsia-500/20">
+      <span class="mx-auto inline-flex rounded-full bg-red-500/10 px-5 py-3 text-5xl font-extrabold tracking-tight text-red-300 shadow-lg shadow-red-500/20">
         403
       </span>
       <div>
@@ -17,11 +17,11 @@
           Este rincón del foro requiere otro nivel de acceso, como el despacho del delegado o el backstage del equipo de programación.
         </p>
       </div>
-      <div class="rounded-3xl bg-zinc-900/80 p-6 text-left text-sm text-zinc-400 ring-1 ring-white/5">
+      <div class="rounded-md bg-zinc-900/80 p-6 text-left text-sm text-zinc-400 ring-1 ring-white/5">
         <p>Tranquilo, no es culpa tuya: el servidor está haciendo de profe estricto y te pide credenciales mejores.</p>
       </div>
       <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <a href="{{ url_for('home') }}" class="inline-flex items-center justify-center rounded-full bg-fuchsia-500 px-7 py-3 text-base font-semibold text-black transition hover:bg-fuchsia-400">
+        <a href="{{ url_for('home') }}" class="inline-flex items-center justify-center rounded-md bg-cyan-500 px-7 py-3 text-base font-semibold text-black transition hover:bg-cyan-400">
           Regresar al inicio
         </a>
       </div>

@@ -23,6 +23,7 @@
             {% if rol == 'ADMINISTRADOR' %}
             <th class="py-3 pr-3 font-medium">Rol</th>
             {% endif %}
+            <th class="py-3 pr-3 font-medium text-center">Estado</th>
             <th class="py-3 pr-3 font-medium w-20 text-center">Tokens</th>
             {% if rol == 'ADMINISTRADOR' %}
             <th class="py-3 pr-3 text-right font-medium">Acciones</th>
@@ -40,6 +41,19 @@
             {% if rol == 'ADMINISTRADOR' %}
             <td class="py-3 pr-3">{{ usuario_item.rol }}</td>
             {% endif %}
+            <td class="py-3 pr-3 text-center">
+              {% if usuario_item.is_active %}
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-400 border border-emerald-500/20 transition-all duration-200 hover:bg-emerald-500/20">
+                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Activo
+                </span>
+              {% else %}
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-medium text-rose-400 border border-rose-500/20 transition-all duration-200 hover:bg-rose-500/20">
+                  <span class="h-1.5 w-1.5 rounded-full bg-rose-400"></span>
+                  Inactivo
+                </span>
+              {% endif %}
+            </td>
             <td class="py-3 pr-3 text-zinc-400 w-20 text-center">{{ usuario_item.tokens }}</td>
             {% if rol == 'ADMINISTRADOR' %}
             <td class="py-3 pr-3 text-right">
@@ -50,7 +64,11 @@
                   {% if usuario_item.rol == 'ALUMNO' %}
                   <button class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn" data-action="matricular-usuario" data-id="{{ usuario_item.id_usuario }}">Matricular</button>
                   {% endif %}
-                  <button class="w-full rounded px-3 py-2 text-left text-xs text-red-500 hover:text-red-500 hover:bg-zinc-900 action-btn" data-action="eliminar-usuario" data-id="{{ usuario_item.id_usuario }}">Eliminar</button>
+                  {% if usuario_item.is_active %}
+                  <button class="w-full rounded px-3 py-2 text-left text-xs text-red-500 hover:text-red-500 hover:bg-zinc-900 action-btn" data-action="eliminar-usuario" data-id="{{ usuario_item.id_usuario }}">Desactivar</button>
+                  {% else %}
+                  <button class="w-full rounded px-3 py-2 text-left text-xs text-emerald-500 hover:text-emerald-400 hover:bg-zinc-900 action-btn" data-action="restaurar-usuario" data-id="{{ usuario_item.id_usuario }}">Activar</button>
+                  {% endif %}
                 </div>
               </details>
             </td>
@@ -58,7 +76,7 @@
           </tr>
           {% else %}
           <tr>
-            <td class="py-4 text-zinc-500" colspan="{% if rol == 'ADMINISTRADOR' %}6{% else %}3{% endif %}">No hay usuarios para mostrar.</td>
+            <td class="py-4 text-zinc-500" colspan="{% if rol == 'ADMINISTRADOR' %}7{% else %}4{% endif %}">No hay usuarios para mostrar.</td>
           </tr>
           {% endfor %}
         </tbody>

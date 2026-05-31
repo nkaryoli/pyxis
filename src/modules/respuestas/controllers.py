@@ -124,6 +124,26 @@ def eliminar_respuesta_web(id_respuesta):
 
     return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
 
+@respuestas.route('/respuestas/<int:id_respuesta>/restaurar', methods=['POST'])
+def restaurar_respuesta_web(id_respuesta):
+    usuario_actual = getattr(g, 'current_user', None)
+    respuesta = RespuestaService.obtener_por_id(id_respuesta)
+    if not usuario_actual or not respuesta:
+        flash("No tienes permiso para restaurar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
+        flash("No tienes permiso para restaurar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
+    try:
+        RespuestaService.modificar_respuesta(id_respuesta, is_deleted=False)
+        flash("Respuesta restaurada correctamente.")
+    except Exception as e:
+        flash(f"Error al restaurar: {str(e)}")
+
+    return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
 @respuestas.route('/respuestas/<int:id_respuesta>/validar', methods=['POST'])
 def validar_respuesta_web(id_respuesta):
     usuario_actual = getattr(g, 'current_user', None)
@@ -131,6 +151,10 @@ def validar_respuesta_web(id_respuesta):
     if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
         flash("No tienes permiso para validar esta respuesta.")
         return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if respuesta.is_deleted:
+        flash("No se puede validar una respuesta inactiva o eliminada.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
 
     try:
         RespuestaService.modificar_respuesta(id_respuesta, es_mejor=1)
@@ -147,6 +171,10 @@ def desvalidar_respuesta_web(id_respuesta):
     if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
         flash("No tienes permiso para desvalidar esta respuesta.")
         return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if respuesta.is_deleted:
+        flash("No se puede invalidar una respuesta inactiva o eliminada.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
 
     try:
         RespuestaService.modificar_respuesta(id_respuesta, es_mejor=0)
@@ -180,7 +208,7 @@ def crear_respuesta_api(id_post):
             id_usuario=id_usuario,
             contenido=datos['contenido_respuesta']
         )
-        return jsonify({"mensaje": "Respuesta creada", "respuesta": nueva.to_dict()}), 201
+        return jsonify({"mensaje": "Respuesta creada con éxito", "respuesta": nueva.to_dict()}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -212,4 +240,51 @@ def ver_respuestas_usuario_api(id_usuario):
 # --- 4. GESTIONAR RESPUESTA POR ID (PUT y DELETE con verificación de Rol y Propiedad) ---
 @respuestas.route('/api/respuestas/<int:id_respuesta>', methods=['PUT', 'DELETE'])
 def gestionar_respuesta_api(id_respuesta):
-    return jsonify({"mensaje": "Gestión completada"}), 200
+    try:
+        usuario_id_solicitante = request.headers.get('X-User-Id')
+        usuario_rol = request.headers.get('X-User-Role')
+        
+        if not usuario_id_solicitante or not usuario_rol:
+            return jsonify({"error": "Autenticación requerida. Falta X-User-Id o X-User-Role."}), 401
+
+        usuario_id_solicitante = int(usuario_id_solicitante)
+
+        respuesta = RespuestaService.obtener_por_id(id_respuesta)
+        if not respuesta:
+            return jsonify({"error": f"No se encontró ninguna respuesta con el ID {id_respuesta}"}), 404
+
+        if request.method == 'DELETE':
+            es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (respuesta.id_usuario == usuario_id_solicitante)
+            if not es_autorizado:
+                return jsonify({"error": "No tienes permisos para borrar esta respuesta."}), 403
+            
+            RespuestaService.eliminar_respuesta(id_respuesta)
+            return jsonify({"mensaje": f"Respuesta con ID {id_respuesta} eliminada correctamente"}), 200
+
+        elif request.method == 'PUT':
+            es_autorizado = (usuario_rol == 'ADMINISTRADOR') or (respuesta.id_usuario == usuario_id_solicitante)
+            if not es_autorizado:
+                return jsonify({"error": "No tienes permisos para modificar esta respuesta."}), 403
+            
+            datos = request.get_json() or {}
+            is_deleted = datos.get('is_deleted')
+            if is_deleted is not None:
+                if isinstance(is_deleted, str):
+                    is_deleted = is_deleted.lower() == 'true'
+                else:
+                    is_deleted = bool(is_deleted)
+
+            respuesta_actualizada = RespuestaService.modificar_respuesta(
+                id_respuesta=id_respuesta,
+                contenido=datos.get('contenido_respuesta'),
+                imagen=datos.get('imagen_respuesta'),
+                es_mejor=datos.get('es_mejor'),
+                is_deleted=is_deleted
+            )
+            return jsonify({
+                "mensaje": "Respuesta modificada con éxito",
+                "respuesta": respuesta_actualizada.to_dict()
+            }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

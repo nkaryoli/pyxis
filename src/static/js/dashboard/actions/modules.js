@@ -196,7 +196,7 @@ export function handleModuleAction(button, context) {
         const codigo = button.dataset.codigo;
         if (!codigo)
             return true;
-        mostrarConfirmacion("Eliminar Asignatura", "¿Estás seguro de que deseas eliminar permanentemente esta asignatura?", () => {
+        mostrarConfirmacion("Eliminar Asignatura", "¿Estás seguro de que deseas eliminar esta asignatura?", () => {
             void eliminarModulo(codigo, context.userRole)
                 .then(() => {
                 guardarToastPendiente("Asignatura eliminada con éxito", "success");
@@ -204,6 +204,18 @@ export function handleModuleAction(button, context) {
             })
                 .catch((err) => guardarToastPendiente(`No se pudo eliminar el módulo: ${err.message}`, "error"));
         });
+        return true;
+    }
+    if (action === "restaurar-modulo") {
+        const codigo = button.dataset.codigo;
+        if (!codigo)
+            return true;
+        void actualizarModulo(codigo, { is_deleted: false, rol_usuario_activo: "ADMINISTRADOR" })
+            .then(() => {
+            guardarToastPendiente("Asignatura reactivada con éxito", "success");
+            location.reload();
+        })
+            .catch((err) => guardarToastPendiente(`No se pudo reactivar el módulo: ${err.message}`, "error"));
         return true;
     }
     return false;

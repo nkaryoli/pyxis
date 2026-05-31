@@ -221,17 +221,32 @@ export function handleUserAction(
 		if (!id) return true;
 
 		mostrarConfirmacion(
-			"Eliminar Usuario",
-			"¿Estás seguro de que deseas eliminar permanentemente este usuario?",
+			"Desactivar Usuario",
+			"¿Estás seguro de que deseas desactivar este usuario?",
 			() => {
 				void eliminarUsuario(id)
 					.then(() => {
-						guardarToastPendiente("Usuario eliminado con éxito", "success");
+						guardarToastPendiente("Usuario desactivado con éxito", "success");
 						location.reload();
 					})
-					.catch(() => guardarToastPendiente("No se pudo eliminar el usuario con la API actual.", "error"));
+					.catch(() => guardarToastPendiente("No se pudo desactivar el usuario.", "error"));
 			}
 		);
+		return true;
+	}
+
+	if (action === "restaurar-usuario") {
+		const id = button.dataset.id;
+		if (!id) return true;
+
+		const root = document.querySelector<HTMLElement>("[data-dashboard-root]");
+		const solicitanteId = root?.dataset.userId ?? "";
+		void actualizarUsuario(id, { is_active: true }, solicitanteId)
+			.then(() => {
+				guardarToastPendiente("Usuario activado con éxito", "success");
+				location.reload();
+			})
+			.catch((err: Error) => guardarToastPendiente(`No se pudo activar el usuario: ${err.message}`, "error"));
 		return true;
 	}
 

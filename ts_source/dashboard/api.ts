@@ -53,9 +53,10 @@ export function crearModulo(payload: {
 export function actualizarModulo(
 	codigo: string,
 	payload: {
-		nombre_asignatura: string;
-		curso_modulo: string;
-		rol_usuario_activo: string;
+		nombre_asignatura?: string;
+		curso_modulo?: string;
+		rol_usuario_activo?: string;
+		is_deleted?: boolean;
 	},
 ): Promise<unknown> {
 	return requestJson(`/api/modulos/${encodeURIComponent(codigo)}`, {
@@ -109,8 +110,9 @@ export function eliminarUsuario(idUsuario: string): Promise<unknown> {
 export function actualizarPost(
 	idPost: string,
 	payload: {
-		titulo_post: string;
-		contenido_post: string;
+		titulo_post?: string;
+		contenido_post?: string;
+		is_deleted?: boolean;
 	},
 	userId: string,
 	userRole: string,

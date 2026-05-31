@@ -8,11 +8,13 @@ class RespuestaService:
 
     @staticmethod
     def obtener_respuestas_de_post(id_post):
-        return RespuestaRepository.get_by_post_id(id_post)
+        from src.extensions import should_include_deleted
+        return RespuestaRepository.get_by_post_id(id_post, include_deleted=should_include_deleted())
 
     @staticmethod
     def obtener_respuestas_de_usuario(id_usuario):
-        return RespuestaRepository.get_by_user_id(id_usuario)
+        from src.extensions import should_include_deleted
+        return RespuestaRepository.get_by_user_id(id_usuario, include_deleted=should_include_deleted())
 
     @staticmethod
     def obtener_por_id(id_respuesta):
@@ -23,5 +25,5 @@ class RespuestaService:
         return RespuestaRepository.delete(id_respuesta)
 
     @staticmethod
-    def modificar_respuesta(id_respuesta, contenido=None, imagen=None, es_mejor=None):
-        return RespuestaRepository.update(id_respuesta, contenido, imagen, es_mejor)
+    def modificar_respuesta(id_respuesta, contenido=None, imagen=None, es_mejor=None, is_deleted=None):
+        return RespuestaRepository.update(id_respuesta, contenido, imagen, es_mejor, is_deleted)

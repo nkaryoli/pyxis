@@ -92,7 +92,14 @@ def put_modulo(codigo_modulo):
         nuevo_curso = data.get('curso_modulo')
         rol_usuario = data.get('rol_usuario_activo')
         
-        actualizado = ModuloService.modificar_modulo(codigo_modulo, nuevo_nombre, nuevo_curso, rol_usuario)
+        is_deleted = data.get('is_deleted')
+        if is_deleted is not None:
+            if isinstance(is_deleted, str):
+                is_deleted = is_deleted.lower() == 'true'
+            else:
+                is_deleted = bool(is_deleted)
+        
+        actualizado = ModuloService.modificar_modulo(codigo_modulo, nuevo_nombre, nuevo_curso, rol_usuario, is_deleted=is_deleted)
         
         return jsonify({
             'codigo_modulo': actualizado.codigo_modulo,

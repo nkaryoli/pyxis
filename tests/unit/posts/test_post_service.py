@@ -21,7 +21,7 @@ def test_listar_todos_service(monkeypatch):
     # Interceptamos PostRepository.get_all
     monkeypatch.setattr(
         "src.services.post_service.PostRepository.get_all",
-        lambda: mock_lista
+        lambda *args, **kwargs: mock_lista
     )
     
     resultado = PostService.listar_todos()
@@ -38,7 +38,7 @@ def test_ver_posts_por_usuario_service(monkeypatch):
     
     monkeypatch.setattr(
         "src.services.post_service.PostRepository.get_by_user_id",
-        lambda id_user: mock_lista if id_user == 10 else []
+        lambda id_user, *args, **kwargs: mock_lista if id_user == 10 else []
     )
     
     resultado = PostService.ver_posts_por_usuario(10)
@@ -114,7 +114,7 @@ def test_modificar_post_service(monkeypatch):
     
     monkeypatch.setattr(
         "src.services.post_service.PostRepository.update",
-        lambda id_post, titulo, contenido, codigo_modulo, imagen: post_editado
+        lambda *args, **kwargs: post_editado
     )
     
     resultado = PostService.modificar_post(id_post=1, titulo="Titulo Modificado")

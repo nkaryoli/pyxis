@@ -1,6 +1,6 @@
 {% extends 'layout.html' %} {% block title %}Inicio | Pyxis Forum{% endblock %} 
 {% block page_content %}
-<section class="space-y-9">
+<section class="space-y-9 min-h-screen pb-16">
 
     <div class="pt-6 flex flex-col items-center md:items-start">
 		<p class="text-sm text-center md:text-start uppercase tracking-[0.35em] text-cyan-400">
@@ -34,11 +34,21 @@
 		</div>
 
 		<div class="grid gap-6 md:grid-cols-2">
+			{% set ns = namespace(active_count=0) %}
 			{% for modulo in modulos | sort(attribute='posts_count', reverse=true) %}
-				{% if loop.index <= 4 %}
-					<div class="col-span-1 h-full">
-						{% include 'partials/category_card.html' %}
-					</div>
+				{% if not modulo.is_deleted %}
+					{% if ns.active_count < 4 %}
+						{% set ns.active_count = ns.active_count + 1 %}
+						<div class="col-span-1 h-full">
+							{% include 'partials/category_card.html' %}
+						</div>
+					{% endif %}
+				{% else %}
+					{% if current_user and current_user.rol in ['ADMINISTRADOR', 'PROFESOR'] %}
+						<div class="col-span-1 h-full">
+							{% include 'partials/category_card.html' %}
+						</div>
+					{% endif %}
 				{% endif %}
 			{% endfor %}
 		</div>

@@ -7,14 +7,17 @@ class PostRepository:
     """Repositorio de acceso a datos para la entidad Post."""
 
     @staticmethod
-    def get_all():
+    def get_all(include_deleted=False):
         """Devuelve todos los posts ordenados por fecha de creación descendente."""
         session = get_session()
         try:
-            posts = session.query(Post).options(
+            query = session.query(Post).options(
                 selectinload(Post.respuestas_relacion),
                 selectinload(Post.modulo),
-            ).order_by(Post.fecha_creacion_post.desc()).all()
+            )
+            if not include_deleted:
+                query = query.filter(Post.is_deleted == False)
+            posts = query.order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
@@ -36,14 +39,17 @@ class PostRepository:
             session.close()
 
     @staticmethod
-    def get_by_user_id(id_usuario):
+    def get_by_user_id(id_usuario, include_deleted=False):
         """Devuelve todos los posts de un usuario concreto."""
         session = get_session()
         try:
-            posts = session.query(Post).options(
+            query = session.query(Post).options(
                 selectinload(Post.respuestas_relacion),
                 selectinload(Post.modulo),
-            ).filter_by(id_usuario=id_usuario).all()
+            ).filter(Post.id_usuario == id_usuario)
+            if not include_deleted:
+                query = query.filter(Post.is_deleted == False)
+            posts = query.all()
             session.expunge_all()
             return posts
         finally:
@@ -74,12 +80,12 @@ class PostRepository:
 
     @staticmethod
     def delete(id_post):
-        """Elimina un post por su identificador y devuelve si la operación tuvo éxito."""
+        """Marca un post como eliminado (borrado lógico)."""
         session = get_session()
         try:
             post = session.query(Post).filter_by(id_post=id_post).first()
             if post:
-                session.delete(post)
+                post.is_deleted = True
                 session.commit()
                 return True
             return False
@@ -90,7 +96,7 @@ class PostRepository:
             session.close()
 
     @staticmethod
-    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
+    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None, is_deleted=None):
         """Actualiza los campos enviados de un post existente."""
         session = get_session()
         try:
@@ -109,6 +115,8 @@ class PostRepository:
                 post.imagen_post = imagen
             if fecha_creacion is not None: 
                 post.fecha_creacion_post = fecha_creacion 
+            if is_deleted is not None:
+                post.is_deleted = is_deleted
 
             session.commit()
             session.refresh(post)
@@ -122,29 +130,35 @@ class PostRepository:
             session.close()
             
     @staticmethod
-    def get_by_modulo_code(codigo_modulo):
+    def get_by_modulo_code(codigo_modulo, include_deleted=False):
         """Devuelve los posts asociados a un código de módulo."""
         session = get_session()
         try:
             codigo_limpio = (codigo_modulo or "").strip().upper()
-            posts = session.query(Post).options(
+            query = session.query(Post).options(
                 selectinload(Post.respuestas_relacion),
                 selectinload(Post.modulo),
-            ).filter_by(codigo_modulo=codigo_limpio).order_by(Post.fecha_creacion_post.desc()).all()
+            ).filter(Post.codigo_modulo == codigo_limpio)
+            if not include_deleted:
+                query = query.filter(Post.is_deleted == False)
+            posts = query.order_by(Post.fecha_creacion_post.desc()).all()
             session.expunge_all()
             return posts
         finally:
             session.close()
             
     @staticmethod
-    def get_recent():
+    def get_recent(include_deleted=False):
         """Devuelve los posts recientes publicados en los últimos días."""
         session = get_session()
         try:
-            posts = session.query(Post).options(
+            query = session.query(Post).options(
                 selectinload(Post.respuestas_relacion),
                 selectinload(Post.modulo),
-            ).order_by(Post.fecha_creacion_post.desc()).limit(10).all()
+            )
+            if not include_deleted:
+                query = query.filter(Post.is_deleted == False)
+            posts = query.order_by(Post.fecha_creacion_post.desc()).limit(10).all()
             session.expunge_all()
             limite_tres_dias = datetime.now() - timedelta(days=3)
             posts_filtrados = [
@@ -160,11 +174,13 @@ class PostRepository:
             
             
     @staticmethod
-    def get_by_user_paginated(id_usuario, limit, offset):
+    def get_by_user_paginated(id_usuario, limit, offset, include_deleted=False):
         session = get_session()
         try:
-            posts = session.query(Post).filter_by(id_usuario=id_usuario)\
-                .order_by(Post.fecha_creacion_post.desc())\
+            query = session.query(Post).filter(Post.id_usuario == id_usuario)
+            if not include_deleted:
+                query = query.filter(Post.is_deleted == False)
+            posts = query.order_by(Post.fecha_creacion_post.desc())\
                 .limit(limit).offset(offset).all()
             session.expunge_all()
             return posts
@@ -172,10 +188,13 @@ class PostRepository:
             session.close()
 
     @staticmethod
-    def count_by_user(id_usuario):
+    def count_by_user(id_usuario, include_deleted=False):
         session = get_session()
         try:
-            return session.query(Post).filter_by(id_usuario=id_usuario).count()
+            query = session.query(Post).filter(Post.id_usuario == id_usuario)
+            if not include_deleted:
+                query = query.filter(Post.is_deleted == False)
+            return query.count()
         finally:
             session.close()
     

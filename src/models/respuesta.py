@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from src.extensions import Base
@@ -10,9 +10,10 @@ class Respuesta(Base):
     contenido_respuesta = Column(Text, nullable=False)
     fecha_respuesta = Column(DateTime, default=datetime.utcnow)
     id_post = Column(Integer, ForeignKey('POSTS.id_post'), nullable=False)
-    id_usuario = Column(Integer, ForeignKey('USUARIOS.id_usuario'), nullable=False)
+    id_usuario = Column(Integer, ForeignKey('USUARIOS.id_usuario'), nullable=True)
     es_mejor_respuesta = Column(Integer, default=0) 
     imagen_respuesta = Column(String(255), nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=False)
 
     usuario = relationship("Usuario", backref="respuestas", lazy="joined")
     
@@ -30,7 +31,14 @@ class Respuesta(Base):
 
     @property
     def autor(self):
-        return self.usuario.username if self.usuario else f"Usuario {self.id_usuario}"
+        from src.extensions import should_include_deleted
+        if not self.usuario:
+            return "Usuario Eliminado"
+        if not self.usuario.is_active:
+            if should_include_deleted():
+                return f"Usuario Inactivo ({self.usuario.username})"
+            return "Usuario Inactivo"
+        return self.usuario.username
     
     @property
     def mejor(self):

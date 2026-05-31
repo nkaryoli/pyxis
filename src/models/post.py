@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from src.extensions import Base
@@ -10,9 +10,10 @@ class Post(Base):
     titulo_post = Column(String(150), nullable=False)
     contenido_post = Column(Text, nullable=False)
     fecha_creacion_post = Column(DateTime, default=datetime.now)
-    id_usuario = Column(Integer, ForeignKey('USUARIOS.id_usuario'), nullable=False)
-    codigo_modulo = Column(String(50), ForeignKey('MODULOS.codigo_modulo'), nullable=True) 
+    id_usuario = Column(Integer, ForeignKey('USUARIOS.id_usuario'), nullable=True)
+    codigo_modulo = Column(String(50), ForeignKey('MODULOS.codigo_modulo'), nullable=False) 
     imagen_post = Column(String(255), nullable=True)  
+    is_deleted = Column(Boolean, default=False, nullable=False)
     
     usuario = relationship("Usuario", backref="posts", lazy="joined") 
     modulo = relationship("Modulo", lazy="joined")
@@ -27,7 +28,14 @@ class Post(Base):
 
     @property
     def autor(self):
-        return self.usuario.username if self.usuario else f"Usuario {self.id_usuario}"
+        from src.extensions import should_include_deleted
+        if not self.usuario:
+            return "Usuario Eliminado"
+        if not self.usuario.is_active:
+            if should_include_deleted():
+                return f"Usuario Inactivo ({self.usuario.username})"
+            return "Usuario Inactivo"
+        return self.usuario.username
 
     @property
     def respuestas(self):
@@ -55,7 +63,6 @@ class Post(Base):
             "id_usuario": self.id_usuario,
             "codigo_modulo": self.codigo_modulo,
             "imagen_post": self.imagen_post,
+            "is_deleted": self.is_deleted,
             "fecha_creacion": self.fecha_creacion_post.isoformat() if self.fecha_creacion_post else None
         }
-
- 

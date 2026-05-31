@@ -22,9 +22,19 @@ def test_crear_respuesta_api_ok(client, monkeypatch):
         to_dict=lambda: {"id_respuesta": 1, "contenido_respuesta": "Buena solución", "id_usuario": 10}
     )
 
+    post_mock = SimpleNamespace(id_post=5, codigo_modulo="M06")
+    monkeypatch.setattr(
+        "src.services.post_service.PostService.obtener_por_id",
+        lambda id_post: post_mock
+    )
+    monkeypatch.setattr(
+        "src.services.usuario_service.UsuarioService.esta_matriculado",
+        lambda id_usuario, codigo_modulo: True
+    )
+
     monkeypatch.setattr(
         "src.modules.respuestas.controllers.RespuestaService.crear_respuesta",
-        lambda id_post, id_usuario, contenido, es_mejor, imagen: respuesta_mock
+        lambda id_post, id_usuario, contenido, es_mejor=0, imagen=None: respuesta_mock
     )
 
     payload = {
@@ -84,16 +94,16 @@ def test_ver_respuestas_usuario_api_ok(client, monkeypatch):
     )
 
     monkeypatch.setattr(
-        "src.modules.respuestas.controllers.RespuestaService.obtener_respuestas_de_usuario",
-        lambda id_usuario: [r_mock] if id_usuario == 44 else []
+        "src.modules.respuestas.controllers.UsuarioService.obtener_respuestas_paginadas",
+        lambda id_usuario, page: ([r_mock.to_dict()], 1)
     )
 
     response = client.get('/api/usuarios/44/respuestas')
     body = response.get_json()
 
     assert response.status_code == 200
-    assert len(body) == 1
-    assert body[0]["id_usuario"] == 44
+    assert len(body["items"]) == 1
+    assert body["items"][0]["id_usuario"] == 44
 
 
 def test_gestionar_respuesta_sin_headers_da_401(client):
@@ -173,7 +183,7 @@ def test_modificar_respuesta_autorizado_propietario(client, monkeypatch):
     )
     monkeypatch.setattr(
         "src.modules.respuestas.controllers.RespuestaService.modificar_respuesta",
-        lambda id_respuesta, contenido, imagen: respuesta_editada
+        lambda *args, **kwargs: respuesta_editada
     )
 
     headers = {'X-User-Id': '10', 'X-User-Role': 'ALUMNO'}

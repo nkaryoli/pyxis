@@ -9,8 +9,7 @@ class HistoricoTokens(Base):
     fecha_tokens = Column(DateTime, default=func.current_timestamp())
     motivo = Column(String(255), nullable=False)
     trimestre = Column(String(50), nullable=False)
-    id_usuario = Column(Integer, nullable=False)
-    #id_usuario = Column(Integer, ForeignKey('usuarios.id_usuario'), nullable=False)
+    id_usuario = Column(Integer, ForeignKey('USUARIOS.id_usuario'), nullable=False)
 
     def to_dict(self):
         return {

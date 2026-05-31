@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <div class="w-full">
+            <div class="w-full min-w-0">
                 <div class="flex items-center gap-3 text-sm text-zinc-400">
                     <a href="{{ url_for('modulos.detalle_modulo', nombre_modulo=post.modulo_nombre) }}" class="text-cyan-400 hover:text-cyan-300">
                         {{ post.modulo_nombre }}
@@ -25,7 +25,12 @@
                 </div>
 
                 <div class="flex items-center justify-between gap-9 mt-3 text-sm text-zinc-400">
-                    <h1 class="text-2xl font-bold text-white">{{ post.titulo_post }}</h1>
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+                        {% if post.is_deleted %}
+                            <span class="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-xs font-bold text-rose-400 border border-rose-500/20 uppercase">Inactivo</span>
+                        {% endif %}
+                        {{ post.titulo_post }}
+                    </h1>
                     <span>{{ post.respuestas_count }} respuestas</span>
                 </div>
 
@@ -37,7 +42,7 @@
                     <p class="text-sm text-zinc-400">{{ post.usuario.email_usuario }}</p>
                 </div>
                 {% endif %}
-                <p class="mt-5 text-zinc-300">{{ post.contenido_post }}</p>
+                <p class="mt-5 text-zinc-300 wrap-break-word">{{ post.contenido_post }}</p>
                 {% if post.imagen_post %}
                 <div class="mt-4 overflow-hidden rounded-md border border-zinc-800 bg-zinc-950/60">
                     <img src="{{ post.imagen_post }}" alt="Imagen del post" class="w-full object-cover max-h-96" />
@@ -65,12 +70,15 @@
                     {% endif %}
                 </div>
                 
-                <div class="space-y-3 w-full">
+                <div class="space-y-3 w-full min-w-0">
                     <div class="flex items-start justify-between gap-4 flex-wrap">
                         <div class="text-xs text-zinc-500 uppercase tracking-wider">
                             Respondido por: <span class="font-semibold text-zinc-300">@{{ respuesta.autor }}</span>
                             <span class="mx-2">•</span>
                             <span>{{ respuesta.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                            {% if respuesta.is_deleted %}
+                                <span class="inline-flex items-center gap-1 rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/20 ml-2 uppercase">Eliminada</span>
+                            {% endif %}
                         </div>
                         
                         <div class="flex items-center gap-2 flex-wrap">
@@ -84,49 +92,61 @@
                             
                         </div>
                     </div>
-                  
+
                     {% if edit_respuesta and edit_respuesta.id_respuesta == respuesta.id_respuesta %}
-                    <form action="{{ url_for('respuestas.editar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" enctype="multipart/form-data" class="space-y-5 rounded-md border border-cyan-500/20 bg-zinc-950/90 p-5 shadow-[0_20px_45px_-25px_rgba(14,165,233,0.55)]">
-                        <textarea name="contenido_respuesta" rows="4" required class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/20">{{ respuesta.contenido }}</textarea>
-                        <div class="space-y-2">
-                            <label for="imagen_respuesta_{{ respuesta.id_respuesta }}" class="block text-sm font-medium text-zinc-400">Subir nueva imagen (opcional)</label>
-                            <div class="flex flex-wrap items-center gap-3">
-                                <label for="imagen_respuesta_{{ respuesta.id_respuesta }}" class="inline-flex cursor-pointer items-center justify-center rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/15">
-                                    Seleccionar archivo
-                                </label>
-                                <span class="text-sm text-zinc-400">PNG, JPG, GIF o WEBP</span>
+                    <form action="{{ url_for('respuestas.editar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" enctype="multipart/form-data" class="space-y-5 py-3">
+                        <textarea name="contenido_respuesta" rows="4" required class="w-full rounded-md border border-zinc-700  bg-zinc-950/50 px-4 py-3 text-sm text-zinc-200 placeholder:text-zinc-500 focus:border-cyan-300/70 focus:outline-none focus:ring-2 focus:ring-cyan-400/20">{{ respuesta.contenido }}</textarea>
+                        <div class="flex flex-row justify-between items-center">
+                            <div class="space-y-2">
+                                <label for="imagen_respuesta_{{ respuesta.id_respuesta }}" class="block text-sm font-medium text-zinc-400">Subir nueva imagen (opcional)</label>
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <label for="imagen_respuesta_{{ respuesta.id_respuesta }}" class="inline-flex cursor-pointer items-center justify-center rounded-sm border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-100 transition hover:bg-cyan-500/15">
+                                        Seleccionar archivo
+                                    </label>
+                                    <span class="text-sm text-zinc-400">PNG, JPG, GIF o WEBP</span>
+                                </div>
+                                <input type="file" name="imagen_respuesta" id="imagen_respuesta_{{ respuesta.id_respuesta }}" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="sr-only" />
                             </div>
-                            <input type="file" name="imagen_respuesta" id="imagen_respuesta_{{ respuesta.id_respuesta }}" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="sr-only" />
-                        </div>
-                        <div class="flex flex-wrap gap-3">
-                            <button type="submit" class="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-cyan-400">Guardar</button>
-                            <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page) }}" class="rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:border-zinc-600 hover:text-white">Cancelar</a>
+                            <div class="flex flex-wrap gap-3">
+                                <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page) }}" class="rounded-sm border border-zinc-700 px-4 py-2 text-sm text-zinc-300 hover:border-zinc-600 hover:text-white">Cancelar</a>
+                                <button type="submit" class="rounded-sm bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-cyan-400">Guardar</button>
+                            </div>
                         </div>
                     </form>
                     {% else %}
-                    <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">{{ respuesta.contenido }}</p>
+                    <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-line wrap-break-word">{{ respuesta.contenido }}</p>
                     {% if respuesta.imagen_respuesta %}
                     <div class="mt-4 overflow-hidden rounded-md border border-zinc-800 bg-zinc-950/60">
                         <img src="{{ respuesta.imagen_respuesta }}" alt="Imagen de la respuesta" class="w-full object-cover max-h-80" />
                     </div>
                     {% endif %}
                     {% endif %}
-                      <div class=" w-full flex items-center justify-end gap-4">
-                            {% if current_user and (current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') and not respuesta.mejor %}
-                            <form action="{{ url_for('respuestas.validar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
-                                <button type="submit" class="text-xs font-semibold text-emerald-500 bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm hover:text-emerald-200">Validar</button>
-                            </form>
-                            {% elif current_user and (current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') and respuesta.mejor %}
-                            <form action="{{ url_for('respuestas.desvalidar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
-                                <button type="submit" class="text-xs font-semibold text-amber-300 hover:text-yellow-200  bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm">Invalidar</button>
-                            </form>
+                    <div class="w-full flex items-center justify-end gap-4 mt-6">
+                            {% if not respuesta.is_deleted %}
+                                {% if current_user and (current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') and not respuesta.mejor %}
+                                <form action="{{ url_for('respuestas.validar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
+                                    <button type="submit" class="text-xs font-semibold text-emerald-500 bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm hover:text-emerald-200">Validar</button>
+                                </form>
+                                {% elif current_user and (current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') and respuesta.mejor %}
+                                <form action="{{ url_for('respuestas.desvalidar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
+                                    <button type="submit" class="text-xs font-semibold text-amber-300 hover:text-yellow-200  bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm">Invalidar</button>
+                                </form>
+                                {% endif %}
                             {% endif %}
-                 
+
                             {% if current_user and (respuesta.id_usuario == current_user.id_usuario or current_user.rol == 'ADMINISTRADOR' or current_user.rol == 'PROFESOR') %}
-                            <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page, edit_respuesta=respuesta.id_respuesta) }}" class="text-xs font-semibold text-cyan-300 hover:text-cyan-200 bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm">Editar</a>
-                            <form action="{{ url_for('respuestas.eliminar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
-                                <button type="submit" class="text-xs font-semibold text-red-400  bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm hover:text-red-200">Eliminar</button>
-                            </form>
+                                {% if not respuesta.is_deleted %}
+                                    <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post, page=page, edit_respuesta=respuesta.id_respuesta) }}" class="text-xs font-semibold text-cyan-300 hover:text-cyan-200 bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm">Editar</a>
+                                    <form action="{{ url_for('respuestas.eliminar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
+                                        <button type="submit" class="text-xs font-semibold text-red-400  bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm hover:text-red-200">Eliminar</button>
+                                    </form>
+                                {% else %}
+                                    {% if current_user.rol in ['ADMINISTRADOR', 'PROFESOR'] %}
+                                        <form action="{{ url_for('respuestas.restaurar_respuesta_web', id_respuesta=respuesta.id_respuesta) }}" method="POST" class="inline-flex items-center">
+                                            <button type="submit" class="text-xs font-semibold text-emerald-400 bg-zinc-500/10 border border-zinc-600/10 p-2 rounded-sm hover:text-emerald-200">Restaurar</button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
                             {% endif %}
                     </div>
                 </div>
@@ -173,20 +193,20 @@
                 <h3 class="text-lg font-semibold text-white">Añade tu respuesta</h3>
             </div>
 
-            <textarea name="contenido_respuesta" id="contenido_respuesta" rows="5" required class="w-full rounded-md border border-zinc-700 bg-zinc-900 px-5 py-4 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20" placeholder="Escribe tu respuesta aquí..."></textarea>
+            <textarea name="contenido_respuesta" id="contenido_respuesta" rows="5" required class="w-full rounded-sm border border-zinc-700 bg-zinc-900 px-5 py-4 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20" placeholder="Escribe tu respuesta aquí..."></textarea>
 
             <div class="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
                 <div>
                     <label for="imagen_respuesta" class="mb-2 block text-sm font-medium text-zinc-300">Adjuntar imagen</label>
                     <div class="flex flex-wrap items-center gap-3">
-                        <label for="imagen_respuesta" class="inline-flex cursor-pointer items-center justify-center rounded-md border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-500/15">
+                        <label for="imagen_respuesta" class="inline-flex cursor-pointer items-center justify-center rounded-sm text-xs border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 font-medium text-cyan-100 transition hover:bg-cyan-500/15">
                             Buscar archivo
                         </label>
                         <span class="text-sm text-zinc-400">PNG, JPG, GIF o WEBP</span>
                     </div>
                     <input type="file" name="imagen_respuesta" id="imagen_respuesta" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="sr-only" />
                 </div>
-                <button type="submit" class="inline-flex items-center justify-center rounded-md bg-cyan-500 px-6 py-3 text-sm font-semibold text-black transition hover:bg-cyan-400 shadow-lg shadow-cyan-500/20">
+                <button type="submit" class="inline-flex items-center justify-center rounded-sm bg-cyan-500 px-6 py-3 text-sm font-semibold text-black transition hover:bg-cyan-400 shadow-lg shadow-cyan-500/20">
                     Publicar respuesta
                 </button>
             </div>

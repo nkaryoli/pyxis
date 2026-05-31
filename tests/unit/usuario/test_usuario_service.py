@@ -76,7 +76,7 @@ def test_actualizar_usuario_profesor_cambia_email_duplicado(monkeypatch):
     monkeypatch.setattr(UsuarioRepository, "get_by_email", lambda email: True)
 
     with pytest.raises(ValueError) as exc_info:
-        UsuarioService.actualizar_usuario(10, {"email_usuario": "duplicado@p.com"}, 2)
+        UsuarioService.actualizar_usuario(10, {"email_usuario": "duplicado@monlau.com"}, 2)
     assert "El nuevo email ya está en uso por otro usuario." in str(exc_info.value)
 
 

@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.repositories.usuario_repository import UsuarioRepository
 from functools import wraps
-from flask import request, g, jsonify
+from flask import request, g, jsonify, redirect, url_for
 
 
 class AuthService:
@@ -76,6 +76,9 @@ class AuthService:
         if not usuario:
             raise ValueError('Credenciales inválidas.')
 
+        if not getattr(usuario, 'is_active', True):
+            raise ValueError('Esta cuenta de usuario se encuentra inactiva o ha sido desactivada.')
+
         if not check_password_hash(usuario.password_usuario, password):
             raise ValueError('Credenciales inválidas.')
 
@@ -111,13 +114,17 @@ class AuthService:
 
         Busca el token en la cookie `auth_token` o en el header `Authorization: Bearer ...`.
         Valida el token y, si es válido, adjunta el usuario actual en `flask.g.current_user`.
-        Devuelve 401 si falta o es inválido.
+        Si falta o es inválido, redirige al login para peticiones HTML o devuelve 401 en JSON.
         """
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            token = None
-            # Prefer cookie HttpOnly
+            wants_json = (
+                request.is_json or 
+                'application/json' in request.headers.get('Accept', '') or
+                request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            )
+
             token = request.cookies.get('auth_token')
 
             # Fallback a header Authorization
@@ -127,20 +134,33 @@ class AuthService:
                     token = auth_header.split(' ', 1)[1].strip()
 
             if not token:
+                if not wants_json:
+                    return redirect(url_for('auth.login'))
                 return jsonify({'error': 'Autenticación requerida'}), 401
 
             try:
                 payload = cls.validar_token(token)
             except ValueError as e:
+                if not wants_json:
+                    return redirect(url_for('auth.login'))
                 return jsonify({'error': str(e)}), 401
 
             id_usuario = payload.get('id_usuario')
             if not id_usuario:
+                if not wants_json:
+                    return redirect(url_for('auth.login'))
                 return jsonify({'error': 'Token inválido (sin id)'}), 401
 
             usuario = UsuarioRepository.get_by_id(id_usuario)
             if not usuario:
+                if not wants_json:
+                    return redirect(url_for('auth.login'))
                 return jsonify({'error': 'Usuario no encontrado'}), 401
+
+            if not getattr(usuario, 'is_active', True):
+                if not wants_json:
+                    return redirect(url_for('auth.login'))
+                return jsonify({'error': 'Tu cuenta de usuario ha sido desactivada'}), 401
 
             # Attach current user to flask.g
             g.current_user = usuario

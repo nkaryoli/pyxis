@@ -117,23 +117,32 @@ def gestionar_post_api(id_post):
         if not post:
             return jsonify({"error": f"No se encontró el post con ID {id_post}"}), 404
 
-        es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (post.id_usuario == usuario_id_solicitante)
-        if not es_autorizado:
-            return jsonify({"error": "No tienes permisos para modificar o borrar este post."}), 403
-
         if request.method == 'DELETE':
+            es_autorizado = (usuario_rol in ['ADMINISTRADOR', 'PROFESOR']) or (post.id_usuario == usuario_id_solicitante)
+            if not es_autorizado:
+                return jsonify({"error": "No tienes permisos para borrar este post."}), 403
             PostService.eliminar_post(id_post)
             return jsonify({"mensaje": f"Post {id_post} eliminado con éxito"}), 200
             
         elif request.method == 'PUT':
+            es_autorizado = (usuario_rol == 'ADMINISTRADOR') or (post.id_usuario == usuario_id_solicitante)
+            if not es_autorizado:
+                return jsonify({"error": "No tienes permisos para modificar este post."}), 403
             data = request.get_json()
+            is_deleted = data.get('is_deleted')
+            if is_deleted is not None:
+                if isinstance(is_deleted, str):
+                    is_deleted = is_deleted.lower() == 'true'
+                else:
+                    is_deleted = bool(is_deleted)
             post_actualizado = PostService.modificar_post(
                 id_post=id_post,
                 titulo=data.get('titulo_post'),
                 contenido=data.get('contenido_post'),
                 codigo_modulo=data.get('codigo_modulo'),
                 imagen=data.get('imagen_post'),
-                fecha_creacion=data.get('fecha_creacion_post')
+                fecha_creacion=data.get('fecha_creacion_post'),
+                is_deleted=is_deleted
             )
             return jsonify(post_actualizado.to_dict()), 200
 

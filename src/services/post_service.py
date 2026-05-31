@@ -5,11 +5,13 @@ class PostService:
 
     @staticmethod
     def listar_todos():
-        return PostRepository.get_all()
+        from src.extensions import should_include_deleted
+        return PostRepository.get_all(include_deleted=should_include_deleted())
 
     @staticmethod
     def ver_posts_por_usuario(id_usuario):
-        return PostRepository.get_by_user_id(id_usuario)
+        from src.extensions import should_include_deleted
+        return PostRepository.get_by_user_id(id_usuario, include_deleted=should_include_deleted())
 
     @staticmethod
     def crear_post(titulo, contenido, id_usuario, codigo_modulo, imagen=None):
@@ -27,17 +29,19 @@ class PostService:
         return PostRepository.get_by_id(id_post)
     
     @staticmethod
-    def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
-        return PostRepository.update(id_post, titulo, contenido, codigo_modulo, imagen, fecha_creacion)
+    def modificar_post(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None, is_deleted=None):
+        return PostRepository.update(id_post, titulo, contenido, codigo_modulo, imagen, fecha_creacion, is_deleted)
     
     
     @staticmethod
     def ver_posts_por_modulo(codigo_modulo):
-        return PostRepository.get_by_modulo_code(codigo_modulo)
+        from src.extensions import should_include_deleted
+        return PostRepository.get_by_modulo_code(codigo_modulo, include_deleted=should_include_deleted())
     
     @staticmethod
     def listar_recientes():
-        return PostRepository.get_recent()
+        from src.extensions import should_include_deleted
+        return PostRepository.get_recent(include_deleted=should_include_deleted())
     
     @staticmethod
     def obtener_todos_los_modulos():
