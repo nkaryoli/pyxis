@@ -35,7 +35,7 @@ def ver_perfil(id_usuario):
     try:
         usuario_actual = getattr(g, 'current_user', None)
         if not usuario_actual or int(usuario_actual.id_usuario) != int(id_usuario):
-            return render_template('errors/error.html', error='Acceso denegado'), 403
+            return render_template('errors/403.html', error='Acceso denegado'), 403
 
         usuario, posts = UsuarioService.obtener_usuario_por_id(id_usuario)
         
