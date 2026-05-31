@@ -124,6 +124,26 @@ def eliminar_respuesta_web(id_respuesta):
 
     return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
 
+@respuestas.route('/respuestas/<int:id_respuesta>/restaurar', methods=['POST'])
+def restaurar_respuesta_web(id_respuesta):
+    usuario_actual = getattr(g, 'current_user', None)
+    respuesta = RespuestaService.obtener_por_id(id_respuesta)
+    if not usuario_actual or not respuesta:
+        flash("No tienes permiso para restaurar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
+        flash("No tienes permiso para restaurar esta respuesta.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
+    try:
+        RespuestaService.modificar_respuesta(id_respuesta, is_deleted=False)
+        flash("Respuesta restaurada correctamente.")
+    except Exception as e:
+        flash(f"Error al restaurar: {str(e)}")
+
+    return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
+
 @respuestas.route('/respuestas/<int:id_respuesta>/validar', methods=['POST'])
 def validar_respuesta_web(id_respuesta):
     usuario_actual = getattr(g, 'current_user', None)
@@ -131,6 +151,10 @@ def validar_respuesta_web(id_respuesta):
     if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
         flash("No tienes permiso para validar esta respuesta.")
         return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if respuesta.is_deleted:
+        flash("No se puede validar una respuesta inactiva o eliminada.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
 
     try:
         RespuestaService.modificar_respuesta(id_respuesta, es_mejor=1)
@@ -147,6 +171,10 @@ def desvalidar_respuesta_web(id_respuesta):
     if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
         flash("No tienes permiso para desvalidar esta respuesta.")
         return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post if respuesta else 0))
+
+    if respuesta.is_deleted:
+        flash("No se puede invalidar una respuesta inactiva o eliminada.")
+        return redirect(url_for('posts.post_respuesta', id_post=respuesta.id_post))
 
     try:
         RespuestaService.modificar_respuesta(id_respuesta, es_mejor=0)

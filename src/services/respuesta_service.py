@@ -25,5 +25,5 @@ class RespuestaService:
         return RespuestaRepository.delete(id_respuesta)
 
     @staticmethod
-    def modificar_respuesta(id_respuesta, contenido=None, imagen=None, es_mejor=None):
-        return RespuestaRepository.update(id_respuesta, contenido, imagen, es_mejor)
+    def modificar_respuesta(id_respuesta, contenido=None, imagen=None, es_mejor=None, is_deleted=None):
+        return RespuestaRepository.update(id_respuesta, contenido, imagen, es_mejor, is_deleted)
