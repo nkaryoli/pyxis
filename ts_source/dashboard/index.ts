@@ -2,6 +2,7 @@ import { getDashboardContext } from "./context.js";
 import { initDashboardActions } from "./actions/index.js";
 import { initDashboardTabs } from "./tabs.js";
 import { initClientPagination } from "./pagination.js";
+import { chequearToastsPendientes } from "./toast.js";
 
 const context = getDashboardContext();
 
@@ -12,6 +13,9 @@ if (context) {
 	initClientPagination("seccion-modulos", 7);
 	initClientPagination("seccion-usuarios", 7);
 	initClientPagination("seccion-posts", 7);
+
+	// Comprobar si hay notificaciones flotantes pendientes de mostrar
+	chequearToastsPendientes();
 
 	// Cierra los menús desplegables details abiertos al hacer clic fuera
 	document.addEventListener("click", (e) => {

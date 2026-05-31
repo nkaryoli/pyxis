@@ -1,6 +1,7 @@
 import type { DashboardContext } from "../types.js";
 import { actualizarUsuario, crearUsuario, eliminarUsuario } from "../api.js";
 import { mostrarConfirmacion } from "../confirm.js";
+import { guardarToastPendiente } from "../toast.js";
 
 // Modal y Formulario de Usuario (Edición/Creación de credenciales)
 const modal = document.getElementById('modal-usuario') as HTMLDialogElement;
@@ -90,9 +91,10 @@ form?.addEventListener('submit', (e) => {
         void actualizarUsuario(id, payload, solicitanteId)
             .then(() => {
                 modal.close();
+                guardarToastPendiente("Usuario actualizado con éxito", "success");
                 location.reload();
             })
-            .catch((err: Error) => alert(`No se pudo editar el usuario: ${err.message}`));
+            .catch((err: Error) => guardarToastPendiente(`No se pudo editar el usuario: ${err.message}`, "error"));
     } else {
         if (!password) {
             mInputPassword.required = true;
@@ -106,9 +108,10 @@ form?.addEventListener('submit', (e) => {
         })
             .then(() => {
                 modal.close();
+                guardarToastPendiente("Usuario creado con éxito", "success");
                 location.reload();
             })
-            .catch((err: Error) => alert(`No se pudo crear el usuario: ${err.message}`));
+            .catch((err: Error) => guardarToastPendiente(`No se pudo crear el usuario: ${err.message}`, "error"));
     }
 });
 
@@ -129,9 +132,10 @@ formMatricula?.addEventListener('submit', (e) => {
     void actualizarUsuario(id, { modulos: modulosSeleccionados }, solicitanteId)
         .then(() => {
             modalMatricula.close();
+            guardarToastPendiente("Matrículas actualizadas con éxito", "success");
             location.reload();
         })
-        .catch((err: Error) => alert(`No se pudo guardar la matrícula: ${err.message}`));
+        .catch((err: Error) => guardarToastPendiente(`No se pudo guardar la matrícula: ${err.message}`, "error"));
 });
 
 export function handleUserAction(
@@ -176,10 +180,7 @@ export function handleUserAction(
                 mTxtTitulo.textContent = "Editar Usuario";
                 modal.showModal();
             })
-            .catch((err) => {
-                console.error(err);
-                alert("No se pudo cargar la información del usuario para editar.");
-            });
+            .catch((err: Error) => guardarToastPendiente(`No se pudo cargar la información del usuario para editar: ${err.message}`, "error"));
             
 		return true;
 	}
@@ -210,10 +211,7 @@ export function handleUserAction(
                 mTxtMatriculaTitulo.textContent = `Matricular a ${user.username}`;
                 modalMatricula.showModal();
             })
-            .catch((err) => {
-                console.error(err);
-                alert("No se pudo cargar la información de matrícula del estudiante.");
-            });
+            .catch((err: Error) => guardarToastPendiente(`No se pudo cargar la información de matrícula del estudiante: ${err.message}`, "error"));
             
 		return true;
 	}
@@ -227,8 +225,11 @@ export function handleUserAction(
 			"¿Estás seguro de que deseas eliminar permanentemente este usuario?",
 			() => {
 				void eliminarUsuario(id)
-					.then(() => location.reload())
-					.catch(() => alert("No se pudo eliminar el usuario con la API actual."));
+					.then(() => {
+						guardarToastPendiente("Usuario eliminado con éxito", "success");
+						location.reload();
+					})
+					.catch(() => guardarToastPendiente("No se pudo eliminar el usuario con la API actual.", "error"));
 			}
 		);
 		return true;

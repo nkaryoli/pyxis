@@ -1,5 +1,6 @@
 import { actualizarModulo, crearModulo, eliminarModulo } from "../api.js";
 import { mostrarConfirmacion } from "../confirm.js";
+import { guardarToastPendiente } from "../toast.js";
 // Modal de edición/creación de módulos
 const modal = document.getElementById("modal-modulo");
 const form = document.getElementById("form-modulo");
@@ -94,9 +95,10 @@ form === null || form === void 0 ? void 0 : form.addEventListener("submit", (e) 
         })
             .then(() => {
             modal.close();
+            guardarToastPendiente("Asignatura actualizada con éxito", "success");
             location.reload();
         })
-            .catch((err) => alert(`No se pudo editar el módulo: ${err.message}`));
+            .catch((err) => guardarToastPendiente(`No se pudo editar el módulo: ${err.message}`, "error"));
     }
     else {
         void crearModulo({
@@ -107,9 +109,10 @@ form === null || form === void 0 ? void 0 : form.addEventListener("submit", (e) 
         })
             .then(() => {
             modal.close();
+            guardarToastPendiente("Asignatura creada con éxito", "success");
             location.reload();
         })
-            .catch((err) => alert(`No se pudo crear el módulo: ${err.message}`));
+            .catch((err) => guardarToastPendiente(`No se pudo crear el módulo: ${err.message}`, "error"));
     }
 });
 export function handleModuleAction(button, context) {
@@ -185,6 +188,7 @@ export function handleModuleAction(button, context) {
             .catch((err) => {
             console.error(err);
             mContainerAlumnosLista.innerHTML = `<p class="text-red-400 text-sm py-4 text-center">No se pudo cargar la lista: ${err.message}</p>`;
+            guardarToastPendiente(`No se pudo cargar la lista: ${err.message}`, "error");
         });
         return true;
     }
@@ -194,8 +198,11 @@ export function handleModuleAction(button, context) {
             return true;
         mostrarConfirmacion("Eliminar Asignatura", "¿Estás seguro de que deseas eliminar permanentemente esta asignatura?", () => {
             void eliminarModulo(codigo, context.userRole)
-                .then(() => location.reload())
-                .catch((err) => alert(`No se pudo eliminar el módulo: ${err.message}`));
+                .then(() => {
+                guardarToastPendiente("Asignatura eliminada con éxito", "success");
+                location.reload();
+            })
+                .catch((err) => guardarToastPendiente(`No se pudo eliminar el módulo: ${err.message}`, "error"));
         });
         return true;
     }
