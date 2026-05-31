@@ -41,3 +41,13 @@ def get_session():
     if Session is None:
         raise RuntimeError("Base de datos no inicializada. Llama a init_db() primero.")
     return Session()
+
+
+def should_include_deleted():
+    """Retorna True si el usuario actual en el contexto HTTP es un ADMINISTRADOR."""
+    from flask import has_request_context, g
+    if has_request_context():
+        usuario = getattr(g, 'current_user', None)
+        if usuario and getattr(usuario, 'rol', None) == 'ADMINISTRADOR':
+            return True
+    return False

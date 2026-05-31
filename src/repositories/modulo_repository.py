@@ -28,18 +28,19 @@ class ModuloRepository:
         return modulo
 
     @staticmethod
-    def get_all():
+    def get_all(include_deleted=False):
         """Obtiene todos los modulos de la BD (Todos los Usuarios)."""
         session = get_session()
         try:
             # Hacemos una consulta con LEFT OUTER JOIN para obtener el número de posts
             # por cada módulo en la misma consulta y evitar N+1 queries.
-            rows = (
+            query = (
                 session.query(Modulo, func.count(Post.id_post).label('posts_count'))
                 .outerjoin(Post, Modulo.codigo_modulo == Post.codigo_modulo)
-                .group_by(Modulo.codigo_modulo)
-                .all()
             )
+            if not include_deleted:
+                query = query.filter(Modulo.is_deleted == False)
+            rows = query.group_by(Modulo.codigo_modulo).all()
 
             modulos = []
             for modulo, posts_count in rows:
@@ -56,23 +57,28 @@ class ModuloRepository:
             session.close()
 
     @staticmethod
-    def get_by_codigo(codigo_modulo):
+    def get_by_codigo(codigo_modulo, include_deleted=False):
         """Obtiene un modulo en especifico de la BD (Todos los Usuarios)."""
         session = get_session()
         try:
-            return session.query(Modulo).filter_by(codigo_modulo=codigo_modulo).first()
+            query = session.query(Modulo).filter_by(codigo_modulo=codigo_modulo)
+            if not include_deleted:
+                query = query.filter_by(is_deleted=False)
+            return query.first()
         finally:
             session.close()
 
     @staticmethod
-    def get_by_name(nombre_modulo):
+    def get_by_name(nombre_modulo, include_deleted=False):
         """Busca un módulo por nombre ignorando mayúsculas/minúsculas."""
         session = get_session()
         try:
-            modulo = session.query(Modulo).filter(
+            query = session.query(Modulo).filter(
                 func.lower(Modulo.nombre_asignatura) == nombre_modulo.lower()
-            ).first()
-            return modulo
+            )
+            if not include_deleted:
+                query = query.filter(Modulo.is_deleted == False)
+            return query.first()
         finally:
             session.close()
 
@@ -110,12 +116,12 @@ class ModuloRepository:
     
     @staticmethod
     def delete(codigo_modulo):
-        """Elimina un modulo de la BD (Solo profesores y administradores)."""
+        """Desactiva un modulo de la BD (borrado lógico)."""
         session = get_session()
         try:
             modulo = session.query(Modulo).filter_by(codigo_modulo=codigo_modulo).first()
             if modulo:
-                session.delete(modulo)
+                modulo.is_deleted = True
                 session.commit()
                 return True
             return False

@@ -76,6 +76,9 @@ class AuthService:
         if not usuario:
             raise ValueError('Credenciales inválidas.')
 
+        if not usuario.is_active:
+            raise ValueError('Esta cuenta de usuario se encuentra inactiva o ha sido desactivada.')
+
         if not check_password_hash(usuario.password_usuario, password):
             raise ValueError('Credenciales inválidas.')
 
@@ -141,6 +144,9 @@ class AuthService:
             usuario = UsuarioRepository.get_by_id(id_usuario)
             if not usuario:
                 return jsonify({'error': 'Usuario no encontrado'}), 401
+
+            if not usuario.is_active:
+                return jsonify({'error': 'Tu cuenta de usuario ha sido desactivada'}), 401
 
             # Attach current user to flask.g
             g.current_user = usuario

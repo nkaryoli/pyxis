@@ -6,14 +6,16 @@ class ModuloService:
     @staticmethod
     def obtener_todos_los_modulos():
         """Obtiene todas las asignaturas de la base de datos."""
-        return ModuloRepository.get_all()
+        from src.extensions import should_include_deleted
+        return ModuloRepository.get_all(include_deleted=should_include_deleted())
     
     @staticmethod
     def obtener_modulo_por_codigo(codigo_modulo):
         """Busca una asignatura por su clave primaria string y valida su existencia."""
         if not codigo_modulo:
             raise ValueError("El código del módulo no puede estar vacío.")
-        modulo = ModuloRepository.get_by_codigo(codigo_modulo.strip().upper())
+        from src.extensions import should_include_deleted
+        modulo = ModuloRepository.get_by_codigo(codigo_modulo.strip().upper(), include_deleted=should_include_deleted())
         if not modulo:
             raise ValueError(f"Módulo con código '{codigo_modulo}' no encontrado.")
         return modulo
@@ -24,7 +26,8 @@ class ModuloService:
         if not nombre_modulo:
             raise ValueError("El nombre del módulo no puede estar vacío.")
         nombre_limpio = nombre_modulo.strip()
-        modulo = ModuloRepository.get_by_name(nombre_limpio)
+        from src.extensions import should_include_deleted
+        modulo = ModuloRepository.get_by_name(nombre_limpio, include_deleted=should_include_deleted())
         if not modulo:
             raise ValueError(f"Módulo con nombre'{nombre_modulo}' no encontrado.")
         return modulo
@@ -62,7 +65,7 @@ class ModuloService:
         if len(curso_limpio) < 3:
             raise ValueError("El campo curso debe tener al menos 3 caracteres")
         
-        if ModuloRepository.get_by_codigo(codigo_limpio):
+        if ModuloRepository.get_by_codigo(codigo_limpio, include_deleted=True):
             raise ValueError(f"El código de módulo '{codigo_limpio}' ya está registrado")
             
         return ModuloRepository.create(codigo_limpio, nombre_limpio, curso_limpio)
@@ -85,7 +88,7 @@ class ModuloService:
         if len(nombre_limpio) < 4:
             raise ValueError("El nuevo nombre de la asignatura debe tener al menos 4 caracteres")
 
-        modulo_existente = ModuloRepository.get_by_codigo(codigo_limpio)
+        modulo_existente = ModuloRepository.get_by_codigo(codigo_limpio, include_deleted=True)
         if not modulo_existente:
             raise ValueError(f"No se puede modificar: el módulo '{codigo_limpio}' no existe")
             
@@ -102,7 +105,7 @@ class ModuloService:
             
         codigo_limpio = codigo_modulo.strip().upper()
         
-        if not ModuloRepository.get_by_codigo(codigo_limpio):
+        if not ModuloRepository.get_by_codigo(codigo_limpio, include_deleted=True):
             raise ValueError(f"No se puede eliminar: el módulo '{codigo_limpio}' no existe")
             
         return ModuloRepository.delete(codigo_limpio)

@@ -148,8 +148,10 @@ class UsuarioService:
                 - total_pages (int): Cantidad total de páginas de resultados disponibles.
         """
         offset = (page - 1) * per_page
-        items = PostRepository.get_by_user_paginated(id_usuario, limit=per_page, offset=offset)
-        total_count = PostRepository.count_by_user(id_usuario)
+        from src.extensions import should_include_deleted
+        inc_del = should_include_deleted()
+        items = PostRepository.get_by_user_paginated(id_usuario, limit=per_page, offset=offset, include_deleted=inc_del)
+        total_count = PostRepository.count_by_user(id_usuario, include_deleted=inc_del)
         
         total_pages = max(1, ceil(total_count / per_page))
         
@@ -180,8 +182,10 @@ class UsuarioService:
         """
         offset = (page - 1) * per_page
         
-        items = RespuestaRepository.get_by_user_paginated(id_usuario, limit=per_page, offset=offset)
-        total_count = RespuestaRepository.count_by_user(id_usuario)
+        from src.extensions import should_include_deleted
+        inc_del = should_include_deleted()
+        items = RespuestaRepository.get_by_user_paginated(id_usuario, limit=per_page, offset=offset, include_deleted=inc_del)
+        total_count = RespuestaRepository.count_by_user(id_usuario, include_deleted=inc_del)
         
         total_pages = max(1, ceil(total_count / per_page))
         

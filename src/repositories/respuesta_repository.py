@@ -26,20 +26,26 @@ class RespuestaRepository:
             session.close()
 
     @staticmethod
-    def get_by_post_id(id_post):
+    def get_by_post_id(id_post, include_deleted=False):
         session = get_session()
         try:
-            respuestas = session.query(Respuesta).filter_by(id_post=id_post).all()
+            query = session.query(Respuesta).filter(Respuesta.id_post == id_post)
+            if not include_deleted:
+                query = query.filter(Respuesta.is_deleted == False)
+            respuestas = query.all()
             session.expunge_all()
             return respuestas
         finally:
             session.close()
 
     @staticmethod
-    def get_by_user_id(id_usuario):
+    def get_by_user_id(id_usuario, include_deleted=False):
         session = get_session()
         try:
-            respuestas = session.query(Respuesta).filter_by(id_usuario=id_usuario).all()
+            query = session.query(Respuesta).filter(Respuesta.id_usuario == id_usuario)
+            if not include_deleted:
+                query = query.filter(Respuesta.is_deleted == False)
+            respuestas = query.all()
             session.expunge_all()
             return respuestas
         finally:
@@ -62,7 +68,7 @@ class RespuestaRepository:
         try:
             respuesta = session.query(Respuesta).filter_by(id_respuesta=id_respuesta).first()
             if respuesta:
-                session.delete(respuesta)
+                respuesta.is_deleted = True
                 session.commit()
                 return True
             return False
@@ -100,12 +106,14 @@ class RespuestaRepository:
     
     
     @staticmethod
-    def get_by_user_paginated(id_usuario, limit, offset):
+    def get_by_user_paginated(id_usuario, limit, offset, include_deleted=False):
         session = get_session()
         try:
             # Ordenamos por fecha de respuesta, asumiendo que el campo existe
-            respuestas = session.query(Respuesta).filter_by(id_usuario=id_usuario)\
-                .order_by(Respuesta.fecha_respuesta.desc())\
+            query = session.query(Respuesta).filter(Respuesta.id_usuario == id_usuario)
+            if not include_deleted:
+                query = query.filter(Respuesta.is_deleted == False)
+            respuestas = query.order_by(Respuesta.fecha_respuesta.desc())\
                 .limit(limit).offset(offset).all()
             session.expunge_all()
             return respuestas
@@ -113,9 +121,12 @@ class RespuestaRepository:
             session.close()
 
     @staticmethod
-    def count_by_user(id_usuario):
+    def count_by_user(id_usuario, include_deleted=False):
         session = get_session()
         try:
-            return session.query(Respuesta).filter_by(id_usuario=id_usuario).count()
+            query = session.query(Respuesta).filter(Respuesta.id_usuario == id_usuario)
+            if not include_deleted:
+                query = query.filter(Respuesta.is_deleted == False)
+            return query.count()
         finally:
             session.close()

@@ -29,9 +29,10 @@ def _cargar_usuario_actual():
             return None
 
         usuario = UsuarioRepository.get_by_id(id_usuario)
-        if usuario:
+        if usuario and usuario.is_active:
             g.current_user = usuario
-        return usuario
+            return usuario
+        return None
     except ValueError:
         return None
 

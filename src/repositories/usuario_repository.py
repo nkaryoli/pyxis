@@ -86,12 +86,12 @@ class UsuarioRepository:
 
     @staticmethod
     def delete(id_usuario):
-        """Elimina un usuario de la base de datos."""
+        """Desactiva un usuario de la base de datos (borrado lógico)."""
         session = get_session()
         try:
             usuario = session.query(Usuario).filter_by(id_usuario=id_usuario).first()
             if usuario:
-                session.delete(usuario)
+                usuario.is_active = False
                 session.commit()
                 return True
             return False

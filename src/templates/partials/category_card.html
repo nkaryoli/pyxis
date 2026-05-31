@@ -10,6 +10,9 @@
 		<div>
 			<div class="flex items-center justify-between gap-4">
 				<h3 class="flex-1 min-w-0 truncate text-lg font-semibold text-white group-hover:text-cyan-300">
+					{% if modulo.is_deleted %}
+						<span class="text-red-400 font-extrabold mr-1">[ELIMINADO]</span>
+					{% endif %}
 					{{ modulo.nombre_asignatura }}
 				</h3>
 

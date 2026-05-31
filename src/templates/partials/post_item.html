@@ -10,6 +10,9 @@
 			<h3
 				class="mt-2 text-lg font-semibold text-white group-hover:text-cyan-300"
 			>
+				{% if post.is_deleted %}
+					<span class="text-red-400 font-extrabold mr-1">[ELIMINADO]</span>
+				{% endif %}
 				{{ post.titulo_post }}
 			</h3>
 		</div>

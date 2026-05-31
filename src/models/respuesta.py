@@ -31,7 +31,14 @@ class Respuesta(Base):
 
     @property
     def autor(self):
-        return self.usuario.username if self.usuario else f"Usuario {self.id_usuario}"
+        from src.extensions import should_include_deleted
+        if not self.usuario:
+            return "Usuario Eliminado"
+        if not self.usuario.is_active:
+            if should_include_deleted():
+                return f"Usuario Inactivo ({self.usuario.username})"
+            return "Usuario Inactivo"
+        return self.usuario.username
     
     @property
     def mejor(self):
