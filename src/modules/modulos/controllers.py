@@ -114,3 +114,20 @@ def delete_modulo(codigo_modulo):
         return jsonify({'message': f'Módulo {codigo_modulo} eliminado correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@modulos.route('/api/modulos/<string:codigo_modulo>/alumnos', methods=['GET'])
+def get_alumnos_modulo(codigo_modulo):
+    """Endpoint API que devuelve los alumnos matriculados en un módulo."""
+    try:
+        from src.repositories.matricula_repository import MatriculaRepository
+        alumnos = MatriculaRepository.get_alumnos_by_modulo(codigo_modulo)
+        return jsonify([
+            {
+                'id_usuario': a.id_usuario,
+                'username': a.username,
+                'email': a.email_usuario
+            }
+            for a in alumnos
+        ]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

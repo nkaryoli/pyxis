@@ -101,6 +101,9 @@ class UsuarioService:
             raise ValueError("No se han proporcionado datos válidos para actualizar.")
             
         if codigos_modulos is not None:
+            if destino.rol != 'ALUMNO':
+                raise ValueError("Solo los alumnos pueden ser matriculados en módulos académicos.")
+
             from src.repositories.matricula_repository import MatriculaRepository
             from datetime import datetime, timedelta
             MatriculaRepository.delete_all_by_usuario_id(id_usuario_destino)

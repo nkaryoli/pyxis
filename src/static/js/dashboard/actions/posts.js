@@ -1,11 +1,15 @@
 import { actualizarPost, eliminarPost } from "../api.js";
+import { mostrarConfirmacion } from "../confirm.js";
+import { guardarToastPendiente } from "../toast.js";
 const modal = document.getElementById("modal-post");
 const form = document.getElementById("form-post");
 const mInputId = document.getElementById("modal-post-id");
 const mInputTitulo = document.getElementById("modal-post-titulo-input");
 const mInputContenido = document.getElementById("modal-post-contenido-input");
 const btnCancelar = document.getElementById("btn-cancelar-post");
+const btnCancelarTop = document.getElementById("btn-cancelar-post-top");
 btnCancelar === null || btnCancelar === void 0 ? void 0 : btnCancelar.addEventListener("click", () => modal.close());
+btnCancelarTop === null || btnCancelarTop === void 0 ? void 0 : btnCancelarTop.addEventListener("click", () => modal.close());
 form === null || form === void 0 ? void 0 : form.addEventListener("submit", (e) => {
     var _a, _b;
     e.preventDefault();
@@ -20,6 +24,7 @@ form === null || form === void 0 ? void 0 : form.addEventListener("submit", (e) 
     void actualizarPost(id, { titulo_post: titulo, contenido_post: contenido }, userId, userRole)
         .then(() => {
         modal.close();
+        guardarToastPendiente("Publicación actualizada con éxito", "success");
         location.reload();
     })
         .catch((err) => alert(`No se pudo editar el post: ${err.message}`));
@@ -52,17 +57,22 @@ export function handlePostAction(button, context) {
         })
             .catch((err) => {
             console.error(err);
-            alert("No se pudo cargar la información del post para editar.");
+            guardarToastPendiente(`No se pudo cargar la información del post para editar: ${err.message}`, "error");
         });
         return true;
     }
     if (action === "eliminar-post") {
         const id = button.dataset.id;
-        if (!id || !confirm(`¿Eliminar el post ${id}?`))
+        if (!id)
             return true;
-        void eliminarPost(id, context.userId, context.userRole)
-            .then(() => location.reload())
-            .catch((err) => alert(`No se pudo eliminar el post: ${err.message}`));
+        mostrarConfirmacion("Eliminar Publicación", "¿Estás seguro de que deseas eliminar permanentemente esta publicación?", () => {
+            void eliminarPost(id, context.userId, context.userRole)
+                .then(() => {
+                guardarToastPendiente("Publicación eliminada con éxito", "success");
+                location.reload();
+            })
+                .catch((err) => guardarToastPendiente(`No se pudo eliminar el post: ${err.message}`, "error"));
+        });
         return true;
     }
     return false;

@@ -8,62 +8,136 @@ export function initClientPagination(containerId, rowsPerPage = 5) {
     const tbody = table.querySelector("tbody");
     if (!tbody)
         return;
-    // Obtenemos todas las filas excluyendo la fila de "No hay elementos para mostrar"
-    const rows = Array.from(tbody.querySelectorAll("tr")).filter((row) => !row.querySelector("td[colspan]"));
+    // Obtenemos todas las filas excluyendo la fila de "No hay elementos para mostrar" y de no-coincidencias
+    const rows = Array.from(tbody.querySelectorAll("tr")).filter((row) => !row.querySelector("td[colspan]") && !row.classList.contains("no-matches-row"));
+    // Encontrar elementos de filtro dentro del contenedor
+    const filters = Array.from(container.querySelectorAll(".table-filter"));
+    // Crear fila de "No se han encontrado resultados" dinámicamente si no existe
+    let noMatchesRow = tbody.querySelector(".no-matches-row");
+    if (!noMatchesRow && rows.length > 0) {
+        const cols = table.querySelectorAll("th").length || 6;
+        noMatchesRow = document.createElement("tr");
+        noMatchesRow.className = "no-matches-row hidden";
+        noMatchesRow.innerHTML = `<td class="py-8 text-zinc-500 text-center" colspan="${cols}">No se han encontrado resultados coincidentes.</td>`;
+        tbody.appendChild(noMatchesRow);
+    }
     const controls = container.querySelector(".pagination-controls");
-    if (rows.length === 0) {
-        if (controls) {
-            controls.classList.add("hidden");
-            controls.classList.remove("flex");
-        }
-        return;
-    }
-    const totalPages = Math.ceil(rows.length / rowsPerPage);
-    if (totalPages <= 1) {
-        if (controls) {
-            controls.classList.add("hidden");
-            controls.classList.remove("flex");
-        }
-        return;
-    }
-    else {
-        if (controls) {
-            controls.classList.remove("hidden");
-            controls.classList.add("flex");
-        }
-    }
     let currentPage = 1;
-    const btnPrev = controls.querySelector(".btn-prev");
-    const btnNext = controls.querySelector(".btn-next");
-    const txtCurrent = controls.querySelector(".current-page-txt");
-    const txtTotal = controls.querySelector(".total-pages-txt");
-    txtTotal.textContent = String(totalPages);
+    let activeRows = rows;
+    let totalPages = Math.ceil(activeRows.length / rowsPerPage);
     const updateDisplay = () => {
+        // Aplicar todos los filtros activos
+        activeRows = rows.filter((row) => {
+            var _a, _b;
+            for (const filter of filters) {
+                const val = filter.value.trim().toLowerCase();
+                if (!val)
+                    continue;
+                const filterField = filter.dataset.filterField;
+                if (filterField) {
+                    const cell = row.querySelector(`[data-field="${filterField}"]`);
+                    const cellText = ((_a = cell === null || cell === void 0 ? void 0 : cell.textContent) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase()) || "";
+                    if (filter instanceof HTMLInputElement) {
+                        if (!cellText.includes(val))
+                            return false;
+                    }
+                    else {
+                        if (cellText !== val)
+                            return false;
+                    }
+                }
+                else {
+                    const rowText = ((_b = row.textContent) === null || _b === void 0 ? void 0 : _b.toLowerCase()) || "";
+                    if (!rowText.includes(val))
+                        return false;
+                }
+            }
+            return true;
+        });
+        totalPages = Math.ceil(activeRows.length / rowsPerPage);
+        // Ocultar todas las filas base primero
+        rows.forEach((row) => row.classList.add("hidden"));
+        // Mostrar u ocultar la fila de "No se han encontrado resultados"
+        if (activeRows.length === 0 && rows.length > 0) {
+            noMatchesRow === null || noMatchesRow === void 0 ? void 0 : noMatchesRow.classList.remove("hidden");
+            if (controls) {
+                controls.classList.add("hidden");
+                controls.classList.remove("flex");
+            }
+            return;
+        }
+        else {
+            noMatchesRow === null || noMatchesRow === void 0 ? void 0 : noMatchesRow.classList.add("hidden");
+        }
+        // Mostrar/ocultar los controles de paginación según corresponda
+        if (totalPages <= 1) {
+            if (controls) {
+                controls.classList.add("hidden");
+                controls.classList.remove("flex");
+            }
+        }
+        else {
+            if (controls) {
+                controls.classList.remove("hidden");
+                controls.classList.add("flex");
+            }
+        }
+        // Limitar la página actual dentro de los rangos válidos
+        if (currentPage > totalPages)
+            currentPage = totalPages;
+        if (currentPage < 1)
+            currentPage = 1;
+        // Mostrar las filas correspondientes a la página actual
         const start = (currentPage - 1) * rowsPerPage;
         const end = currentPage * rowsPerPage;
-        rows.forEach((row, index) => {
+        activeRows.forEach((row, index) => {
             if (index >= start && index < end) {
                 row.classList.remove("hidden");
             }
-            else {
-                row.classList.add("hidden");
+        });
+        // Actualizar textos e interactividad de los botones de control
+        if (controls) {
+            const txtCurrent = controls.querySelector(".current-page-txt");
+            const txtTotal = controls.querySelector(".total-pages-txt");
+            if (txtCurrent)
+                txtCurrent.textContent = String(currentPage);
+            if (txtTotal)
+                txtTotal.textContent = String(totalPages || 1);
+            const btnPrev = controls.querySelector(".btn-prev");
+            const btnNext = controls.querySelector(".btn-next");
+            if (btnPrev)
+                btnPrev.disabled = currentPage === 1;
+            if (btnNext)
+                btnNext.disabled = currentPage === totalPages;
+        }
+    };
+    // Registrar listeners de controles de paginación si existen
+    if (controls) {
+        const btnPrev = controls.querySelector(".btn-prev");
+        const btnNext = controls.querySelector(".btn-next");
+        btnPrev === null || btnPrev === void 0 ? void 0 : btnPrev.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updateDisplay();
             }
         });
-        txtCurrent.textContent = String(currentPage);
-        btnPrev.disabled = currentPage === 1;
-        btnNext.disabled = currentPage === totalPages;
-    };
-    btnPrev.addEventListener("click", () => {
-        if (currentPage > 1) {
-            currentPage--;
+        btnNext === null || btnNext === void 0 ? void 0 : btnNext.addEventListener("click", () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateDisplay();
+            }
+        });
+    }
+    // Registrar listeners de filtros reactivos
+    filters.forEach((filter) => {
+        filter.addEventListener("change", () => {
+            currentPage = 1;
             updateDisplay();
-        }
-    });
-    btnNext.addEventListener("click", () => {
-        if (currentPage < totalPages) {
-            currentPage++;
+        });
+        filter.addEventListener("input", () => {
+            currentPage = 1;
             updateDisplay();
-        }
+        });
     });
     // Inicialización
     updateDisplay();

@@ -1,45 +1,65 @@
-<dialog id="modal-modulo" class="fixed inset-0 m-auto w-full max-w-lg rounded-lg border border-white/10 bg-zinc-950/95 p-8 shadow-2xl shadow-black/40 backdrop:bg-black/60 backdrop:backdrop-blur-sm outline-none">
-	<form method="dialog" id="form-modulo" class="space-y-4">
+<dialog id="modal-modulo" class="fixed inset-0 m-auto w-full max-w-md rounded-lg border border-cyan-400/20 bg-zinc-950/95 p-8 shadow-2xl shadow-cyan-500/20 backdrop:bg-black/60 backdrop:backdrop-blur-sm outline-none overflow-visible">
+	<button type="button" id="btn-cancelar-modulo-top" class="absolute right-1 top-1 cursor-pointer rounded-sm bg-zinc-900/5 px-2 py-1 text-sm  text-zinc-300 transition hover:bg-white/5 hover:text-cyan-500">
+		x
+	</button>
+	<form method="dialog" id="form-modulo" class="relative space-y-4">
 		<input type="hidden" id="modal-modulo-mode" value="create" />
 		
 		<div class="mb-6">
-			<h2 id="modal-modulo-titulo" class="text-2xl font-semibold text-white">---</h2>
+			<h2 id="modal-modulo-titulo" class="text-2xl font-medium text-white">---</h2>
 		</div>
 
 		<div>
 			<label for="modal-modulo-codigo" class="mb-2 block text-sm font-medium text-white">Código del módulo</label>
-			<input id="modal-modulo-codigo" type="text" required class="text-sm w-full rounded-md border border-zinc-300/30 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="ej: PRG" />
+			<input id="modal-modulo-codigo" type="text" required class="text-sm w-full rounded-sm border border-cyan-400/20 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="ej: PRG" />
 		</div>
 
 		<div>
 			<label for="modal-modulo-nombre" class="mb-2 block text-sm font-medium text-white">Nombre de la asignatura</label>
-			<input id="modal-modulo-nombre" type="text" required class="text-sm w-full rounded-md border border-zinc-300/30 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="ej: Programación" />
+			<input id="modal-modulo-nombre" type="text" required class="text-sm w-full rounded-sm border border-cyan-400/20 bg-white/5 px-4 py-2 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20" placeholder="ej: Programación" />
 		</div>
 
 		<div>
 			<label class="mb-2 block text-sm font-medium text-white">Curso del módulo</label>
 			<div class="flex gap-3">
-				<div class="w-1/2">
-					<select id="modal-modulo-curso-anio" class="w-full rounded-md border text-sm border-zinc-300/30 bg-zinc-900 px-4 py-2 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20">
-						<option value="1º" selected>1º</option>
-						<option value="2º">2º</option>
-					</select>
+				<!-- Custom select para Año -->
+				<div class="w-1/2 relative" id="modal-modulo-curso-anio-wrapper">
+					<button type="button" id="btn-custom-curso-anio" class="w-full flex items-center justify-between rounded-sm border text-sm border-cyan-400/20 bg-zinc-900 px-4 py-2 text-white outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20 transition cursor-pointer">
+						<span id="custom-curso-anio-value">1º</span>
+						<svg class="w-4 h-4 text-zinc-400 animate-pulse" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"></path>
+						</svg>
+					</button>
+					<input type="hidden" id="modal-modulo-curso-anio" value="1º" />
+					<div id="custom-curso-anio-options" class="hidden absolute left-0 z-50 mt-1 w-full rounded border border-cyan-500/20 bg-zinc-950 p-1 shadow-2xl">
+						<div data-val="1º" class="curso-anio-option cursor-pointer rounded px-3 py-2 text-xs text-white hover:bg-zinc-900 hover:text-cyan-400 transition">1º</div>
+						<div data-val="2º" class="curso-anio-option cursor-pointer rounded px-3 py-2 text-xs text-white hover:bg-zinc-900 hover:text-cyan-400 transition">2º</div>
+					</div>
 				</div>
-				<div class="w-1/2">
-					<select id="modal-modulo-curso-carrera" class="w-full rounded-md border text-sm border-zinc-300/30 bg-zinc-900 px-4 py-2 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20">
-						<option value="DAW" selected>DAW</option>
-						<option value="DAM">DAM</option>
-						<option value="ASIX">ASIX</option>
-					</select>
+
+				<!-- Custom select para Carrera -->
+				<div class="w-1/2 relative" id="modal-modulo-curso-carrera-wrapper">
+					<button type="button" id="btn-custom-curso-carrera" class="w-full flex items-center justify-between rounded-sm border text-sm border-cyan-400/20 bg-zinc-900 px-4 py-2 text-white outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20 transition cursor-pointer">
+						<span id="custom-curso-carrera-value">DAW</span>
+						<svg class="w-4 h-4 text-zinc-400 animate-pulse" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" d="m19 9-7 7-7-7"></path>
+						</svg>
+					</button>
+					<input type="hidden" id="modal-modulo-curso-carrera" value="DAW" />
+					<div id="custom-curso-carrera-options" class="hidden absolute left-0 z-50 mt-1 w-full rounded border border-cyan-500/20 bg-zinc-950 p-1 shadow-2xl">
+						<div data-val="DAW" class="curso-carrera-option cursor-pointer rounded px-3 py-2 text-xs text-white hover:bg-zinc-900 hover:text-cyan-400 transition">DAW</div>
+						<div data-val="DAM" class="curso-carrera-option cursor-pointer rounded px-3 py-2 text-xs text-white hover:bg-zinc-900 hover:text-cyan-400 transition">DAM</div>
+						<div data-val="ASIX" class="curso-carrera-option cursor-pointer rounded px-3 py-2 text-xs text-white hover:bg-zinc-900 hover:text-cyan-400 transition">ASIX</div>
+					</div>
 				</div>
 			</div>
 		</div>
 		
-		<div class="flex items-center justify-end gap-3 pt-4">
-			<button type="button" id="btn-cancelar-modulo" class="rounded-md border border-zinc-700 bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:bg-white/5 hover:text-white">
+		<div class="flex items-center justify-end gap-3 border-zinc-600 pt-6">
+			<button type="button" id="btn-cancelar-modulo" class="cursor-pointer rounded-sm border border-red-500/80 bg-transparent px-4 py-2 text-sm font-medium text-red-500/80 transition hover:bg-red-300/5 hover:border-red-600 hover:text-red-600">
 				Cancelar
 			</button>
-			<button type="submit" id="btn-guardar-modulo" class="rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-cyan-400">
+			<button type="submit" id="btn-guardar-modulo" class="cursor-pointer rounded-sm bg-cyan-500 px-5 py-2 text-sm font-semibold text-black transition hover:bg-cyan-400">
 				Guardar
 			</button>
 		</div>
