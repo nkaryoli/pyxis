@@ -1,8 +1,18 @@
 <header class="fixed z-50 w-full shadow-md shadow-zinc-900/20 bg-zinc-950/90 backdrop-blur border-b border-zinc-800">
 	<div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-		<a href="{{ url_for('home') if request.endpoint and 'home' in request.endpoint else '/' }}" class="text-lg font-bold tracking-wide text-cyan-400">
-			Pyxis
-		</a>
+		<div class="flex items-center gap-3">
+			<button id="sidebar-toggle" class="cursor-pointer lg:hidden text-zinc-300 hover:text-cyan-400 focus:outline-none transition-colors" aria-label="Abrir menú">
+				<svg id="hamburger-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+				</svg>
+				<svg id="close-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+				</svg>
+			</button>
+			<a href="{{ url_for('home') if request.endpoint and 'home' in request.endpoint else '/' }}" class="text-lg font-bold tracking-wide text-cyan-400">
+				Pyxis
+			</a>
+		</div>
 		<nav class="flex items-center gap-3 text-sm text-zinc-300">
 			
 			<form action="{{ url_for('posts.buscar_posts') }}" method="GET" class="w-full max-w-64">
