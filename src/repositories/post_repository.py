@@ -96,7 +96,7 @@ class PostRepository:
             session.close()
 
     @staticmethod
-    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None):
+    def update(id_post, titulo=None, contenido=None, codigo_modulo=None, imagen=None, fecha_creacion=None, is_deleted=None):
         """Actualiza los campos enviados de un post existente."""
         session = get_session()
         try:
@@ -115,6 +115,8 @@ class PostRepository:
                 post.imagen_post = imagen
             if fecha_creacion is not None: 
                 post.fecha_creacion_post = fecha_creacion 
+            if is_deleted is not None:
+                post.is_deleted = is_deleted
 
             session.commit()
             session.refresh(post)

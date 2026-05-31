@@ -121,6 +121,7 @@ formMatricula === null || formMatricula === void 0 ? void 0 : formMatricula.addE
         .catch((err) => guardarToastPendiente(`No se pudo guardar la matrícula: ${err.message}`, "error"));
 });
 export function handleUserAction(button, context) {
+    var _a;
     const action = button.dataset.action;
     if (action === "crear-usuario") {
         form.reset();
@@ -188,14 +189,28 @@ export function handleUserAction(button, context) {
         const id = button.dataset.id;
         if (!id)
             return true;
-        mostrarConfirmacion("Eliminar Usuario", "¿Estás seguro de que deseas eliminar permanentemente este usuario?", () => {
+        mostrarConfirmacion("Desactivar Usuario", "¿Estás seguro de que deseas desactivar este usuario?", () => {
             void eliminarUsuario(id)
                 .then(() => {
-                guardarToastPendiente("Usuario eliminado con éxito", "success");
+                guardarToastPendiente("Usuario desactivado con éxito", "success");
                 location.reload();
             })
-                .catch(() => guardarToastPendiente("No se pudo eliminar el usuario con la API actual.", "error"));
+                .catch(() => guardarToastPendiente("No se pudo desactivar el usuario.", "error"));
         });
+        return true;
+    }
+    if (action === "restaurar-usuario") {
+        const id = button.dataset.id;
+        if (!id)
+            return true;
+        const root = document.querySelector("[data-dashboard-root]");
+        const solicitanteId = (_a = root === null || root === void 0 ? void 0 : root.dataset.userId) !== null && _a !== void 0 ? _a : "";
+        void actualizarUsuario(id, { is_active: true }, solicitanteId)
+            .then(() => {
+            guardarToastPendiente("Usuario activado con éxito", "success");
+            location.reload();
+        })
+            .catch((err) => guardarToastPendiente(`No se pudo activar el usuario: ${err.message}`, "error"));
         return true;
     }
     return false;

@@ -71,28 +71,30 @@ class ModuloService:
         return ModuloRepository.create(codigo_limpio, nombre_limpio, curso_limpio)
     
     @staticmethod
-    def modificar_modulo(codigo_modulo, nuevo_nombre, nuevo_curso, rol_usuario):
+    def modificar_modulo(codigo_modulo, nuevo_nombre, nuevo_curso, rol_usuario, is_deleted=None):
         """Modifica un módulo existente tras validar los parámetros y el rol. Acceso: Solo prof y admin."""
         if rol_usuario not in ['PROFESOR', 'ADMINISTRADOR']:
             raise ValueError("Acceso denegado: Solo los profesores y administradores pueden modificar módulos")
 
         if not codigo_modulo:
             raise ValueError("El código del módulo es obligatorio para editarlo")
-        if not nuevo_nombre or not nuevo_curso:
-            raise ValueError("Los campos modificados no pueden quedarse vacíos")
             
         codigo_limpio = codigo_modulo.strip().upper()
-        nombre_limpio = nuevo_nombre.strip()
-        curso_limpio = nuevo_curso.strip()
-        
-        if len(nombre_limpio) < 4:
-            raise ValueError("El nuevo nombre de la asignatura debe tener al menos 4 caracteres")
-
         modulo_existente = ModuloRepository.get_by_codigo(codigo_limpio, include_deleted=True)
         if not modulo_existente:
             raise ValueError(f"No se puede modificar: el módulo '{codigo_limpio}' no existe")
             
-        return ModuloRepository.update(codigo_limpio, nombre_limpio, curso_limpio)
+        nombre_limpio = modulo_existente.nombre_asignatura
+        if nuevo_nombre is not None:
+            nombre_limpio = nuevo_nombre.strip()
+            if len(nombre_limpio) < 4:
+                raise ValueError("El nuevo nombre de la asignatura debe tener al menos 4 caracteres")
+
+        curso_limpio = modulo_existente.curso_modulo
+        if nuevo_curso is not None:
+            curso_limpio = nuevo_curso.strip()
+            
+        return ModuloRepository.update(codigo_limpio, nombre_limpio, curso_limpio, is_deleted)
 
     @staticmethod
     def eliminar_modulo_existente(codigo_modulo, rol_usuario):

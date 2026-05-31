@@ -63,7 +63,6 @@ class Post(Base):
             "id_usuario": self.id_usuario,
             "codigo_modulo": self.codigo_modulo,
             "imagen_post": self.imagen_post,
+            "is_deleted": self.is_deleted,
             "fecha_creacion": self.fecha_creacion_post.isoformat() if self.fecha_creacion_post else None
         }
-
- 

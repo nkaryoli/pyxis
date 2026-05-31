@@ -65,7 +65,7 @@ export function handlePostAction(button, context) {
         const id = button.dataset.id;
         if (!id)
             return true;
-        mostrarConfirmacion("Eliminar Publicación", "¿Estás seguro de que deseas eliminar permanentemente esta publicación?", () => {
+        mostrarConfirmacion("Eliminar Publicación", "¿Estás seguro de que deseas eliminar esta publicación?", () => {
             void eliminarPost(id, context.userId, context.userRole)
                 .then(() => {
                 guardarToastPendiente("Publicación eliminada con éxito", "success");
@@ -73,6 +73,18 @@ export function handlePostAction(button, context) {
             })
                 .catch((err) => guardarToastPendiente(`No se pudo eliminar el post: ${err.message}`, "error"));
         });
+        return true;
+    }
+    if (action === "restaurar-post") {
+        const id = button.dataset.id;
+        if (!id)
+            return true;
+        void actualizarPost(id, { is_deleted: false }, context.userId, context.userRole)
+            .then(() => {
+            guardarToastPendiente("Publicación restaurada con éxito", "success");
+            location.reload();
+        })
+            .catch((err) => guardarToastPendiente(`No se pudo restaurar el post: ${err.message}`, "error"));
         return true;
     }
     return false;

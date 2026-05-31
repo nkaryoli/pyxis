@@ -100,7 +100,7 @@ class ModuloRepository:
             session.close()
 
     @staticmethod
-    def update(codigo_modulo, nuevo_nombre, nuevo_curso):
+    def update(codigo_modulo, nuevo_nombre, nuevo_curso, is_deleted=None):
         """Actualiza un modulo existente en la BD (Solo profesores y administradores)."""
         session = get_session()
         try:
@@ -108,6 +108,8 @@ class ModuloRepository:
             if modulo:
                 modulo.nombre_asignatura = nuevo_nombre
                 modulo.curso_modulo = nuevo_curso
+                if is_deleted is not None:
+                    modulo.is_deleted = is_deleted
                 session.commit()
                 session.refresh(modulo)
                 return modulo

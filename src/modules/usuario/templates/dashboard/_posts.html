@@ -64,18 +64,19 @@
               <summary
                 class="list-none cursor-pointer rounded-sm bg-zinc-500/5 px-3 py-2 text-xs font-medium text-cyan-500 hover:text-cyan-300 hover:border-cyan-500/70 border border-cyan-500/20">
                 Acciones</summary>
-              <div
-                class="absolute right-0 z-10 mt-2 w-32 rounded border border-cyan-500/20 bg-zinc-950 p-1 shadow-lg shadow-black/40">
-                <button
-                  class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn"
-                  data-action="ver-post" data-id="{{ post.id_post }}">Ver</button>
-                {% if rol == 'ADMINISTRADOR' or rol == 'PROFESOR' %}
-                <button
-                  class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn"
-                  data-action="editar-post" data-id="{{ post.id_post }}">Editar</button>
-                <button
-                  class="w-full rounded px-3 py-2 text-left text-xs text-red-500 hover:text-red-500 hover:bg-zinc-900 action-btn"
-                  data-action="eliminar-post" data-id="{{ post.id_post }}">Eliminar</button>
+              <div class="absolute right-0 z-10 mt-2 w-32 rounded border border-cyan-500/20 bg-zinc-950 p-1 shadow-lg shadow-black/40">
+                <button class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn" data-action="ver-post" data-id="{{ post.id_post }}">Ver</button>
+                {% if not post.is_deleted %}
+                  {% if rol == 'ADMINISTRADOR' %}
+                  <button class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn" data-action="editar-post" data-id="{{ post.id_post }}">Editar</button>
+                  {% endif %}
+                  {% if rol == 'ADMINISTRADOR' or rol == 'PROFESOR' %}
+                  <button class="w-full rounded px-3 py-2 text-left text-xs text-red-500 hover:text-red-500 hover:bg-zinc-900 action-btn" data-action="eliminar-post" data-id="{{ post.id_post }}">Eliminar</button>
+                  {% endif %}
+                {% else %}
+                  {% if rol == 'ADMINISTRADOR' %}
+                  <button class="w-full rounded px-3 py-2 text-left text-xs text-emerald-500 hover:text-emerald-400 hover:bg-zinc-900 action-btn" data-action="restaurar-post" data-id="{{ post.id_post }}">Restaurar</button>
+                  {% endif %}
                 {% endif %}
               </div>
             </details>
