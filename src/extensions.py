@@ -44,10 +44,10 @@ def get_session():
 
 
 def should_include_deleted():
-    """Retorna True si el usuario actual en el contexto HTTP es un ADMINISTRADOR."""
+    """Retorna True si el usuario actual en el contexto HTTP es ADMINISTRADOR o PROFESOR."""
     from flask import has_request_context, g
     if has_request_context():
         usuario = getattr(g, 'current_user', None)
-        if usuario and getattr(usuario, 'rol', None) == 'ADMINISTRADOR':
+        if usuario and getattr(usuario, 'rol', None) in ['ADMINISTRADOR', 'PROFESOR']:
             return True
     return False

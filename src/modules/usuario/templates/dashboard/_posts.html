@@ -6,13 +6,17 @@
         <p class="text-sm text-zinc-400">Listado de posts con acceso directo a respuestas y validación.</p>
       </div>
       <div class="relative">
-					<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500 transition-colors pointer-events-auto z-10">
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-							<circle cx="11" cy="11" r="7"></circle>
-							<path d="m20 20-3.5-3.5"></path>
-						</svg>
-					</span>
-					<input type="text" class="table-filter rounded border border-cyan-500/50 bg-zinc-950 pl-9 px-3 py-2 text-sm text-white hover:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 placeholder:text-zinc-500 w-44" placeholder="Buscar por alumno..." data-filter-field="autor">
+        <span
+          class="absolute inset-y-0 left-0 flex items-center pl-3 text-zinc-500 transition-colors pointer-events-auto z-10">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor"
+            stroke-width="1.8">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="m20 20-3.5-3.5"></path>
+          </svg>
+        </span>
+        <input type="text"
+          class="table-filter rounded border border-cyan-500/50 bg-zinc-950 pl-9 px-3 py-2 text-sm text-white hover:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 placeholder:text-zinc-500 w-44"
+          placeholder="Buscar por alumno..." data-filter-field="autor">
       </div>
     </div>
 
@@ -20,10 +24,11 @@
       <thead class="text-zinc-400">
         <tr>
           {% if rol == 'ADMINISTRADOR' %}
-            <th class="py-3 pr-4 font-medium">ID</th>
+          <th class="py-3 pr-4 font-medium">ID</th>
           {% endif %}
           <th class="py-3 pr-4 font-medium">Título</th>
           <th class="py-3 pr-4 font-medium">Módulo</th>
+          <th class="py-3 pr-4 font-medium text-center">Estado</th>
           <th class="py-3 pr-4 font-medium  w-24 text-center">Respuestas</th>
           <th class="py-3 pr-4 font-medium w-28 text-center">Autor</th>
           <th class="py-3 text-right font-medium">Acciones</th>
@@ -33,20 +38,44 @@
         {% for post in posts %}
         <tr class="hover:bg-zinc-900/40">
           {% if rol == 'ADMINISTRADOR' %}
-            <td class="py-3 pr-4 font-mono text-xs text-cyan-300">{{ post.id_post }}</td>
+          <td class="py-3 pr-4 font-mono text-xs text-cyan-300">{{ post.id_post }}</td>
           {% endif %}
           <td class="py-3 pr-4">{{ post.titulo_post }}</td>
           <td class="py-3 pr-4 text-zinc-400">{{ post.modulo_nombre }}</td>
+          <td class="py-3 pr-4 text-center">
+            {% if post.is_deleted %}
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-medium text-rose-400 border border-rose-500/20 transition-all duration-200 hover:bg-rose-500/20">
+              <span class="h-1.5 w-1.5 rounded-full bg-rose-400"></span>
+              Eliminado
+            </span>
+            {% else %}
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-400 border border-emerald-500/20 transition-all duration-200 hover:bg-emerald-500/20">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Activo
+            </span>
+            {% endif %}
+          </td>
           <td class="py-3 pr-4 text-zinc-400 w-24 text-center">{{ post.respuestas_count }}</td>
           <td class="py-3 pr-4 text-zinc-400 w-28 text-center" data-field="autor">{{ post.autor }}</td>
           <td class="py-3 text-right">
             <details class="relative inline-block text-left">
-              <summary class="list-none cursor-pointer rounded-sm bg-zinc-500/5 px-3 py-2 text-xs font-medium text-cyan-500 hover:text-cyan-300 hover:border-cyan-500/70 border border-cyan-500/20">Acciones</summary>
-              <div class="absolute right-0 z-10 mt-2 w-32 rounded border border-cyan-500/20 bg-zinc-950 p-1 shadow-lg shadow-black/40">
-                <button class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn" data-action="ver-post" data-id="{{ post.id_post }}">Ver</button>
+              <summary
+                class="list-none cursor-pointer rounded-sm bg-zinc-500/5 px-3 py-2 text-xs font-medium text-cyan-500 hover:text-cyan-300 hover:border-cyan-500/70 border border-cyan-500/20">
+                Acciones</summary>
+              <div
+                class="absolute right-0 z-10 mt-2 w-32 rounded border border-cyan-500/20 bg-zinc-950 p-1 shadow-lg shadow-black/40">
+                <button
+                  class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn"
+                  data-action="ver-post" data-id="{{ post.id_post }}">Ver</button>
                 {% if rol == 'ADMINISTRADOR' or rol == 'PROFESOR' %}
-                <button class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn" data-action="editar-post" data-id="{{ post.id_post }}">Editar</button>
-                <button class="w-full rounded px-3 py-2 text-left text-xs text-red-500 hover:text-red-500 hover:bg-zinc-900 action-btn" data-action="eliminar-post" data-id="{{ post.id_post }}">Eliminar</button>
+                <button
+                  class="w-full rounded px-3 py-2 text-left text-xs text-white hover:text-cyan-400 hover:bg-zinc-900 action-btn"
+                  data-action="editar-post" data-id="{{ post.id_post }}">Editar</button>
+                <button
+                  class="w-full rounded px-3 py-2 text-left text-xs text-red-500 hover:text-red-500 hover:bg-zinc-900 action-btn"
+                  data-action="eliminar-post" data-id="{{ post.id_post }}">Eliminar</button>
                 {% endif %}
               </div>
             </details>
@@ -54,11 +83,12 @@
         </tr>
         {% else %}
         <tr>
-          <td class="py-4 text-zinc-500" colspan="{% if rol == 'ADMINISTRADOR' %}6{% else %}5{% endif %}">No hay posts para mostrar.</td>
+          <td class="py-4 text-zinc-500" colspan="{% if rol == 'ADMINISTRADOR' %}7{% else %}6{% endif %}">No hay posts
+            para mostrar.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  {% include 'dashboard/_paginacion.html' %} 
+  {% include 'dashboard/_paginacion.html' %}
 </section>
