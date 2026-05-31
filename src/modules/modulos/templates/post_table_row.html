@@ -1,6 +1,9 @@
-<tr class="group bg-transparent hover:bg-zinc-900/60">
+<tr class="group {% if post.is_deleted %}opacity-65 bg-rose-950/5 border-dashed border-rose-500/20{% else %}bg-transparent hover:bg-zinc-900/60{% endif %}">
     <td class="px-6 py-4 align-top">
         <a href="{{ url_for('posts.post_respuesta', id_post=post.id_post) }}" class="block text-sm font-medium text-white hover:text-cyan-300">
+            {% if post.is_deleted %}
+                <span class="inline-flex items-center gap-1 rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/20 mr-1.5 uppercase">Inactivo</span>
+            {% endif %}
             {{ post.titulo_post }}
         </a>
         <div class="mt-1 text-xs text-zinc-400">

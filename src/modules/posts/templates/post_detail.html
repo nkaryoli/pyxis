@@ -25,9 +25,9 @@
                 </div>
 
                 <div class="flex items-center justify-between gap-9 mt-3 text-sm text-zinc-400">
-                    <h1 class="text-2xl font-bold text-white">
+                    <h1 class="text-2xl font-bold text-white flex items-center gap-2">
                         {% if post.is_deleted %}
-                            <span class="text-red-400 font-extrabold mr-2">[ELIMINADO]</span>
+                            <span class="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-xs font-bold text-rose-400 border border-rose-500/20 uppercase">Inactivo</span>
                         {% endif %}
                         {{ post.titulo_post }}
                     </h1>
