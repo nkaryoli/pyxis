@@ -1,6 +1,18 @@
 # Pyxis 
 
-Bienvenido al repositorio de **Pyxis**, una plataforma de colaboración para estudiantes donde resolver dudas organizadas por módulos educativos. Este proyecto se desarrolla bajo la metodología ABP para el curso 2025-2026.
+**Pyxis** es un foro educativo moderno diseñado para transformar la forma en la que los estudiantes y profesores interactúan. En muchas ocasiones, las dudas de un alumno son las mismas que las del resto de la clase, pero se pierden en correos o chats privados. 
+
+Pyxis soluciona esto proporcionando un espacio colaborativo centralizado y organizado por **Asignaturas (Módulos)**. Aquí, los alumnos pueden publicar sus preguntas y debatir posibles soluciones. Para garantizar que la información sea fiable, los **Profesores** pueden intervenir y certificar la "Mejor Respuesta" de cada hilo de discusión, construyendo así una base de conocimiento muy valiosa para los exámenes.
+
+Este proyecto ha sido desarrollado bajo la metodología de Aprendizaje Basado en Proyectos (ABP) para el curso 2025-2026.
+
+## Características Principales
+
+* **Sistema de Roles y Permisos (RBAC):** Interfaces y privilegios adaptados para Administradores, Profesores y Alumnos.
+* **Foros por Asignaturas (Módulos):** Las dudas se organizan por materia. Los alumnos solo pueden publicar o responder en los módulos en los que están matriculados.
+* **Validación de Respuestas:** Los profesores tienen el poder de marcar la "Mejor Respuesta" dentro de un hilo, validando la solución correcta para el resto de la clase.
+* **Gestión de Perfiles y Actividad:** Cada usuario dispone de un perfil público con su avatar, historial de posts y un sistema de notificaciones sobre sus interacciones.
+* **Diseño Moderno y Responsivo:** Interfaz inmersiva en *Dark Mode* diseñada desde cero con Tailwind CSS, completamente adaptada a móviles (Mobile First).
 
 ---
 
