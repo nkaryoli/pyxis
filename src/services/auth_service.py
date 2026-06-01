@@ -40,7 +40,16 @@ class AuthService:
 
     @classmethod
     def registrar_usuario_con_rol(cls, datos, rol):
-        """Crea un usuario permitiendo definir el rol explícitamente."""
+        """
+        Crea un usuario permitiendo definir el rol explícitamente.
+        
+        Args:
+            datos (dict): Diccionario con email y password.
+            rol (str): Rol asignado al usuario.
+            
+        Returns:
+            Usuario: Objeto de usuario creado.
+        """
         email = cls._normalizar_email(datos.get('email_usuario') or datos.get('email'))
         password = datos.get('password_usuario') or datos.get('password')
         confirmacion = datos.get('confirm_password_usuario') or datos.get('confirm_password')
@@ -65,7 +74,15 @@ class AuthService:
 
     @classmethod
     def autenticar_usuario(cls, datos):
-        """Comprueba credenciales válidas y devuelve el usuario junto al token."""
+        """
+        Comprueba credenciales válidas y devuelve el usuario junto al token.
+        
+        Args:
+            datos (dict): Diccionario con email y password.
+            
+        Returns:
+            dict: Contiene el objeto usuario y el token de autenticación.
+        """
         email = cls._normalizar_email(datos.get('email_usuario') or datos.get('email'))
         password = datos.get('password_usuario') or datos.get('password')
 
@@ -110,8 +127,9 @@ class AuthService:
 
     @classmethod
     def token_required(cls, func):
-        """Decorador para proteger endpoints que requieren autenticación.
-
+        """
+        Decorador para proteger endpoints que requieren autenticación.
+        
         Busca el token en la cookie `auth_token` o en el header `Authorization: Bearer ...`.
         Valida el token y, si es válido, adjunta el usuario actual en `flask.g.current_user`.
         Si falta o es inválido, redirige al login para peticiones HTML o devuelve 401 en JSON.
@@ -127,7 +145,6 @@ class AuthService:
 
             token = request.cookies.get('auth_token')
 
-            # Fallback a header Authorization
             if not token:
                 auth_header = request.headers.get('Authorization', '')
                 if auth_header.startswith('Bearer '):
@@ -162,7 +179,6 @@ class AuthService:
                     return redirect(url_for('auth.login'))
                 return jsonify({'error': 'Tu cuenta de usuario ha sido desactivada'}), 401
 
-            # Attach current user to flask.g
             g.current_user = usuario
             return func(*args, **kwargs)
 

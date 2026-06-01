@@ -58,8 +58,6 @@ class UsuarioService:
         Returns:
             Usuario: Objeto del usuario actualizado en base de datos.
         """
-        print('el id del solicitante es ', usuario_id_solicitante)
-        print('el id del destino es ', id_usuario_destino)
         
         solicitante_res = UsuarioService.obtener_usuario_por_id(usuario_id_solicitante)
         destino_res = UsuarioService.obtener_usuario_por_id(id_usuario_destino)
@@ -124,7 +122,7 @@ class UsuarioService:
 
     @staticmethod
     def eliminar_usuario(id_usuario, usuario_rol):
-        """Lógica para eliminar un usuario."""               
+        """Desactiva o elimina a un usuario del sistema (requiere rol de administrador)."""               
         
         if usuario_rol != 'ADMINISTRADOR':
             raise ValueError("No se puede eliminar a un usuario si no eres administrador.")
@@ -241,12 +239,14 @@ class UsuarioService:
     
     @staticmethod
     def esta_matriculado(usuario, codigo_modulo):
+        """Verifica si un usuario está matriculado en un módulo."""
         if usuario.rol in ['ADMINISTRADOR', 'PROFESOR']:
             return True
         return MatriculaRepository.verificar_matricula(usuario.id_usuario, codigo_modulo)
 
     @staticmethod
     def obtener_modulos_usuario(usuario):
+        """Obtiene todos los módulos en los que el usuario está matriculado."""
         return MatriculaRepository.get_modulos_para_usuario(usuario)
     
     
