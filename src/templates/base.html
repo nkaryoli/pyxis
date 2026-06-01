@@ -13,11 +13,63 @@
 	<body class="min-h-screen bg-linear-to-b from-zinc-950 via-zinc-950 to-black text-zinc-100 antialiased relative">
 		<div class="w-full h-96 bg-radial from-cyan-300/10 via-transparent to-trasparent absolute -top-32 -z-20"></div>
 		{% include 'partials/navbar.html' %}
+
+		{% with messages = get_flashed_messages(with_categories=true) %}
+			{% if messages %}
+				<div id="flash-messages-container" class="fixed top-20 right-4 z-50 flex flex-col gap-3 max-w-md w-full px-4 sm:px-0">
+					{% for category, message in messages %}
+						{% set bg_color = 'bg-rose-500/10 border-rose-500/20 text-rose-400 shadow-lg shadow-rose-500/5' %}
+						{% if category == 'success' or 'exito' in category|lower or 'éxito' in category|lower or 'correctamente' in message|lower or 'éxito' in message|lower or 'exito' in message|lower %}
+							{% set bg_color = 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-lg shadow-emerald-500/5' %}
+						{% elif category == 'info' %}
+							{% set bg_color = 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400 shadow-lg shadow-cyan-500/5' %}
+						{% endif %}
+						<div class="flash-message flex items-start gap-3 rounded-md border p-4 shadow-lg backdrop-blur-md transition-all duration-300 transform translate-x-0 opacity-100 {{ bg_color }}" role="alert">
+							<div class="flex-1 text-sm font-medium">
+								{{ message }}
+							</div>
+							<button type="button" class="close-flash text-zinc-400 hover:text-white transition-colors cursor-pointer" aria-label="Cerrar">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+								</svg>
+							</button>
+						</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+		{% endwith %}
+
 		<main class="mx-auto max-w-5xl pt-15 px-4">
 			{% block content %}{% endblock %}
 		</main>
 		{% include 'partials/footer.html' %}
 	
 		{% block page_scripts %}{% endblock %}
+
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const container = document.getElementById('flash-messages-container');
+				if (container) {
+					const messages = container.querySelectorAll('.flash-message');
+					messages.forEach(msg => {
+						const closeBtn = msg.querySelector('.close-flash');
+						const dismiss = () => {
+							msg.classList.add('translate-x-full', 'opacity-0');
+							setTimeout(() => {
+								msg.remove();
+								if (container.children.length === 0) {
+									container.remove();
+								}
+							}, 300);
+						};
+						if (closeBtn) {
+							closeBtn.addEventListener('click', dismiss);
+						}
+						// Desvanecer automáticamente tras 6 segundos
+						setTimeout(dismiss, 6000);
+					});
+				}
+			});
+		</script>
 	</body>
 </html>

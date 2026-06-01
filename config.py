@@ -12,7 +12,12 @@ class Config:
     MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
     MYSQL_USER = os.environ.get('MYSQL_USER', 'root')
     MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', '')
-    MYSQL_DB = os.environ.get('MYSQL_DB', 'abptest')
+    TESTING = os.environ.get('FLASK_ENV') == 'testing'
+    
+    if TESTING:
+        MYSQL_DB = os.environ.get('MYSQL_TEST_DB', 'abptest')
+    else:
+        MYSQL_DB = os.environ.get('MYSQL_DB', 'pyxis_dev')
 
     # Cookie security flags (se leen desde env y se convierten correctamente)
     SESSION_COOKIE_SECURE = _bool(os.environ.get('SESSION_COOKIE_SECURE'), False)
