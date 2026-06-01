@@ -171,10 +171,9 @@ class PostRepository:
         finally:
             session.close()
             
-            
-            
     @staticmethod
     def get_by_user_paginated(id_usuario, limit, offset, include_deleted=False):
+        """Devuelve los posts de un usuario de forma paginada."""
         session = get_session()
         try:
             query = session.query(Post).filter(Post.id_usuario == id_usuario)
@@ -189,6 +188,7 @@ class PostRepository:
 
     @staticmethod
     def count_by_user(id_usuario, include_deleted=False):
+        """Cuenta el total de posts publicados por un usuario."""
         session = get_session()
         try:
             query = session.query(Post).filter(Post.id_usuario == id_usuario)
@@ -197,5 +197,3 @@ class PostRepository:
             return query.count()
         finally:
             session.close()
-    
-    

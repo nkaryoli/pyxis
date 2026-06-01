@@ -2,9 +2,11 @@ from src.extensions import get_session
 from src.models.tokens import HistoricoTokens
 
 class TokensRepository:
+    """Repositorio para operaciones CRUD sobre la tabla HISTORICO_TOKENS."""
 
     @staticmethod
     def create(tokens, motivo, trimestre, id_usuario):
+        """Crea un nuevo registro en el historial de tokens."""
         session = get_session()
         try:
             nuevo_registro = HistoricoTokens(
@@ -26,6 +28,7 @@ class TokensRepository:
 
     @staticmethod
     def get_by_user_id(id_usuario):
+        """Obtiene el historial de tokens de un usuario específico."""
         session = get_session()
         try:
             historial = session.query(HistoricoTokens).filter_by(id_usuario=id_usuario).all()
@@ -36,9 +39,20 @@ class TokensRepository:
             
     @staticmethod
     def delete(id_tokens):
+        """
+        Elimina un registro del historial de tokens por su ID.
+        
+        Args:
+            id_tokens (int): ID del registro de tokens.
+            
+        Returns:
+            bool: True si se eliminó correctamente, False si no se encontró.
+            
+        Note:
+            Buscamos el registro directamente en la tabla física HISTORICO_TOKENS y realizamos un borrado físico (no lógico).
+        """
         session = get_session()
         try:
-            # Buscamos el registro en la tabla física HISTORICO_TOKENS
             registro = session.query(HistoricoTokens).filter_by(id_tokens=id_tokens).first()
             if registro:
                 session.delete(registro)
@@ -51,12 +65,19 @@ class TokensRepository:
         finally:
             session.close()
     
-    
     @staticmethod
     def get_all():
+        """
+        Obtiene todos los registros del historial de tokens.
+        
+        Returns:
+            list[HistoricoTokens]: Lista de todos los movimientos de tokens.
+            
+        Note:
+            Hace un SELECT * FROM HISTORICO_TOKENS sin filtros.
+        """
         session = get_session()
         try:
-            # Hace un SELECT * FROM HISTORICO_TOKENS
             todos_los_tokens = session.query(HistoricoTokens).all()
             session.expunge_all()
             return todos_los_tokens

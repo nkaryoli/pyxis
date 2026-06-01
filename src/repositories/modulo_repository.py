@@ -4,7 +4,7 @@ from src.models.post import Post
 from sqlalchemy import func
 
 class ModuloRepository:
-    "Repositorio para operaciones CRUD de Modulo en la BD."
+    """Repositorio para operaciones CRUD de Modulo en la BD."""
 
     _ICONOS_POR_MODULO = {
         "MOD-BBDD": "database",
@@ -18,13 +18,12 @@ class ModuloRepository:
         "MOD-SIST": "shield",
         
         "MOD-SOST": "spark",
-    "MOD-DIGI": "monitor",
-    "MOD-ING": "layout",
-    "MOD-XARX": "shield",
-    "MOD-IAW": "rocket",
-    "MOD-ISO": "server",
-    "MOD-ASGD": "file-text",
-
+        "MOD-DIGI": "monitor",
+        "MOD-ING": "layout",
+        "MOD-XARX": "shield",
+        "MOD-IAW": "rocket",
+        "MOD-ISO": "server",
+        "MOD-ASGD": "file-text",
     }
 
     @staticmethod
@@ -36,7 +35,17 @@ class ModuloRepository:
 
     @staticmethod
     def get_all(include_deleted=False):
-        """Obtiene todos los modulos de la BD (Todos los Usuarios)."""
+        """
+        Obtiene todos los modulos de la BD (Todos los Usuarios).
+        
+        Args:
+            include_deleted (bool): Si es True, incluye módulos marcados como eliminados lógicamente.
+
+        Returns:
+            list[Modulo]: Lista de módulos con los atributos dinámicos:
+                - posts_count: número de posts asociados.
+                - numero_posts: alias de compatibilidad para plantillas.
+        """
         session = get_session()
         try:
             # Hacemos una consulta con LEFT OUTER JOIN para obtener el número de posts
@@ -136,4 +145,3 @@ class ModuloRepository:
             return False
         finally:
             session.close()
-            
