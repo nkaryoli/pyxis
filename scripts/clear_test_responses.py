@@ -37,9 +37,14 @@ def main():
         sys.exit(2)
 
     # Additional safety: if DB URI looks like production, warn and abort unless forced
-    db_uri = app.config.get('SQLALCHEMY_DATABASE_URI') or ''
-    prod_indicators = ['prod', 'amazonaws', 'rds', 'azure', 'cloud', 'mysql', 'postgresql']
-    if any(ind in db_uri.lower() for ind in prod_indicators) and not args.force and not app.config.get('TESTING'):
+    db_uri = (
+        f"mysql+pymysql://{app.config.get('MYSQL_USER')}:"
+        f"{app.config.get('MYSQL_PASSWORD')}@"
+        f"{app.config.get('MYSQL_HOST')}/{app.config.get('MYSQL_DB')}"
+    )
+    prod_indicators = ['prod', 'amazonaws', 'rds', 'azure', 'cloud']
+    allow_env = os.environ.get('ALLOW_DB_CLEAN') == '1'
+    if any(ind in db_uri.lower() for ind in prod_indicators) and not args.force and not app.config.get('TESTING') and not allow_env:
         print('ERROR: Detected a database URI that may be production-like:', db_uri)
         print('Refusing to run without --force or ALLOW_DB_CLEAN=1. Set --dry-run to inspect what would be deleted.')
         sys.exit(3)

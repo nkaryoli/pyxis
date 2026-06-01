@@ -5,7 +5,11 @@ describe("Pruebas de Permisos del Foro y Matriculación E2E", () => {
 		cy.task("clearTestResponses", { force: false }).then((res) => {
 		if (res && res.allowed === false) {
 			cy.log("Task not allowed, falling back to cy.exec:", res.message);
-			cy.exec("venv/Scripts/python scripts/clear_test_responses.py", {
+			const python =
+				Cypress.platform === "win32"
+					? "venv\\Scripts\\python"
+					: "venv/bin/python";
+			cy.exec(`${python} scripts/clear_test_responses.py`, {
 			env: {
 				PYTHONIOENCODING: "utf-8",
 				ALLOW_DB_CLEAN: "1",

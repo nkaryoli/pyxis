@@ -26,7 +26,7 @@ module.exports = defineConfig({
             const python =
               process.platform === "win32"
                 ? "venv\\Scripts\\python"
-                : "venv/Scripts/python";
+                : "venv/bin/python";
             const script = "scripts/clear_test_responses.py";
 
             execFile(

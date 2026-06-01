@@ -140,7 +140,7 @@ Iniciar Flask (ejemplos):
 ```bash
 cd /path/to/pyxis
 export PYTHONPATH=. FLASK_APP=src:create_app FLASK_ENV=testing
-venv/Scripts/python -m flask run --port 5000
+venv/bin/python -m flask run --port 5000
 ```
 - PowerShell (Windows):
 ```powershell
@@ -194,7 +194,7 @@ Comportamiento del `cy.task` y fallback
 
 Precauciones:
 - No uses `ALLOW_DB_CLEAN=1` en bases de datos reales ni en entornos de producción.
-- Usa una base de datos de prueba (`MYSQL_DB=abpTest`) para ejecutar los specs.
+- Usa una base de datos de prueba (configurada en `MYSQL_TEST_DB`) para ejecutar los specs.
 
 Escribir nuevos tests
 ---------------------
