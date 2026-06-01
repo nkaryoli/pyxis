@@ -216,8 +216,6 @@ def eliminar_usuario_api(id_usuario):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-### Endpoints de API (Backend)
-
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>/foto', methods=['POST'])
 def subir_foto_perfil(id_usuario):
     """
@@ -244,7 +242,6 @@ def subir_foto_perfil(id_usuario):
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         
         file.save(filepath)
-        print(f"DEBUG: Archivo guardado en {filepath}")
 
         url_para_db = f"/static/uploads/perfiles/{filename}"
 
@@ -256,7 +253,6 @@ def subir_foto_perfil(id_usuario):
         }), 200
 
     except Exception as e:
-        print(f"ERROR CRÍTICO SUBIDA: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @usuarios_bp.route('/api/usuarios/<int:id_usuario>', methods=['GET'])

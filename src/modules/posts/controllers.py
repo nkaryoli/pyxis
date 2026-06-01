@@ -26,11 +26,9 @@ def _extraer_datos_request():
     return datos or {}
 
 
-# --- APIS 
-
-# --- 1. LISTAR TODOS ---
 @posts.route('/api/posts', methods=['GET'])
 def listar_todos_api():
+    """Endpoint API para listar todos los posts."""
     try:
         lista = PostService.listar_todos()
         return jsonify([p.to_dict() for p in lista]), 200
@@ -38,9 +36,17 @@ def listar_todos_api():
         return jsonify({"error": str(e)}), 500
 
 
-# --- 2. CREAR ---
 @posts.route('/api/posts', methods=['POST'])
 def crear_post_api():
+    """
+    Endpoint API para crear un nuevo post.
+    
+    Returns:
+        JSON: Detalles del post creado (201) o error (403/500).
+        
+    Note:
+        Requiere que el usuario esté matriculado en el módulo objetivo.
+    """
     try:
         data = request.get_json() 
         id_usuario = data.get('id_usuario')
@@ -62,9 +68,9 @@ def crear_post_api():
         return jsonify({"error": str(e)}), 500
 
 
-# --- 3. VER POST POR ID ---
 @posts.route('/api/posts/<int:id_post>', methods=['GET'])
 def ver_post_por_id_api(id_post):
+    """Endpoint API que obtiene los detalles de un post específico."""
     try:
         post_encontrado = PostService.obtener_por_id(id_post)
         if not post_encontrado:
@@ -75,9 +81,9 @@ def ver_post_por_id_api(id_post):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 4. VER POSTS POR ID DE USUARIO ---
 @posts.route('/api/usuarios/<int:id_usuario>/posts', methods=['GET'])
 def ver_posts_usuario_api(id_usuario):
+    """Endpoint API que obtiene los posts de un usuario paginados."""
     try:
         page = request.args.get('page', 1, type=int)
         if page < 1:
@@ -91,9 +97,9 @@ def ver_posts_usuario_api(id_usuario):
         return jsonify({"error": str(e)}), 500
     
     
-# --- 5. VER POSTS POR CÓDIGO DE MÓDULO ---
 @posts.route('/api/modulos/<string:codigo_modulo>/posts', methods=['GET'])
 def ver_posts_modulo_api(codigo_modulo):
+    """Endpoint API que lista los posts pertenecientes a un módulo."""
     try:
         lista = PostService.ver_posts_por_modulo(codigo_modulo)
         return jsonify([p.to_dict() for p in lista]), 200
@@ -101,9 +107,20 @@ def ver_posts_modulo_api(codigo_modulo):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 6. MODIFICAR O ELIMINAR POR ID ---
 @posts.route('/api/posts/<int:id_post>', methods=['PUT', 'DELETE'])
 def gestionar_post_api(id_post):
+    """
+    Endpoint API unificado para modificar o eliminar un post existente.
+    
+    Args:
+        id_post (int): ID del post.
+        
+    Returns:
+        JSON: Objeto modificado/eliminado (200), o error (401/403/404).
+        
+    Note:
+        Requiere las cabeceras X-User-Id y X-User-Role. Validará la propiedad del post o el rol.
+    """
     try:
         usuario_id_solicitante = request.headers.get('X-User-Id')
         usuario_rol = request.headers.get('X-User-Role')
@@ -156,6 +173,12 @@ def gestionar_post_api(id_post):
 
 @posts.route('/posts', methods=['GET'])
 def posts_por_modulo():
+    """
+    Renderiza la vista principal con todos los posts paginados.
+    
+    Returns:
+        Render: Plantilla HTML 'posts.html' con la lista de posts.
+    """
     try:
         page = request.args.get('page', 1, type=int)
         if page < 1:
@@ -179,11 +202,19 @@ def posts_por_modulo():
         
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
- 
- 
+
 
 @posts.route('/posts/<int:id_post>', methods=['GET'])
 def post_respuesta(id_post):
+    """
+    Renderiza la vista de detalles de un post junto con sus respuestas asociadas.
+    
+    Args:
+        id_post (int): ID del post a visualizar.
+        
+    Returns:
+        Render: Plantilla HTML 'post_detail.html' con el post y sus respuestas.
+    """
     try:
 
         post_encontrado = PostService.obtener_por_id(id_post)
@@ -235,9 +266,15 @@ def post_respuesta(id_post):
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
 
- 
+
 @posts.route('/destacados', methods=['GET'])
 def destacados_page():
+    """
+    Renderiza la vista de posts destacados, ordenados por cantidad de respuestas.
+    
+    Returns:
+        Render: Plantilla HTML 'destacados.html' con los posts.
+    """
     try:
         page = request.args.get('page', 1, type=int)
         if page < 1:
@@ -270,10 +307,16 @@ def destacados_page():
 
     except Exception as e:
         return render_template('errors/error.html', error=str(e)), 500
- 
- 
+
+
 @posts.route('/recientes', methods=['GET'])
 def recientes_page():
+    """
+    Renderiza la vista de posts recientes, ordenados por fecha de creación.
+    
+    Returns:
+        Render: Plantilla HTML 'recientes.html' con los posts.
+    """
     try:
         page = request.args.get('page', 1, type=int)
         if page < 1:
@@ -306,7 +349,15 @@ def recientes_page():
 @posts.route('/post/crear', methods=['GET', 'POST'])
 @AuthService.token_required
 def crear_post():
-    """Muestra el formulario y procesa la inserción de una nueva pregunta."""
+    """
+    Muestra el formulario y procesa la inserción de un nuevo post/pregunta.
+    
+    Returns:
+        Render/Redirect: Muestra el formulario o redirige a la vista del post tras su creación.
+        
+    Note:
+        Valida que el usuario tenga sesión activa y esté matriculado en el módulo.
+    """
     usuario = getattr(g, 'current_user', None)
     if not usuario:
         if _wants_json():
@@ -356,11 +407,16 @@ def crear_post():
         return f"Error al guardar en la base de datos: {str(e)}", 500
     
 
-
-    # NAVBAR
+# Funcio 'search' de la NAVBAR
 
 @posts.route('/search', methods=['GET'])
 def buscar_posts():
+    """
+    Renderiza la vista de resultados de búsqueda por relevancia en posts.
+    
+    Returns:
+        Render: Plantilla HTML 'navbar_busqueda.html' con los resultados.
+    """
     try:
         query = request.args.get('q', '').strip()
         page = request.args.get('page', 1, type=int)

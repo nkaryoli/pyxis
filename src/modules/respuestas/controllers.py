@@ -16,6 +16,18 @@ def allowed_image(filename):
 
 @respuestas.route('/posts/<int:id_post>/publicar', methods=['POST'])
 def crear_respuesta_web(id_post):
+    """
+    Procesa el formulario web para publicar una nueva respuesta en un post.
+    
+    Args:
+        id_post (int): ID del post donde se responde.
+        
+    Returns:
+        Redirect: Recarga la vista del post (post_respuesta) tras su publicación.
+        
+    Note:
+        Verifica la autenticación y la matriculación del usuario.
+    """
 
     contenido = request.form.get('contenido_respuesta')
 
@@ -66,6 +78,15 @@ def crear_respuesta_web(id_post):
 
 @respuestas.route('/respuestas/<int:id_respuesta>/editar', methods=['POST'])
 def editar_respuesta_web(id_respuesta):
+    """
+    Procesa el formulario web para editar el contenido de una respuesta existente.
+    
+    Args:
+        id_respuesta (int): ID de la respuesta a editar.
+        
+    Returns:
+        Redirect: Recarga la vista del post asociado.
+    """
     contenido = request.form.get('contenido_respuesta')
 
     usuario_actual = getattr(g, 'current_user', None)
@@ -106,6 +127,15 @@ def editar_respuesta_web(id_respuesta):
 
 @respuestas.route('/respuestas/<int:id_respuesta>/eliminar', methods=['POST'])
 def eliminar_respuesta_web(id_respuesta):
+    """
+    Procesa la solicitud web para eliminar una respuesta (borrado lógico).
+    
+    Args:
+        id_respuesta (int): ID de la respuesta a eliminar.
+        
+    Returns:
+        Redirect: Recarga la vista del post asociado.
+    """
     usuario_actual = getattr(g, 'current_user', None)
     respuesta = RespuestaService.obtener_por_id(id_respuesta)
     if not usuario_actual or not respuesta:
@@ -126,6 +156,15 @@ def eliminar_respuesta_web(id_respuesta):
 
 @respuestas.route('/respuestas/<int:id_respuesta>/restaurar', methods=['POST'])
 def restaurar_respuesta_web(id_respuesta):
+    """
+    Procesa la solicitud web para restaurar una respuesta eliminada lógicamente.
+    
+    Args:
+        id_respuesta (int): ID de la respuesta a restaurar.
+        
+    Returns:
+        Redirect: Recarga la vista del post asociado.
+    """
     usuario_actual = getattr(g, 'current_user', None)
     respuesta = RespuestaService.obtener_por_id(id_respuesta)
     if not usuario_actual or not respuesta:
@@ -146,6 +185,15 @@ def restaurar_respuesta_web(id_respuesta):
 
 @respuestas.route('/respuestas/<int:id_respuesta>/validar', methods=['POST'])
 def validar_respuesta_web(id_respuesta):
+    """
+    Marca una respuesta como 'Mejor Respuesta' (es_mejor=1).
+    
+    Args:
+        id_respuesta (int): ID de la respuesta a validar.
+        
+    Returns:
+        Redirect: Recarga la vista del post asociado.
+    """
     usuario_actual = getattr(g, 'current_user', None)
     respuesta = RespuestaService.obtener_por_id(id_respuesta)
     if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
@@ -166,6 +214,15 @@ def validar_respuesta_web(id_respuesta):
 
 @respuestas.route('/respuestas/<int:id_respuesta>/desvalidar', methods=['POST'])
 def desvalidar_respuesta_web(id_respuesta):
+    """
+    Desmarca una respuesta como 'Mejor Respuesta' (es_mejor=0).
+    
+    Args:
+        id_respuesta (int): ID de la respuesta a desvalidar.
+        
+    Returns:
+        Redirect: Recarga la vista del post asociado.
+    """
     usuario_actual = getattr(g, 'current_user', None)
     respuesta = RespuestaService.obtener_por_id(id_respuesta)
     if not usuario_actual or not respuesta or usuario_actual.rol not in ['PROFESOR', 'ADMINISTRADOR']:
@@ -186,6 +243,15 @@ def desvalidar_respuesta_web(id_respuesta):
 
 @respuestas.route('/api/posts/<int:id_post>/respuestas', methods=['POST'])
 def crear_respuesta_api(id_post):
+    """
+    Endpoint API para crear una nueva respuesta.
+    
+    Args:
+        id_post (int): ID del post al que se responde.
+        
+    Returns:
+        JSON: Mensaje de confirmación y datos de la respuesta creada (201).
+    """
     datos = request.get_json()
     if not datos or 'contenido_respuesta' not in datos or 'id_usuario' not in datos:
         return jsonify({"error": "Faltan campos obligatorios"}), 400
@@ -194,9 +260,7 @@ def crear_respuesta_api(id_post):
         from src.services.post_service import PostService
         id_usuario = datos['id_usuario']
 
-        # Obtener el post para verificar su módulo
         post = PostService.obtener_por_id(id_post)
-        # Aceptar tanto id_usuario como objeto Usuario: obtener el objeto si se pasó el id
         try:
             from src.services.usuario_service import UsuarioService
             usuario_res = UsuarioService.obtener_usuario_por_id(id_usuario)
@@ -224,6 +288,7 @@ def crear_respuesta_api(id_post):
 
 @respuestas.route('/api/posts/<int:id_post>/respuestas', methods=['GET'])
 def listar_respuestas_post_api(id_post):
+    """Endpoint API que obtiene la lista de respuestas de un post."""
     try:
         lista = RespuestaService.obtener_respuestas_de_post(id_post)
         return jsonify([r.to_dict() for r in lista]), 200
@@ -231,9 +296,9 @@ def listar_respuestas_post_api(id_post):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 3. GET RESPUESTAS POR ID_USUARIO ---
 @respuestas.route('/api/usuarios/<int:id_usuario>/respuestas', methods=['GET'])
 def ver_respuestas_usuario_api(id_usuario):
+    """Endpoint API que obtiene las respuestas creadas por un usuario paginadas."""
     try:
         page = request.args.get('page', 1, type=int)
         if page < 1:
@@ -247,9 +312,20 @@ def ver_respuestas_usuario_api(id_usuario):
         return jsonify({"error": str(e)}), 500
 
 
-# --- 4. GESTIONAR RESPUESTA POR ID (PUT y DELETE con verificación de Rol y Propiedad) ---
 @respuestas.route('/api/respuestas/<int:id_respuesta>', methods=['PUT', 'DELETE'])
 def gestionar_respuesta_api(id_respuesta):
+    """
+    Endpoint API unificado para modificar o eliminar una respuesta por su ID.
+    
+    Args:
+        id_respuesta (int): ID de la respuesta objetivo.
+        
+    Returns:
+        JSON: Detalles actualizados o mensaje de eliminación (200), o error (401/403/404).
+        
+    Note:
+        Valida que el usuario solicitante (X-User-Id) sea el propietario o tenga rol apropiado.
+    """
     try:
         usuario_id_solicitante = request.headers.get('X-User-Id')
         usuario_rol = request.headers.get('X-User-Role')
