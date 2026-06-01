@@ -111,7 +111,6 @@ class RespuestaRepository:
     def get_by_user_paginated(id_usuario, limit, offset, include_deleted=False):
         session = get_session()
         try:
-            # Ordenamos por fecha de respuesta, asumiendo que el campo existe
             query = session.query(Respuesta).filter(Respuesta.id_usuario == id_usuario)
             if not include_deleted:
                 query = query.filter(Respuesta.is_deleted == False)

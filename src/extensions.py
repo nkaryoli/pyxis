@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Base class para todos los modelos
+
 Base = declarative_base()
 
-# Variables globales para engine y Session
+
 engine = None
 Session = None
 
