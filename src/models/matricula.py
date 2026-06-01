@@ -11,4 +11,5 @@ class Matricula(Base):
     fecha_final = Column(DateTime, nullable=False)
 
     def __repr__(self):
+        """Devuelve una representación en texto de la matrícula."""
         return f"<Matricula id_usuario={self.id_usuario} codigo_modulo={self.codigo_modulo}>"

@@ -4,6 +4,7 @@ from datetime import datetime
 from src.extensions import Base
 
 class Post(Base):
+    """Modelo que representa la tabla POSTS en la base de datos."""
     __tablename__ = 'POSTS'
     
     id_post = Column(Integer, primary_key=True, autoincrement=True)
@@ -20,14 +21,17 @@ class Post(Base):
     respuestas_relacion = relationship("Respuesta", backref="post", lazy="selectin")
     
     def __repr__(self):
+        """Devuelve una representación en texto del post."""
         return f"<Post {self.id_post}: {self.titulo_post}>"
     
     @property
     def created_at(self):
+        """Obtiene la fecha de creación del post."""
         return self.fecha_creacion_post
 
     @property
     def autor(self):
+        """Obtiene el nombre de usuario del autor del post manejando usuarios eliminados o inactivos."""
         from src.extensions import should_include_deleted
         if not self.usuario:
             return "Usuario Eliminado"
@@ -39,23 +43,28 @@ class Post(Base):
 
     @property
     def respuestas(self):
+        """Obtiene las respuestas asociadas a este post."""
         return self.respuestas_relacion
 
     @property
     def respuestas_count(self):
+        """Obtiene la cantidad total de respuestas de este post."""
         return len(self.respuestas)
 
     @property
     def modulo_nombre(self):
+        """Obtiene el nombre de la asignatura del módulo asociado al post."""
         if self.modulo and self.modulo.nombre_asignatura:
             return self.modulo.nombre_asignatura
         return self.codigo_modulo or "General"
 
     @property
     def modulo_slug(self):
+        """Obtiene el identificador (slug) del módulo asociado."""
         return (self.codigo_modulo or "").lower().strip()
     
     def to_dict(self):
+        """Devuelve un diccionario con los datos del post."""
         return {
             "id_post": self.id_post,
             "titulo_post": self.titulo_post,

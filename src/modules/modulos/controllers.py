@@ -16,6 +16,15 @@ def listar_modulos():
 
 @modulos.route('/modulos/<string:nombre_modulo>', methods=['GET'])
 def detalle_modulo(nombre_modulo):
+    """
+    Muestra la página de detalles de un módulo específico y sus posts paginados.
+    
+    Args:
+        nombre_modulo (str): Nombre exacto del módulo académico.
+        
+    Returns:
+        Render: Plantilla HTML con los datos del módulo y posts paginados, o errores.
+    """
     try:
         page = request.args.get('page', 1, type=int)
         if page < 1:
@@ -47,7 +56,7 @@ def detalle_modulo(nombre_modulo):
 
 @modulos.route('/api/modulos', methods=['GET'])
 def get_modulos():
-    """Endpoint API que devuelve todos los módulos en JSON."""
+    """Endpoint API que devuelve todos los módulos en formato JSON."""
     try:
         lista_modulos = ModuloService.obtener_todos_los_modulos()
         return jsonify([
@@ -63,7 +72,15 @@ def get_modulos():
 
 @modulos.route('/api/modulos', methods=['POST'])
 def post_modulo():
-    """Endpoint API para crear un nuevo módulo (Requiere rol PROFESOR o ADMINISTRADOR)."""
+    """
+    Endpoint API para crear un nuevo módulo.
+    
+    Returns:
+        JSON: Datos del módulo creado o mensaje de error.
+        
+    Note:
+        Requiere rol de PROFESOR o ADMINISTRADOR validado en capa de servicio.
+    """
     try:
         data = request.get_json() if request.is_json else request.form
         
@@ -84,7 +101,18 @@ def post_modulo():
 
 @modulos.route('/api/modulos/<string:codigo_modulo>', methods=['PUT'])
 def put_modulo(codigo_modulo):
-    """Endpoint API para modificar un módulo (Requiere rol PROFESOR o ADMINISTRADOR)."""
+    """
+    Endpoint API para modificar los datos de un módulo existente.
+    
+    Args:
+        codigo_modulo (str): Código del módulo a editar.
+        
+    Returns:
+        JSON: Datos del módulo actualizado o mensaje de error.
+        
+    Note:
+        Requiere rol de PROFESOR o ADMINISTRADOR validado en capa de servicio.
+    """
     try:
         data = request.get_json() if request.is_json else request.form
         
@@ -111,7 +139,18 @@ def put_modulo(codigo_modulo):
 
 @modulos.route('/api/modulos/<string:codigo_modulo>', methods=['DELETE'])
 def delete_modulo(codigo_modulo):
-    """Endpoint API para eliminar un módulo (Requiere rol PROFESOR o ADMINISTRADOR)."""
+    """
+    Endpoint API para realizar un borrado lógico de un módulo.
+    
+    Args:
+        codigo_modulo (str): Código del módulo a eliminar.
+        
+    Returns:
+        JSON: Mensaje de confirmación o mensaje de error.
+        
+    Note:
+        Requiere rol de PROFESOR o ADMINISTRADOR validado en capa de servicio.
+    """
     try:
         data = request.get_json() if request.is_json else request.form
         rol_usuario = data.get('rol_usuario_activo') if data else request.headers.get('X-User-Rol')

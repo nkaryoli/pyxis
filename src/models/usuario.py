@@ -6,7 +6,7 @@ class Usuario(Base):
     __tablename__ = 'USUARIOS'
     
     id_usuario = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(50), nullable=False)  # <--- Sin unique=True
+    username = Column(String(50), nullable=False)
     email_usuario = Column(String(100), nullable=False, unique=True)
     password_usuario = Column(String(255), nullable=False)
     fecha_alta = Column(DateTime, server_default=func.now(), nullable=False)
@@ -16,4 +16,5 @@ class Usuario(Base):
     is_active = Column(Boolean, default=False, nullable=False)
 
     def __repr__(self):
+        """Devuelve una representación en texto del usuario."""
         return f"<Usuario {self.id_usuario}: {self.username}>"

@@ -42,19 +42,33 @@ class UsuarioRepository:
 
     @staticmethod
     def create(username, email, password, rol):
-        """Inserta un nuevo usuario incluyendo el username generado."""
+        """
+        Inserta un nuevo usuario en la base de datos.
+        
+        Args:
+            username (str): Nombre de usuario (se guardará recortado/limpio según la lógica previa).
+            email (str): Correo electrónico del usuario.
+            password (str): Contraseña hasheada.
+            rol (str): Rol del usuario (ALUMNO, PROFESOR, ADMINISTRADOR).
+            
+        Returns:
+            Usuario: El objeto del usuario recién creado.
+            
+        Note:
+            Se establece el valor inicial de tokens por defecto a 0.
+            Se refresca la sesión al final para obtener el ID generado automáticamente y la fecha_alta por defecto.
+        """
         session = get_session()
         try:
             nuevo_usuario = Usuario(                
-                username=username, # <--- Ahora guardamos el nombre recortado
+                username=username,
                 email_usuario=email,
                 password_usuario=password,
                 rol=rol,
-                tokens=0 # Valor inicial por defecto
+                tokens=0
             )
             session.add(nuevo_usuario)
             session.commit()
-            # Refrescamos para obtener el ID generado y la fecha_alta por defecto
             session.refresh(nuevo_usuario)
             return nuevo_usuario
         except Exception as e:
@@ -65,7 +79,20 @@ class UsuarioRepository:
 
     @staticmethod
     def update(id_usuario, datos):
-        """Actualiza datos de un usuario existente."""
+        """
+        Actualiza datos de un usuario existente.
+        
+        Args:
+            id_usuario (int): ID del usuario a actualizar.
+            datos (dict): Diccionario con los campos y nuevos valores a actualizar.
+            
+        Returns:
+            Usuario: El objeto de usuario actualizado, o None si no existe.
+            
+        Note:
+            Ignora la actualización del campo clave 'id_usuario'.
+            Se recarga el objeto con session.refresh() antes de cerrar la sesión para poder usarlo después en el controlador sin problemas de LazyLoading.
+        """
         session = get_session()
         try:
             usuario = session.query(Usuario).filter_by(id_usuario=id_usuario).first()
@@ -74,7 +101,6 @@ class UsuarioRepository:
                     if hasattr(usuario, clave) and clave != 'id_usuario':
                         setattr(usuario, clave, valor)
                 session.commit()
-                # Recargamos el objeto antes de cerrar la sesión para poder usarlo después
                 session.refresh(usuario)
                 return usuario
             return None

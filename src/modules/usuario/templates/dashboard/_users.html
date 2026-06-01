@@ -37,7 +37,11 @@
               <td class="py-3 px-3 font-mono text-xs text-cyan-300">{{ usuario_item.id_usuario }}</td>
             {% endif %}
             <td class="py-3 px-3">{{ usuario_item.username }}</td>
-            <td class="py-3 pr-3 text-zinc-400">{{ usuario_item.email_usuario }}</td>
+            <td class="py-3 pr-3 text-zinc-400">
+              <span class="truncate max-w-[150px] block" title="{{ usuario_item.email_usuario }}">
+                {{ usuario_item.email_usuario }}
+              </span>
+            </td>
             {% if rol == 'ADMINISTRADOR' %}
             <td class="py-3 pr-3">{{ usuario_item.rol }}</td>
             {% endif %}

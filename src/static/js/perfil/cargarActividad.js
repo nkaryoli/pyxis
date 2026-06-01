@@ -11,6 +11,9 @@ import { renderizarPaginador } from '../utils/paginacion.js';
 const ITEMS_PER_PAGE = 5;
 let notificacionesLeidas = new Set();
 let modulosMap = new Map();
+/**
+ * Carga los módulos disponibles desde la API y los almacena en el mapa local.
+ */
 function cargarModulos() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -25,29 +28,35 @@ function cargarModulos() {
         }
     });
 }
+/**
+ * Obtiene el nombre legible de un módulo a partir de su código.
+ *
+ * @param codigo - El código del módulo.
+ * @returns El nombre de la asignatura o un valor por defecto.
+ */
 function getNombreModulo(codigo) {
     return modulosMap.get(codigo) || codigo || 'General';
 }
+/**
+ * Formatea una cadena de fecha a un formato local y legible.
+ *
+ * @param fecha - Cadena de texto con la fecha a formatear.
+ * @returns La fecha formateada o un texto por defecto si es inválida.
+ */
 function formatearFecha(fecha) {
     try {
-        // Intenta parsear la fecha en diferentes formatos
         let date;
-        // Primer intento: formato ISO con T (2026-05-28T10:15:30)
         date = new Date(fecha);
-        // Si falla, intenta reemplazar espacio con T (2026-05-28 10:15:30 -> 2026-05-28T10:15:30)
         if (isNaN(date.getTime()) && fecha.includes(' ')) {
             date = new Date(fecha.replace(' ', 'T'));
         }
-        // Si aún falla, intenta parsear como DD/MM/YYYY o similar
         if (isNaN(date.getTime())) {
             console.warn("Fecha fallida:", fecha);
-            // Intenta formato con "/" o "-"
             const parts = fecha.match(/(\d{1,4})[\/\-](\d{1,2})[\/\-](\d{1,4})/);
             if (parts && parts.length >= 4) {
                 let year = parseInt(parts[1] || '2026');
                 let month = parseInt(parts[2] || '1');
                 let day = parseInt(parts[3] || '1');
-                // Si year es pequeño, asumir que es el tercer elemento
                 if (year < 100) {
                     [day, month, year] = [year, month, day];
                 }
@@ -57,7 +66,6 @@ function formatearFecha(fecha) {
                 date = new Date(year, month - 1, day);
             }
         }
-        // Si aún es inválida, retorna un placeholder
         if (isNaN(date.getTime())) {
             return 'Fecha no disponible';
         }
@@ -70,10 +78,21 @@ function formatearFecha(fecha) {
         return 'Fecha no disponible';
     }
 }
-// Ordena los items más recientes primero
+/**
+ * Ordena un arreglo de items colocando los más recientes primero.
+ *
+ * @param items - Arreglo de elementos a ordenar.
+ * @returns El arreglo de elementos ordenados.
+ */
 function ordenarItems(items) {
     return [...items].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 }
+/**
+ * Renderiza una lista de elementos (posts o respuestas) en el contenedor especificado.
+ *
+ * @param items - Arreglo de elementos a renderizar.
+ * @param containerSelector - ID del contenedor HTML.
+ */
 function renderizarItems(items, containerSelector) {
     const contenedor = document.getElementById(containerSelector);
     if (!contenedor)
@@ -86,7 +105,6 @@ function renderizarItems(items, containerSelector) {
             </div>`;
         return;
     }
-    // Iteramos directamente sobre todos los items sin slice
     items.forEach((item) => {
         const isPost = item.type === 'post';
         const href = isPost ? `/posts/${item.id}` : `/posts/${item.id_post}`;
@@ -116,6 +134,12 @@ function renderizarItems(items, containerSelector) {
             </a>`;
     });
 }
+/**
+ * Renderiza las notificaciones del usuario en el contenedor especificado.
+ *
+ * @param items - Arreglo de notificaciones.
+ * @param containerSelector - ID del contenedor HTML.
+ */
 function renderizarNotificaciones(items, containerSelector) {
     const contenedor = document.getElementById(containerSelector);
     if (!contenedor)
@@ -158,6 +182,12 @@ function renderizarNotificaciones(items, containerSelector) {
         element === null || element === void 0 ? void 0 : element.remove();
     };
 }
+/**
+ * Carga la actividad inicial del perfil de usuario (posts, respuestas y notificaciones).
+ *
+ * @param idUsuario - Identificador del usuario.
+ * @param page - Página a cargar (por defecto 1).
+ */
 export function cargarActividad(idUsuario_1) {
     return __awaiter(this, arguments, void 0, function* (idUsuario, page = 1) {
         try {
@@ -214,6 +244,13 @@ export function cargarActividad(idUsuario_1) {
         }
     });
 }
+/**
+ * Carga dinámicamente los datos de una pestaña al cambiar de página en el paginador.
+ *
+ * @param containerId - ID del contenedor donde se renderizarán los datos.
+ * @param page - Número de página a cargar.
+ * @param idUsuario - Identificador del usuario.
+ */
 export function cargarDatos(containerId, page, idUsuario) {
     return __awaiter(this, void 0, void 0, function* () {
         const contenedor = document.getElementById(containerId);

@@ -34,6 +34,7 @@ class ModuloService:
 
     @staticmethod
     def obtener_posts_por_modulo(codigo_modulo):
+        """Obtiene los posts asociados a un módulo."""
         from src.services.post_service import PostService
         return PostService.ver_posts_por_modulo(codigo_modulo)
 
@@ -47,7 +48,18 @@ class ModuloService:
     
     @staticmethod
     def crear_nuevo_modulo(codigo_modulo, nombre_asignatura, curso_modulo, rol_usuario):
-        """Crea un nuevo módulo con validación de campos y rol."""
+        """
+        Crea un nuevo módulo con validación de campos y rol.
+        
+        Args:
+            codigo_modulo (str): Código del módulo.
+            nombre_asignatura (str): Nombre del módulo.
+            curso_modulo (str): Curso al que pertenece.
+            rol_usuario (str): Rol del usuario que realiza la acción.
+            
+        Returns:
+            Modulo: El objeto del módulo creado.
+        """
         if rol_usuario not in ['PROFESOR', 'ADMINISTRADOR']:
             raise ValueError("Acceso denegado: Solo profesores y administradores pueden crear módulos.")
         
@@ -72,7 +84,19 @@ class ModuloService:
     
     @staticmethod
     def modificar_modulo(codigo_modulo, nuevo_nombre, nuevo_curso, rol_usuario, is_deleted=None):
-        """Modifica un módulo existente tras validar los parámetros y el rol. Acceso: Solo prof y admin."""
+        """
+        Modifica un módulo existente tras validar los parámetros y el rol.
+        
+        Args:
+            codigo_modulo (str): Código del módulo a editar.
+            nuevo_nombre (str): Nuevo nombre del módulo.
+            nuevo_curso (str): Nuevo curso del módulo.
+            rol_usuario (str): Rol del usuario que realiza la acción.
+            is_deleted (bool, optional): Estado de borrado lógico.
+            
+        Returns:
+            Modulo: El objeto del módulo actualizado.
+        """
         if rol_usuario not in ['PROFESOR', 'ADMINISTRADOR']:
             raise ValueError("Acceso denegado: Solo los profesores y administradores pueden modificar módulos")
 
@@ -98,7 +122,16 @@ class ModuloService:
 
     @staticmethod
     def eliminar_modulo_existente(codigo_modulo, rol_usuario):
-        """Elimina un módulo del sistema tras comprobar los permisos. Acceso: Solo prof y admin."""
+        """
+        Elimina un módulo del sistema tras comprobar los permisos.
+        
+        Args:
+            codigo_modulo (str): Código del módulo a eliminar.
+            rol_usuario (str): Rol del usuario que realiza la acción.
+            
+        Returns:
+            bool: True si la eliminación fue exitosa.
+        """
         if rol_usuario not in ['PROFESOR', 'ADMINISTRADOR']:
             raise ValueError("Acceso denegado: Solo los profesores y administradores pueden eliminar módulos")
 

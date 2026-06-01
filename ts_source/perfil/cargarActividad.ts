@@ -33,6 +33,9 @@ interface Item {
 let notificacionesLeidas: Set<number> = new Set();
 let modulosMap: Map<string, string> = new Map();
 
+/**
+ * Carga los módulos disponibles desde la API y los almacena en el mapa local.
+ */
 async function cargarModulos() {
     try {
         const response = await fetch('/api/modulos');
@@ -45,34 +48,40 @@ async function cargarModulos() {
     }
 }
 
+/**
+ * Obtiene el nombre legible de un módulo a partir de su código.
+ * 
+ * @param codigo - El código del módulo.
+ * @returns El nombre de la asignatura o un valor por defecto.
+ */
 function getNombreModulo(codigo: string): string {
     return modulosMap.get(codigo) || codigo || 'General';
 }
 
+/**
+ * Formatea una cadena de fecha a un formato local y legible.
+ * 
+ * @param fecha - Cadena de texto con la fecha a formatear.
+ * @returns La fecha formateada o un texto por defecto si es inválida.
+ */
 function formatearFecha(fecha: string): string {
     try {
-        // Intenta parsear la fecha en diferentes formatos
         let date: Date;
         
-        // Primer intento: formato ISO con T (2026-05-28T10:15:30)
         date = new Date(fecha);
         
-        // Si falla, intenta reemplazar espacio con T (2026-05-28 10:15:30 -> 2026-05-28T10:15:30)
         if (isNaN(date.getTime()) && fecha.includes(' ')) {
             date = new Date(fecha.replace(' ', 'T'));
         }
         
-        // Si aún falla, intenta parsear como DD/MM/YYYY o similar
         if (isNaN(date.getTime())) {
             console.warn("Fecha fallida:", fecha);
-            // Intenta formato con "/" o "-"
             const parts = fecha.match(/(\d{1,4})[\/\-](\d{1,2})[\/\-](\d{1,4})/);
             if (parts && parts.length >= 4) {
                 let year = parseInt(parts[1] || '2026');
                 let month = parseInt(parts[2] || '1');
                 let day = parseInt(parts[3] || '1');
                 
-                // Si year es pequeño, asumir que es el tercer elemento
                 if (year < 100) {
                     [day, month, year] = [year, month, day];
                 }
@@ -83,7 +92,6 @@ function formatearFecha(fecha: string): string {
             }
         }
         
-        // Si aún es inválida, retorna un placeholder
         if (isNaN(date.getTime())) {
             return 'Fecha no disponible';
         }
@@ -97,11 +105,22 @@ function formatearFecha(fecha: string): string {
     }
 }
 
-// Ordena los items más recientes primero
+/**
+ * Ordena un arreglo de items colocando los más recientes primero.
+ * 
+ * @param items - Arreglo de elementos a ordenar.
+ * @returns El arreglo de elementos ordenados.
+ */
 function ordenarItems(items: Item[]): Item[] {
     return [...items].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
 }
 
+/**
+ * Renderiza una lista de elementos (posts o respuestas) en el contenedor especificado.
+ * 
+ * @param items - Arreglo de elementos a renderizar.
+ * @param containerSelector - ID del contenedor HTML.
+ */
 function renderizarItems(items: Item[], containerSelector: string) {
     const contenedor = document.getElementById(containerSelector);
     if (!contenedor) return;
@@ -116,7 +135,6 @@ function renderizarItems(items: Item[], containerSelector: string) {
         return;
     }
     
-    // Iteramos directamente sobre todos los items sin slice
     items.forEach((item: Item) => {
         const isPost = item.type === 'post';
         const href = isPost ? `/posts/${item.id}` : `/posts/${item.id_post}`;
@@ -128,7 +146,6 @@ function renderizarItems(items: Item[], containerSelector: string) {
         const respuestasCount = isPost ? (item.respuestas_count || 0) : '';
         const respuestasHTML = respuestasCount !== '' ? `<span>${respuestasCount} respuestas</span>` : '';
         
-       
         
         contenedor.innerHTML += `
             <a href="${href}" class="block rounded-lg border border-zinc-800 bg-zinc-900/80 p-5 transition hover:-translate-y-1 hover:border-cyan-500">
@@ -151,6 +168,12 @@ function renderizarItems(items: Item[], containerSelector: string) {
     });
 }
 
+/**
+ * Renderiza las notificaciones del usuario en el contenedor especificado.
+ * 
+ * @param items - Arreglo de notificaciones.
+ * @param containerSelector - ID del contenedor HTML.
+ */
 function renderizarNotificaciones(items: Item[], containerSelector: string) {
     const contenedor = document.getElementById(containerSelector);
     if (!contenedor) return;
@@ -200,6 +223,12 @@ function renderizarNotificaciones(items: Item[], containerSelector: string) {
         element?.remove();
     };
 }
+/**
+ * Carga la actividad inicial del perfil de usuario (posts, respuestas y notificaciones).
+ * 
+ * @param idUsuario - Identificador del usuario.
+ * @param page - Página a cargar (por defecto 1).
+ */
 export async function cargarActividad(idUsuario: number, page: number = 1) {
     try {
         await cargarModulos();
@@ -261,6 +290,13 @@ export async function cargarActividad(idUsuario: number, page: number = 1) {
 }
 
 
+/**
+ * Carga dinámicamente los datos de una pestaña al cambiar de página en el paginador.
+ * 
+ * @param containerId - ID del contenedor donde se renderizarán los datos.
+ * @param page - Número de página a cargar.
+ * @param idUsuario - Identificador del usuario.
+ */
 export async function cargarDatos(containerId: string, page: number, idUsuario: number): Promise<void> {
     const contenedor = document.getElementById(containerId);
     if (contenedor) contenedor.innerHTML = '<div class="text-center p-4">Cargando...</div>';
