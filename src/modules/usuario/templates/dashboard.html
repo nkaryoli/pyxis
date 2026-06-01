@@ -1,0 +1,18 @@
+{% extends 'layout.html' %} {% block title %}Dashboard | Pyxis{% endblock %} {%
+block page_content %}
+<section class="max-w-4xl mx-auto py-8" data-dashboard-root data-user-id="{{ usuario.id_usuario }}" data-user-role="{{ rol }}">
+	{% include 'dashboard/_header.html' %} 
+	{% include 'dashboard/_tabs.html' %} 
+	{% include 'dashboard/_modules.html' %} 
+	{% include 'dashboard/_users.html' %} 
+	{% include 'dashboard/_posts.html' %} 
+	{% include 'dashboard/modal/_modal_usuarios.html' %} 
+	{% include 'dashboard/modal/_modal_modulos.html' %} 
+	{% include 'dashboard/modal/_modal_posts.html' %} 
+	{% include 'dashboard/modal/_modal_matriculas.html' %} 
+	{% include 'dashboard/modal/_modal_alumnos_modulo.html' %} 
+	{% include 'dashboard/modal/_modal_confirmacion.html' %} 
+</section>
+
+<script type="module" src="{{ url_for('static', filename='js/dashboard/index.js') }}"></script>
+{% endblock %}

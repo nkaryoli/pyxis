@@ -4,9 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "ts:watch": "npx tsc --watch",
-    "tailwind:watch": "tailwindcss -i ./src/static/css/input.css -o ./src/static/css/output.css --watch"
+    "tailwind:watch": "tailwindcss -i ./src/static/css/input.css -o ./src/static/css/output.css --watch",
+    "watch": "concurrently -k \"npm run ts:watch\" \"npm run tailwind:watch\"",
+    "test:unit": "pytest tests/unit -v --cov=src",
+    "test:unit:ci": "pytest tests/unit -v --cov=src --cov-report=term-missing",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run"
   },
   "repository": {
     "type": "git",
@@ -21,6 +25,8 @@
   "homepage": "https://github.com/nkaryoli/pyxis#readme",
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
+    "concurrently": "^9.2.1",
+    "cypress": "^15.15.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
   }

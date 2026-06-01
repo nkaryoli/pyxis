@@ -1,0 +1,86 @@
+{% extends "base.html" %} 
+{% block title %}Crear cuenta | Pyxis{% endblock %}
+
+{% block content %}
+<div class="flex min-h-[85vh] w-full flex-col items-center justify-center py-12">
+    
+    <div class="w-full max-w-md px-6">
+        <div class="rounded-lg border border-white/10 bg-zinc-950/95 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+            <div class="mb-8 text-center">
+                <p class="mb-2 text-sm uppercase tracking-[0.35em] text-cyan-400">
+                    Pyxis
+                </p>
+                <h1 class="text-3xl font-semibold text-white">Crear cuenta</h1>
+                <p class="mt-2 text-sm text-zinc-400">
+                    Regístrate con tu correo y contraseña
+                </p>
+            </div>
+
+            {% if error %}
+            <div class="mb-5 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('auth.register') }}" class="space-y-4">
+                <div>
+                    <label for="email_usuario" class="mb-2 block text-sm font-medium text-cyan-400">
+                        Correo electrónico
+                    </label>
+                    <input
+                        id="email_usuario"
+                        name="email_usuario"
+                        type="email"
+                        required
+                        class="w-full rounded-md border border-cyan-400/30 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20"
+                        placeholder="tu.nombre@monlau.com"
+                    />
+                </div>
+
+                <div>
+                    <label for="password_usuario" class="mb-2 block text-sm font-medium text-cyan-400">
+                        Contraseña
+                    </label>
+                    <input
+                        id="password_usuario"
+                        name="password_usuario"
+                        type="password"
+                        required
+                        class="w-full rounded-md border border-cyan-400/30 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20"
+                        placeholder="••••••••"
+                    />
+                </div>
+
+                <div>
+                    <label for="confirm_password_usuario" class="mb-2 block text-sm font-medium text-cyan-400">
+                        Confirmar contraseña
+                    </label>
+                    <input
+                        id="confirm_password_usuario"
+                        name="confirm_password_usuario"
+                        type="password"
+                        required
+                        class="w-full rounded-md border border-cyan-400/30 bg-white/5 px-4 py-3 text-white outline-none transition placeholder:text-zinc-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20"
+                        placeholder="••••••••"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full rounded-md bg-cyan-500 px-4 py-3 font-semibold text-black transition hover:bg-cyan-400"
+                >
+                    Registrarme
+                </button>
+            </form>
+
+            <p class="mt-6 text-center text-sm text-zinc-400">
+                ¿Ya tienes cuenta?
+                <a href="{{ url_for('auth.login') }}" class="font-medium text-cyan-400 hover:text-cyan-300">
+                    Iniciar sesión
+                </a>
+            </p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

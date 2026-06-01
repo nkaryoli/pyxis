@@ -1,0 +1,41 @@
+<a
+	href="{{ url_for('modulos.detalle_modulo', nombre_modulo=modulo.nombre_asignatura) }}"
+	class="group block rounded-md border p-6 transition h-full {% if modulo.is_deleted %}opacity-80 hover:opacity-100 border-dashed border-rose-500/50 bg-zinc-950/40{% else %}border-zinc-800 bg-zinc-900/80 hover:-translate-y-0.5 hover:border-cyan-500{% endif %}"
+>
+	<div class="grid grid-cols-[72px_minmax(0,1fr)] gap-2 items-start">
+		<div class="flex items-center">
+		{% include 'partials/card_icon.html' %}
+		</div>
+
+		<div>
+			<div class="flex items-center justify-between gap-4">
+				<h3 class="flex-1 min-w-0 truncate text-lg font-semibold text-white group-hover:text-cyan-300">
+					{% if modulo.is_deleted %}
+						<span class="inline-flex items-center gap-1 rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/20 mr-1.5 uppercase">Inactivo</span>
+					{% endif %}
+					{{ modulo.nombre_asignatura }}
+				</h3>
+
+				<span class="shrink-0 w-16 h-6 text-center rounded-lg border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300">
+					{{ modulo.posts_count }} posts
+				</span>
+			</div>
+			<p class="mt-2 text-sm text-zinc-400">{{ modulo.curso_modulo }}</p>
+
+			<ul class="mt-4 text-sm flex flex-wrap items-center gap-3 text-zinc-400">
+				<li class="flex items-center gap-3">
+					<span class="h-2 w-2 rounded-full bg-cyan-400/30"></span>
+					<span>General</span>
+				</li>
+				<li class="flex items-center gap-3">
+					<span class="h-2 w-2 rounded-full bg-cyan-400/30"></span>
+					<span>Preguntas</span>
+				</li>
+				<li class="flex items-center gap-3">
+					<span class="h-2 w-2 rounded-full bg-cyan-400/30"></span>
+					<span>Recursos</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+</a>

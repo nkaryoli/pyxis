@@ -1,0 +1,124 @@
+{% extends 'layout.html' %}
+
+{% block title %}Perfil de {{ usuario.username | capitalize }} | Pyxis Forum{% endblock %}
+
+{% block page_content %}
+<section class="max-w-4xl mx-auto space-y-8">
+	<div
+		class="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/40 p-8 shadow-2xl backdrop-blur-sm">
+
+		<div class="absolute top-8 right-8">
+			<span
+				class="inline-flex items-center rounded-full bg-cyan-950/30 px-4 py-1 text-xs font-bold text-cyan-400 border border-cyan-500/20">
+				{{ usuario.rol | upper }}
+			</span>
+		</div>
+
+		<div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+			<div
+				class="group relative h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-zinc-800 shadow-xl transition-all duration-300 hover:border-cyan-500/50">
+				{% if usuario.imagen_usuario %}
+				<img id="avatar-img" src="{{ usuario.imagen_usuario }}" alt="Avatar"
+					class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-110">
+				{% else %}
+				<div id="avatar-placeholder"
+					class="flex h-full w-full items-center justify-center bg-zinc-800 text-4xl font-bold text-cyan-400">
+					{{ usuario.username[0] | upper }}
+				</div>
+				{% endif %}
+
+				<label for="input-foto"
+					class="absolute inset-0 flex cursor-pointer flex-col items-center justify-center bg-black/60 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100">
+					<svg class="h-6 w-6 text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+							d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+							d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+					</svg>
+					<span class="text-[10px] font-bold text-white uppercase tracking-widest">Cambiar</span>
+				</label>
+				<input type="file" id="input-foto" class="hidden" accept="image/*"
+					onchange="subirFoto(this, '{{ usuario.id_usuario }}')">
+			</div>
+
+			<div class="flex-1 text-center md:text-left">
+				<h1 class="text-4xl font-extrabold text-white tracking-tight">{{ usuario.username | capitalize }}</h1>
+				<p class="text-zinc-400 mt-1 font-medium">{{ usuario.email_usuario }}</p>
+
+				<div class="mt-6 flex flex-wrap justify-center md:justify-start gap-4">
+					<div
+						class="flex items-center justify-center bg-zinc-800/50 px-5 py-3 rounded-2xl border border-zinc-700/50 min-w-30">
+						<div class="text-center">
+							<span class="block text-2xl font-bold text-white leading-tight">{{ usuario.tokens if
+								usuario.tokens is not none else 0 }}</span>
+							<span
+								class="block text-[10px] uppercase tracking-widest text-zinc-500 font-bold mt-1">Puntos
+								Pyxis</span>
+						</div>
+					</div>
+
+					<div
+						class="flex items-center justify-center bg-zinc-800/30 px-5 py-3 rounded-2xl border border-zinc-700/30 min-w-30">
+						<div class="text-center">
+							<span class="block text-sm font-semibold text-zinc-300 leading-tight">
+								{{ usuario.fecha_alta.strftime('%d/%m/%Y') if usuario.fecha_alta else 'Reciente' }}
+							</span>
+							<span
+								class="block text-[10px] uppercase tracking-widest text-zinc-500 font-bold mt-1">Miembro
+								desde</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="mt-8">
+		<div class="flex gap-8 border-b border-zinc-800 mb-6">
+			<button onclick="cambiarTab('destacados')" id="btn-destacados"
+				class="pb-2 border-b-2 border-cyan-500 text-white font-bold transition-all cursor-pointer">Notificaciones</button>
+			<button onclick="cambiarTab('posts')" id="btn-posts"
+				class="pb-2 text-zinc-500 hover:text-white transition-all cursor-pointer">Posts</button>
+			<button onclick="cambiarTab('respuestas')" id="btn-respuestas"
+				class="pb-2 text-zinc-500 hover:text-white transition-all cursor-pointer">Respuestas</button>
+		</div>
+
+		<div id="content-destacados" class="space-y-4">
+			<div class="text-center py-10">
+				<div class="inline-block">
+					<div class="w-8 h-8 border-4 border-zinc-700 border-t-cyan-500 rounded-full animate-spin"></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="content-posts" class="space-y-4 hidden">
+		</div>
+
+		<div id="content-respuestas" class="space-y-4 hidden">
+		</div>
+	</div>
+</section>
+{% endblock %}
+
+
+{% block page_scripts %}
+<script type="module" src="{{ url_for('static', filename='js/perfil/index.js') }}"></script>
+
+<script>
+    // Se asegura de que el DOM esté listo antes de cargar los datos
+    document.addEventListener('DOMContentLoaded', () => {
+		console.log('Cargando actividad para usuario ID: {{ usuario.id_usuario }}');
+        cargarActividad('{{ usuario.id_usuario }}');
+    });
+
+    // Tu función cambiarTab que ya tenías
+    function cambiarTab(tab) {
+        ['destacados', 'posts', 'respuestas'].forEach(t => {
+            document.getElementById('content-' + t).classList.add('hidden');
+            document.getElementById('btn-' + t).classList.remove('border-b-2', 'border-cyan-500', 'text-white', 'font-bold');
+            document.getElementById('btn-' + t).classList.add('text-zinc-500');
+        });
+        document.getElementById('content-' + tab).classList.remove('hidden');
+        document.getElementById('btn-' + tab).classList.add('border-b-2', 'border-cyan-500', 'text-white', 'font-bold');
+    }
+</script>
+{% endblock %}

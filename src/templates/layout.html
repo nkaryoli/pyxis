@@ -1,0 +1,30 @@
+{% extends "base.html" %} 
+{% block title %}Nueva Pregunta | Pyxis{% endblock %}
+
+{% block content %}
+<section class="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-6 h-full relative">
+	<div id="sidebar-wrapper" class="fixed top-15 bottom-0 left-0 z-40 w-64 -translate-x-full transition-transform duration-300 ease-in-out bg-zinc-950/98 p-6 pt-6 border-r border-zinc-800 overflow-y-auto lg:overflow-y-visible lg:sticky lg:top-15 lg:bottom-auto lg:translate-x-0 lg:z-auto lg:w-full lg:bg-transparent lg:p-0 lg:pt-0 lg:h-auto pb-24">
+		{% include 'partials/sidebar.html' %}
+	</div>
+
+	<div id="sidebar-backdrop" class="fixed top-15 bottom-0 inset-x-0 z-30 bg-black/60 backdrop-blur-xs hidden transition-opacity duration-300"></div>
+
+	<div class="space-y-9 py-6 min-w-0">
+		{% block page_content %}{% endblock %}
+	</div>
+</section>
+
+<script type="module" src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+
+<style>
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	#sidebar-wrapper::-webkit-scrollbar {
+		display: none;
+	}
+	/* Hide scrollbar for IE, Edge and Firefox */
+	#sidebar-wrapper {
+		-ms-overflow-style: none;  /* IE and Edge */
+		scrollbar-width: none;  /* Firefox */
+	}
+</style>
+{% endblock %}

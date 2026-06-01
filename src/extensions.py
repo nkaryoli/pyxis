@@ -1,10 +1,10 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Base class para todos los modelos
+
 Base = declarative_base()
 
-# Variables globales para engine y Session
+
 engine = None
 Session = None
 
@@ -25,8 +25,15 @@ def init_db(database_url):
     # Crear la sesión
     Session = sessionmaker(bind=engine)
     
-    # Crear todas las tablas definidas en los modelos
-    Base.metadata.create_all(engine)
+    # NOTA: No usamos create_all() porque causa circular imports.
+    # El esquema de BD ya existe (ver sql/BBDD.sql)
+    # Esta línea solo verifica que la conexión sea válida
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        print("✓ Conexión a base de datos exitosa")
+    except Exception as e:
+        print(f"✗ Error de conexión: {e}")
 
 
 def get_session():
@@ -34,3 +41,13 @@ def get_session():
     if Session is None:
         raise RuntimeError("Base de datos no inicializada. Llama a init_db() primero.")
     return Session()
+
+
+def should_include_deleted():
+    """Retorna True si el usuario actual en el contexto HTTP es ADMINISTRADOR o PROFESOR."""
+    from flask import has_request_context, g
+    if has_request_context():
+        usuario = getattr(g, 'current_user', None)
+        if usuario and getattr(usuario, 'rol', None) in ['ADMINISTRADOR', 'PROFESOR']:
+            return True
+    return False

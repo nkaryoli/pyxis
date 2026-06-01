@@ -1,0 +1,32 @@
+<div class="mb-6 flex items-center justify-between gap-4 border p-9 rounded-lg border-zinc-800 bg-zinc-900/40">
+	<div class="space-y-2">
+		<p class="text-xs text-cyan-300 uppercase tracking-[0.35em]">
+			Panel de control
+		</p>
+		<h1 class="text-3xl font-bold text-white">Hola, {{ usuario.username }}</h1>
+		<p class="text-sm text-zinc-400">
+			Gestiona tus contenidos y revisa el estado actual de la plataforma.
+		</p>
+	</div>
+	<div class="flex gap-3">
+		<div class="w-24 rounded border border-amber-600/60 bg-amber-600/10 px-4 py-2 text-center">
+			<div class="text-sm text-zinc-400">Módulos</div>
+			<div class="text-lg font-bold text-white">{{ resumen.modulos }}</div>
+		</div>
+		{% if rol == 'PROFESOR' %}
+		<div class="w-24 rounded border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-center">
+			<div class="text-sm text-zinc-400">Alumnos</div>
+			<div class="text-lg font-bold text-white">{{ resumen.alumnos }}</div>
+		</div>
+		{% elif rol == 'ADMINISTRADOR' %}
+		<div class="w-24 rounded border border-blue-400/40 bg-blue-400/10 px-4 py-2 text-center">
+			<div class="text-sm text-zinc-400">Usuarios</div>
+			<div class="text-lg font-bold text-white">{{ resumen.usuarios }}</div>
+		</div>
+		{% endif %}
+		<div class="w-24 rounded border border-cyan-300/50 bg-cyan-500/10 px-4 py-2 text-center">
+			<div class="text-sm text-zinc-400">Posts</div>
+			<div class="text-lg font-bold text-white">{{ resumen.posts }}</div>
+		</div>
+	</div>
+</div>
