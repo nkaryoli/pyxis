@@ -70,7 +70,10 @@ Crea un archivo .env en la raíz del proyecto basándote en los datos de tu base
    MYSQL_HOST=localhost
    MYSQL_USER=root
    MYSQL_PASSWORD=tu_contrasena_aqui
-   MYSQL_DB=abpTest
+   MYSQL_DB=pyxis_dev
+   MYSQL_TEST_DB=abptest
+   ```
+   > **Nota:** `MYSQL_DB` se usará para desarrollo local. Para la ejecución de tests (cuando `FLASK_ENV=testing`), la aplicación utilizará automáticamente `MYSQL_TEST_DB` para evitar corromper los datos de desarrollo.
 
 ---
 
@@ -119,7 +122,7 @@ npm run test:unit
 pytest tests/unit -v --cov=src
 ```
 
-**Con cobertura (para CI/entrega):**
+Con cobertura (CI):
 ```bash
 pytest tests/unit -v --cov=src --cov-report=term-missing
 ```
@@ -128,33 +131,84 @@ pytest tests/unit -v --cov=src --cov-report=term-missing
 
 Los E2E tests se encuentran en `cypress/e2e/` y prueban el flujo real del usuario en el navegador.
 
-**Prerequisitos:**
-- Asegúrate de que Flask está corriendo (`flask --app "src:create_app" run --debug`).
+Prerequisitos:
+- Entorno virtual activado y dependencias instaladas.
+- Servidor Flask en ejecución (`src:create_app`).
 
-**Ejecutar (Interfaz gráfica):**
+Iniciar Flask (ejemplos):
+- Git Bash / Linux / macOS:
 ```bash
-npm run cypress:open
-# Selecciona el navegador y el spec a ejecutar en la ventana de Cypress.
+cd /path/to/pyxis
+export PYTHONPATH=. FLASK_APP=src:create_app FLASK_ENV=testing
+venv/Scripts/python -m flask run --port 5000
+```
+- PowerShell (Windows):
+```powershell
+cd C:\path\to\pyxis
+$env:PYTHONPATH = '.'; $env:FLASK_APP = 'src:create_app'; $env:FLASK_ENV = 'testing'
+.\venv\Scripts\python -m flask run --port 5000
 ```
 
-**Ejecutar (Headless - terminal):**
+Ejecutar Cypress:
+- Interactivo (GUI):
 ```bash
-npm run cypress:run
-# o ejecutar un spec concreto:
-npx cypress run --spec "cypress/e2e/pruebas.cy.js"
+npm run cy:open
+```
+- Headless (terminal):
+```bash
+npx cypress run
+# O ejecutar un spec concreto:
+npx cypress run --spec "cypress/e2e/forum_permissions.cy.js"
 ```
 
-**Escribir nuevos tests:**
+Limpieza segura antes de los specs
+----------------------------------
+Algunos specs (por ejemplo `forum_permissions.cy.js`) intentan limpiar artefactos de Cypress antes de ejecutar usando `scripts/clear_test_responses.py`.
+Por seguridad la limpieza remota desde Cypress está protegida. Opciones para permitirla localmente:
+
+- Exportar la variable en la sesión (no persistente):
+   - Git Bash / Linux / macOS: `export ALLOW_DB_CLEAN=1`
+   - PowerShell (session): `$env:ALLOW_DB_CLEAN = '1'`
+- O iniciar la app con `FLASK_ENV=testing` (el script detecta entorno de testing).
+
+Recomendación para entorno local (ejemplo en Git Bash):
+```bash
+# activar venv
+source venv/Scripts/activate
+
+# permitir limpieza en esta sesión
+export ALLOW_DB_CLEAN=1
+
+# arrancar flask en otra terminal
+export PYTHONPATH=. FLASK_APP=src:create_app FLASK_ENV=testing
+venv/Scripts/python -m flask run --port 5000
+
+# en la terminal de CI/local ejecutar el spec deseado
+npx cypress run --spec "cypress/e2e/forum_permissions.cy.js"
+```
+
+Comportamiento del `cy.task` y fallback
+- El proyecto define una tarea Node `cy.task('clearTestResponses')` que ejecuta el script Python de limpieza si las variables de entorno lo permiten.
+- Ese script limpia posts, respuestas y usuarios creados por Cypress, siempre filtrando por marcadores de test.
+- Si la tarea no está permitida, el spec hará un `cy.exec` como fallback para mantener compatibilidad con ejecuciones locales previas.
+
+Precauciones:
+- No uses `ALLOW_DB_CLEAN=1` en bases de datos reales ni en entornos de producción.
+- Usa una base de datos de prueba (`MYSQL_DB=abpTest`) para ejecutar los specs.
+
+Escribir nuevos tests
+---------------------
 - Crea archivos `.cy.js` en `cypress/e2e/`.
-- Usa `cy.visit()` para navegar, `cy.get()` para selectores, `cy.click()` para acciones.
-- Ejemplo:
+- Usa `cy.visit()` para navegar, `cy.get()` para selectores y `cy.intercept()` / `cy.request()` para APIs cuando sea útil.
+
+Ejemplo mínimo:
 ```javascript
 describe('Mi feature', () => {
-  it('hace algo', () => {
-    cy.visit('/ruta')
-    cy.get('#selector').click()
-    cy.get('#resultado').should('be.visible')
-  })
+   it('hace algo', () => {
+      cy.visit('/ruta')
+      cy.get('#selector').click()
+      cy.get('#resultado').should('be.visible')
+   })
 })
 ```
 
