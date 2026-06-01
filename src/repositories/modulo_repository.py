@@ -9,15 +9,22 @@ class ModuloRepository:
     _ICONOS_POR_MODULO = {
         "MOD-BBDD": "database",
         "MOD-PROG": "code",
-        "MOD-LM": "file-text",
-        "MOD-ED": "spark",
-        "MOD-DEPLOY": "rocket",
-        "MOD-DI": "layout",
-        "MOD-DWEC": "monitor",
+        "MOD-LMAR": "file-text",
+        "MOD-ENT": "spark",
+        "MOD-ING": "layout",
+        "MOD-TUT": "monitor",
         "MOD-DWES": "server",
-        "MOD-FOL": "briefcase",
-        "MOD-LMSGI": "file-text",
-        "MOD-SI": "shield",
+        "MOD-IPO": "briefcase",
+        "MOD-SIST": "shield",
+        
+        "MOD-SOST": "spark",
+    "MOD-DIGI": "monitor",
+    "MOD-ING": "layout",
+    "MOD-XARX": "shield",
+    "MOD-IAW": "rocket",
+    "MOD-ISO": "server",
+    "MOD-ASGD": "file-text",
+
     }
 
     @staticmethod
