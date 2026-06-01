@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
 from src.extensions import Base
 
 class HistoricoTokens(Base):
+    """Modelo que representa la tabla HISTORICO_TOKENS en la base de datos."""
     __tablename__ = 'HISTORICO_TOKENS'
 
     id_tokens = Column(Integer, primary_key=True, autoincrement=True)
@@ -12,6 +13,7 @@ class HistoricoTokens(Base):
     id_usuario = Column(Integer, ForeignKey('USUARIOS.id_usuario'), nullable=False)
 
     def to_dict(self):
+        """Devuelve un diccionario con los datos del registro histórico de tokens."""
         return {
             "id_tokens": self.id_tokens,
             "tokens": self.tokens,

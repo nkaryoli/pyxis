@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from src.extensions import Base
 
 class Respuesta(Base):
+    """Modelo que representa la tabla RESPUESTAS en la base de datos."""
     __tablename__ = 'RESPUESTAS'
     
     id_respuesta = Column(Integer, primary_key=True, autoincrement=True)
@@ -18,19 +19,22 @@ class Respuesta(Base):
     usuario = relationship("Usuario", backref="respuestas", lazy="joined")
     
     def __repr__(self):
+        """Devuelve una representación en texto de la respuesta."""
         return f"<Respuesta {self.id_respuesta} del Post {self.id_post}>"
-    
     
     @property
     def contenido(self):
+        """Obtiene el contenido de la respuesta."""
         return self.contenido_respuesta
 
     @property
     def created_at(self):
+        """Obtiene la fecha de creación de la respuesta."""
         return self.fecha_respuesta
 
     @property
     def autor(self):
+        """Obtiene el nombre de usuario del autor de la respuesta, manejando eliminados o inactivos."""
         from src.extensions import should_include_deleted
         if not self.usuario:
             return "Usuario Eliminado"
@@ -42,10 +46,11 @@ class Respuesta(Base):
     
     @property
     def mejor(self):
+        """Indica si la respuesta fue marcada como la mejor respuesta."""
         return bool(self.es_mejor_respuesta)
     
-    
     def to_dict(self):
+        """Devuelve un diccionario con los datos de la respuesta."""
         return {
             "id_respuesta": self.id_respuesta,
             "contenido_respuesta": self.contenido_respuesta,
@@ -55,5 +60,3 @@ class Respuesta(Base):
             "username_autor": self.autor,
             "fecha_respuesta": self.fecha_respuesta.isoformat() if self.fecha_respuesta else None
         }
-
-    
