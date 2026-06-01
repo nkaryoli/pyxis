@@ -6,6 +6,13 @@ interface RequestOptions {
 	body?: unknown;
 }
 
+/**
+ * Realiza una petición JSON al servidor y maneja errores comunes.
+ * 
+ * @param url - Ruta del endpoint.
+ * @param options - Opciones de la petición.
+ * @returns La respuesta en formato JSON.
+ */
 async function requestJson<T>(
 	url: string,
 	options: RequestOptions,
@@ -38,6 +45,11 @@ async function requestJson<T>(
 	return (await response.json()) as T;
 }
 
+/**
+ * Crea un nuevo módulo mediante la API.
+ * 
+ * @param payload - Datos del módulo a crear.
+ */
 export function crearModulo(payload: {
 	codigo_modulo: string;
 	nombre_asignatura: string;
@@ -50,6 +62,12 @@ export function crearModulo(payload: {
 	});
 }
 
+/**
+ * Actualiza un módulo existente.
+ * 
+ * @param codigo - Código del módulo.
+ * @param payload - Datos a actualizar.
+ */
 export function actualizarModulo(
 	codigo: string,
 	payload: {
@@ -65,6 +83,12 @@ export function actualizarModulo(
 	});
 }
 
+/**
+ * Elimina (o desactiva) un módulo por su código.
+ * 
+ * @param codigo - Código del módulo a eliminar.
+ * @param rolUsuario - Rol del usuario que realiza la acción.
+ */
 export function eliminarModulo(
 	codigo: string,
 	rolUsuario: string,
@@ -75,6 +99,11 @@ export function eliminarModulo(
 	});
 }
 
+/**
+ * Crea un nuevo usuario.
+ * 
+ * @param payload - Datos del nuevo usuario.
+ */
 export function crearUsuario(payload: {
 	email_usuario: string;
 	password_usuario: string;
@@ -87,6 +116,13 @@ export function crearUsuario(payload: {
 	});
 }
 
+/**
+ * Actualiza los datos de un usuario existente.
+ * 
+ * @param idUsuario - ID del usuario objetivo.
+ * @param payload - Datos a actualizar.
+ * @param usuarioIdSolicitante - ID del usuario que ejecuta la acción.
+ */
 export function actualizarUsuario(
 	idUsuario: string,
 	payload: Record<string, unknown>,
@@ -101,12 +137,25 @@ export function actualizarUsuario(
 	});
 }
 
+/**
+ * Elimina un usuario del sistema.
+ * 
+ * @param idUsuario - ID del usuario a eliminar.
+ */
 export function eliminarUsuario(idUsuario: string): Promise<unknown> {
 	return requestJson(`/api/usuarios/${encodeURIComponent(idUsuario)}`, {
 		method: "DELETE",
 	});
 }
 
+/**
+ * Actualiza la información de un post.
+ * 
+ * @param idPost - ID del post.
+ * @param payload - Campos a modificar.
+ * @param userId - ID del usuario solicitante.
+ * @param userRole - Rol del usuario solicitante.
+ */
 export function actualizarPost(
 	idPost: string,
 	payload: {
@@ -127,6 +176,13 @@ export function actualizarPost(
 	});
 }
 
+/**
+ * Elimina un post de forma lógica.
+ * 
+ * @param idPost - ID del post a eliminar.
+ * @param userId - ID del usuario solicitante.
+ * @param userRole - Rol del usuario solicitante.
+ */
 export function eliminarPost(
 	idPost: string,
 	userId: string,

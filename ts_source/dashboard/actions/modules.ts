@@ -127,6 +127,13 @@ form?.addEventListener("submit", (e) => {
 	}
 });
 
+/**
+ * Maneja las acciones delegadas en botones para el contexto de módulos.
+ * 
+ * @param button - Botón HTML clickeado.
+ * @param context - Contexto global del dashboard.
+ * @returns true si la acción fue procesada, false de lo contrario.
+ */
 export function handleModuleAction(
 	button: HTMLButtonElement,
 	context: DashboardContext,

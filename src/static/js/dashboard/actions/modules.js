@@ -115,6 +115,13 @@ form === null || form === void 0 ? void 0 : form.addEventListener("submit", (e) 
             .catch((err) => guardarToastPendiente(`No se pudo crear el módulo: ${err.message}`, "error"));
     }
 });
+/**
+ * Maneja las acciones delegadas en botones para el contexto de módulos.
+ *
+ * @param button - Botón HTML clickeado.
+ * @param context - Contexto global del dashboard.
+ * @returns true si la acción fue procesada, false de lo contrario.
+ */
 export function handleModuleAction(button, context) {
     var _a, _b;
     const action = button.dataset.action;

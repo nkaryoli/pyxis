@@ -1,3 +1,7 @@
+/**
+ * Punto de entrada principal para la interactividad del Dashboard.
+ * Inicializa tabs, acciones, paginación, notificaciones y comportamientos globales de modales.
+ */
 import { getDashboardContext } from "./context.js";
 import { initDashboardActions } from "./actions/index.js";
 import { initDashboardTabs } from "./tabs.js";
@@ -14,10 +18,8 @@ if (context) {
 	initClientPagination("seccion-usuarios", 7);
 	initClientPagination("seccion-posts", 7);
 
-	// Comprobar si hay notificaciones flotantes pendientes de mostrar
 	chequearToastsPendientes();
 
-	// Cierra los menús desplegables details abiertos al hacer clic fuera
 	document.addEventListener("click", (e) => {
 		const target = e.target as Element;
 		const openDetails = document.querySelectorAll<HTMLDetailsElement>("details[open]");
@@ -28,7 +30,6 @@ if (context) {
 		});
 	});
 
-	// Gestiona el scroll del cuerpo de la página en función de los diálogos abiertos
 	const updateBodyScroll = () => {
 		const hasOpenDialog = Array.from(document.querySelectorAll("dialog")).some((dialog) => dialog.open);
 		if (hasOpenDialog) {
@@ -38,19 +39,14 @@ if (context) {
 		}
 	};
 
-	// Observa los cambios en el estado de apertura de los diálogos para bloquear/desbloquear el scroll
 	const dialogObserver = new MutationObserver(() => {
 		updateBodyScroll();
 	});
 
-	// Inicializa el cierre de diálogos al hacer clic fuera y el bloqueo de scroll
 	document.querySelectorAll("dialog").forEach((dialog) => {
 		dialogObserver.observe(dialog, { attributes: true, attributeFilter: ["open"] });
-		
-		// Escuchador nativo del evento de cierre para asegurar que el scroll se desbloquee
 		dialog.addEventListener("close", updateBodyScroll);
 
-		// Cierre al hacer clic fuera (solo clics en el backdrop translúcido)
 		dialog.addEventListener("click", (event) => {
 			if (event.target === dialog) {
 				const rect = dialog.getBoundingClientRect();
