@@ -197,13 +197,15 @@ def crear_respuesta_api(id_post):
         # Obtener el post para verificar su módulo
         post = PostService.obtener_por_id(id_post)
         # Aceptar tanto id_usuario como objeto Usuario: obtener el objeto si se pasó el id
-        usuario_obj = None
         try:
             from src.services.usuario_service import UsuarioService
             usuario_res = UsuarioService.obtener_usuario_por_id(id_usuario)
             usuario_obj = usuario_res[0] if isinstance(usuario_res, tuple) else usuario_res
-        except Exception:
-            usuario_obj = None
+            if not usuario_obj:
+                return jsonify({"error": "El usuario no existe"}), 404
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
+
         if not post:
             return jsonify({"error": "El post no existe"}), 404
         
