@@ -4,6 +4,22 @@ Bienvenido al repositorio de **Pyxis**, una plataforma de colaboración para est
 
 ---
 
+## Capturas de Pantalla (Demo)
+
+| Vista Principal (Escritorio) | Vista Principal (Móvil) |
+| :---: | :---: |
+| <img src="src/static/demo/demo_home.png" height="250"> | <img src="src/static/demo/demo_mobile.png" height="250"> |
+| **Hilo de Discusión y Respuestas** | **Publicar un Post** |
+| <img src="src/static/demo/demo_hilo_respuestas.png" height="250"> | <img src="src/static/demo/demo_post.png" height="250"> |
+| **Inicio de Sesión (Login)** | **Registro de Usuario** |
+| <img src="src/static/demo/demo_login.png" height="250"> | <img src="src/static/demo/demo_register.png" height="250"> |
+| **Panel de Administración** | **Panel de Profesor** |
+| <img src="src/static/demo/demo_admin.png" height="250"> | <img src="src/static/demo/demo_teacher.png" height="250"> |
+| **Panel de Alumno** | |
+| <img src="src/static/demo/demo_alumno.png" height="250"> | |
+
+---
+
 ## Stack Tecnológico
 * **Backend:** Flask (Python) con SQLAlchemy (ORM) y PyMySQL.
 * **Frontend:** HTML5, Tailwind CSS y TypeScript (compilado a JS).
