@@ -193,14 +193,24 @@ def crear_respuesta_api(id_post):
     try:
         from src.services.post_service import PostService
         id_usuario = datos['id_usuario']
-        
+
         # Obtener el post para verificar su módulo
         post = PostService.obtener_por_id(id_post)
+        # Aceptar tanto id_usuario como objeto Usuario: obtener el objeto si se pasó el id
+        try:
+            from src.services.usuario_service import UsuarioService
+            usuario_res = UsuarioService.obtener_usuario_por_id(id_usuario)
+            usuario_obj = usuario_res[0] if isinstance(usuario_res, tuple) else usuario_res
+            if not usuario_obj:
+                return jsonify({"error": "El usuario no existe"}), 404
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
+
         if not post:
             return jsonify({"error": "El post no existe"}), 404
         
         # Validar que el usuario esté matriculado en el módulo del post
-        if post.codigo_modulo and not UsuarioService.esta_matriculado(id_usuario, post.codigo_modulo):
+        if post.codigo_modulo and not UsuarioService.esta_matriculado(usuario_obj, post.codigo_modulo):
             return jsonify({"error": "No estás matriculado en el módulo de este post. Solo puedes responder en posts de módulos donde estés matriculado."}), 403
         
         nueva = RespuestaService.crear_respuesta(

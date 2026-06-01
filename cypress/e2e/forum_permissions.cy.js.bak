@@ -1,0 +1,2 @@
+// Backup of forum_permissions.cy.js before switching cleanup to cy.task
+// If anything breaks, restore this file content over forum_permissions.cy.js
