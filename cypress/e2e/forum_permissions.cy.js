@@ -217,9 +217,12 @@ describe("Pruebas de Permisos del Foro y Matriculación E2E", () => {
 			r.contenido_respuesta.includes(miRespuestaEditada),
 		);
 		expect(respuestaEditada, "respuesta editada").to.exist;
-		});
 
-		cy.reload();
+		const idx = resp.body.findIndex((r) => r.id_respuesta === respuestaEditada.id_respuesta);
+		const perPage = 10;
+		const page = Math.floor(idx / perPage) + 1;
+		cy.visit(`/posts/3?page=${page}`);
+		});
 
 		// Use stable substring after edit to avoid exact-timestamp mismatches
 		cy.contains("Comentario propio ACTUALIZADO", { timeout: 10000 }).should(
